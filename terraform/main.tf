@@ -18,6 +18,18 @@ provider "kubernetes" {
   config_path = "~/.kube/config"
 }
 
+variable "registry_server" {
+  type = string
+}
+
+variable "registry_username" {
+  type = string
+}
+
+variable "registry_password" {
+  type = string
+}
+
 resource "kubernetes_namespace" "pmnamespace" {
   metadata {
     name = "pm-cloud-mock"
