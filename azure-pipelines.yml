@@ -20,7 +20,7 @@ variables:
 
   isToDeploy: $[ne(variables['Build.Reason'], 'PullRequest')]
   isSIT: $[eq(variables['Build.SourceBranch'], 'refs/heads/release/sit')]
-  dockerRegistryServiceConnection: ''
+
 
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/release/sit') }}:
     dockerRegistryServiceConnection: 'tkm-cstaruatregistry-connector'
@@ -28,6 +28,9 @@ variables:
     deployment: deployment-sit
     enviroment: sit
     imagePullSecret: 'cloud-mock-registry-auth'
+
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/release/develop') }}:
+    dockerRegistryServiceConnection: ''
 stages:
   - stage: Test_Develop
     displayName: Test Develop
