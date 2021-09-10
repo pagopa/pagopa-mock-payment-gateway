@@ -29,7 +29,7 @@ variables:
     enviroment: sit
     imagePullSecret: 'cloud-mock-registry-auth'
 
-  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/release/develop') }}:
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/develop') }}:
     dockerRegistryServiceConnection: ''
 stages:
   - stage: Test_Develop
