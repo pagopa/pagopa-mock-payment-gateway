@@ -20,6 +20,7 @@ variables:
 
   isToDeploy: $[ne(variables['Build.Reason'], 'PullRequest')]
   isSIT: $[eq(variables['Build.SourceBranch'], 'refs/heads/release/sit')]
+  dockerRegistryServiceConnection: ''
 
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/release/sit') }}:
     dockerRegistryServiceConnection: 'tkm-cstaruatregistry-connector'
