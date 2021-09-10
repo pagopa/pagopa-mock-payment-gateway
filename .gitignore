@@ -1,5 +1,5 @@
 .idea/
 pmmock.iml
-terraform/.terraform/
-terraform/.terraform.lock.hcl
+terraform/**
+!terraform/*.tf
 target/

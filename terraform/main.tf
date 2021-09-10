@@ -18,16 +18,36 @@ provider "kubernetes" {
   config_path = "~/.kube/config"
 }
 
-resource "kubernetes_namespace" "example" {
+resource "kubernetes_namespace" "pmnamespace" {
   metadata {
-    annotations = {
-      name = "example-annotation"
-    }
-
-    labels = {
-      mylabel = "label-value"
-    }
-
-    name = "terraform-example-namespace2"
+    name = "pm-cloud-mock"
   }
 }
+
+resource "kubernetes_service_account" "pmserviceaccount" {
+  metadata {
+    name      = "azure-devops-pm-cloud-mock"
+    namespace = kubernetes_namespace.pmnamespace.metadata[0].name
+  }
+  depends_on = [
+    kubernetes_namespace.pmnamespace
+  ]
+}
+
+resource "kubernetes_role" "pmserviceaccountrole" {
+  metadata {
+    name      = "pm-cloud-mock"
+    namespace = kubernetes_namespace.pmnamespace.metadata[0].name
+  }
+
+  rule {
+    api_groups = ["", "extensions", "apps"]
+    resources  = ["deployments", "replicasets", "pods", "services"]
+    verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
+  }
+  depends_on = [
+    kubernetes_namespace.pmnamespace,
+    kubernetes_service_account.pmserviceaccount
+  ]
+}
+
