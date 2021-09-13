@@ -1,8 +1,7 @@
 resource "kubernetes_secret" "registry-auth-secret-cloud-mock" {
   metadata {
-    name = "cloud-mock-registry-auth"
+    name      = "cloud-mock-registry-auth"
     namespace = kubernetes_namespace.pmnamespace.metadata[0].name
-
   }
 
   data = {
