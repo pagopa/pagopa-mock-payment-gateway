@@ -29,9 +29,6 @@ import java.util.UUID;
 @Log4j2
 public class PayPalPspRestController {
 
-    @Value("${spring.application.name}")
-    private String appName;
-
     @Autowired
     private TablePpOnboardingBackManagementRepository onboardingBackManagementRepository;
 
@@ -60,7 +57,6 @@ public class PayPalPspRestController {
     }
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
-
     @PatchMapping("/management/pp_oboarding_back/response")
     public PpOnboardingBackManagement changeIdUserIoResponse(@Valid @RequestBody PpOnboardingBackManagement ppOnboardingBackManagement) {
         String idAppIo = ppOnboardingBackManagement.getIdAppIo();
