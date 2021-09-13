@@ -11,7 +11,7 @@ public class PayPalPspController {
     @Value("${spring.application.name}")
     private String appName;
 
-    @GetMapping("/")
+    @GetMapping("/test")
     public String homePage(Model model) {
         model.addAttribute("appName", appName);
         return "home";

@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>it.gov.pagopa</groupId>
-    <artifactId>pm-mock</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>pagopa-pm-cloud-mock</artifactId>
+    <version>1.2-SNAPSHOT</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -67,7 +67,7 @@
         </repository>
     </distributionManagement>
     <scm>
-        <developerConnection>scm:git:https://github.com/pagopa/pm-cloud-mock.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/pagopa/pagopa-pm-cloud-mock.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
