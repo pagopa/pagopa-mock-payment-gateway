@@ -7,8 +7,6 @@ import it.gov.pagopa.db.repository.TableClientRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackManagementRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
 import it.gov.pagopa.db.repository.TableUserPayPalRepository;
-import it.gov.pagopa.exception.NotFoundException;
-import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackManagement;
 import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackRequest;
 import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackResponse;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingBackResponseCode;
@@ -63,35 +61,6 @@ public class PayPalPspRestController {
         String idBack = UUID.randomUUID().toString();
         saveOnTable(ppOnboardingBackRequest, idBack);
         return PpOnboardingBackResponse.builder().esito(PpOnboardingBackResponseCode.OK).urlToCall("/paypalweb/pp_onboarding_call?id_back=" + idBack).build();
-    }
-
-    //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
-    @PatchMapping("/management/pp_oboarding_back/response")
-    public PpOnboardingBackManagement changeIdUserIoResponse(@Valid @RequestBody PpOnboardingBackManagement ppOnboardingBackManagement) {
-        String idAppIo = ppOnboardingBackManagement.getIdAppIo();
-        TablePpOnboardingBackManagement onboardingBackManagementSaved = onboardingBackManagementRepository.findByIdAppIo(idAppIo);
-        if (onboardingBackManagementSaved == null) {
-            onboardingBackManagementSaved = TablePpOnboardingBackManagement.builder().idAppIo(idAppIo).build();
-        }
-        onboardingBackManagementSaved.setErrCode(ppOnboardingBackManagement.getErrCode());
-        onboardingBackManagementSaved.setLastUpdateDate(Instant.now());
-        TablePpOnboardingBackManagement newOnboardingBackManagement = onboardingBackManagementRepository.save(onboardingBackManagementSaved);
-        return convertToPpOnboardingBackManagement(newOnboardingBackManagement);
-    }
-
-    //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
-    @GetMapping("/management/pp_oboarding_back/response/{idAppIo}")
-    public PpOnboardingBackManagement getIdUserIoResponse(@PathVariable String idAppIo) throws NotFoundException {
-        TablePpOnboardingBackManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIo(idAppIo);
-        if (onboardingBackManagement == null) {
-            throw new NotFoundException();
-        }
-        return convertToPpOnboardingBackManagement(onboardingBackManagement);
-    }
-
-    private PpOnboardingBackManagement convertToPpOnboardingBackManagement(TablePpOnboardingBackManagement newOnboardingBackManagement) {
-        return PpOnboardingBackManagement.builder().idAppIo(newOnboardingBackManagement.getIdAppIo())
-                .errCode(newOnboardingBackManagement.getErrCode()).build();
     }
 
     private void saveOnTable(PpOnboardingBackRequest ppOnboardingBackRequest, String idBack) {
