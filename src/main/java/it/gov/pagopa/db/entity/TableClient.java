@@ -8,22 +8,22 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.Instant;
 
-@Table(name = "user_paypal")
+@Table(name = "client")
 @Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TableUserPayPal {
+public class TableClient {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "id_appio")
-    private String idAppIo;
+    @Column(name = "client_name")
+    private String clientName;
 
-    @Column(name = "contract_number")
-    private String contractNumber;
+    @Column(name = "auth_key")
+    private String authKey;
 
     @Builder.Default
     @Column(name = "creation_date")

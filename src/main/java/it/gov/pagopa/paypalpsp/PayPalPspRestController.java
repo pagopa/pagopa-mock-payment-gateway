@@ -3,23 +3,23 @@ package it.gov.pagopa.paypalpsp;
 
 import it.gov.pagopa.db.entity.TablePpOnboardingBack;
 import it.gov.pagopa.db.entity.TablePpOnboardingBackManagement;
+import it.gov.pagopa.db.repository.TableClientRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackManagementRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
 import it.gov.pagopa.db.repository.TableUserPayPalRepository;
-import it.gov.pagopa.eception.NotFoundException;
+import it.gov.pagopa.exception.NotFoundException;
 import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackManagement;
 import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackRequest;
 import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackResponse;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingBackResponseCode;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingBackResponseErrCode;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Pattern;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -38,9 +38,18 @@ public class PayPalPspRestController {
     @Autowired
     private TableUserPayPalRepository tableUserPayPalRepository;
 
+    @Autowired
+    private TableClientRepository tableClientRepository;
+
+    private static final String BEARER_REGEX = "Bearer .*{5,}";
+
     @PostMapping("/api/pp_oboarding_back")
-    public PpOnboardingBackResponse homePage(@Valid @RequestHeader("Authorization") @Pattern(regexp = "Bearer .*{5,}") String authorization,
+    public PpOnboardingBackResponse homePage(@RequestHeader(value = "Authorization", required = false) String authorization,
                                              @Valid @RequestBody PpOnboardingBackRequest ppOnboardingBackRequest) {
+        if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || !tableClientRepository.existsByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) {
+            log.error("Invalid authorization: " + authorization);
+            return manageErrorResponse(PpOnboardingBackResponseErrCode.AUTORIZZAZIONE_NEGATA);
+        }
         log.info(ppOnboardingBackRequest);
         String idAppIo = ppOnboardingBackRequest.getIdAppIo();
         TablePpOnboardingBackManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIo(idAppIo);
@@ -53,7 +62,7 @@ public class PayPalPspRestController {
 
         String idBack = UUID.randomUUID().toString();
         saveOnTable(ppOnboardingBackRequest, idBack);
-        return PpOnboardingBackResponse.builder().esito(PpOnboardingBackResponseCode.OK).urlToCall("?id_back=" + idBack).build();
+        return PpOnboardingBackResponse.builder().esito(PpOnboardingBackResponseCode.OK).urlToCall("/paypalweb/pp_onboarding_call?id_back=" + idBack).build();
     }
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
@@ -69,8 +78,8 @@ public class PayPalPspRestController {
         TablePpOnboardingBackManagement newOnboardingBackManagement = onboardingBackManagementRepository.save(onboardingBackManagementSaved);
         return convertToPpOnboardingBackManagement(newOnboardingBackManagement);
     }
-    //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
 
+    //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
     @GetMapping("/management/pp_oboarding_back/response/{idAppIo}")
     public PpOnboardingBackManagement getIdUserIoResponse(@PathVariable String idAppIo) throws NotFoundException {
         TablePpOnboardingBackManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIo(idAppIo);
@@ -88,7 +97,7 @@ public class PayPalPspRestController {
     private void saveOnTable(PpOnboardingBackRequest ppOnboardingBackRequest, String idBack) {
         TablePpOnboardingBack tablePpOnboardingBack = new TablePpOnboardingBack();
         tablePpOnboardingBack.setIdAppIo(ppOnboardingBackRequest.getIdAppIo());
-        tablePpOnboardingBack.setTimestamp(ppOnboardingBackRequest.getTimestamp());
+        tablePpOnboardingBack.setTimestamp(Instant.now());
         tablePpOnboardingBack.setUrlReturn(ppOnboardingBackRequest.getUrlReturn());
         tablePpOnboardingBack.setIdBack(idBack);
         tablePpOnboardingBackRepository.save(tablePpOnboardingBack);

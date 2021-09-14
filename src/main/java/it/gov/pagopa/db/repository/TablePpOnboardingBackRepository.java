@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TablePpOnboardingBackRepository extends JpaRepository<TablePpOnboardingBack, Long> {
+    TablePpOnboardingBack findByIdBack(String idBack);
 }

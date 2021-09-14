@@ -31,4 +31,7 @@ public class TablePpOnboardingBack {
 
     @Column(name = "id_back")
     private String idBack;
+
+    private boolean used;
+
 }

@@ -20,10 +20,6 @@ public class PpOnboardingBackRequest {
     private String urlReturn;
 
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "Europe/Rome", pattern = "yyyyMMddHHmmss")
-    private Instant timestamp;
-
-    @NotNull
     @JsonProperty("id_appio")
     private String idAppIo;
 

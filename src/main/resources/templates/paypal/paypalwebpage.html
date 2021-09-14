@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+</head>
+<body class="bg-light">
+<div class="container">
+    <div class="py-5 text-center">
+        <img class="d-block mx-auto mb-4" th:src="@{/img/paypal.png}" alt="" width="65" height="57">
+        <h2>Mock Paypal</h2>
+        <p class="lead">A simple page that allows you to simulate all the interactions of a user on the paypal page.</p>
+    </div>
+
+    <div class="row justify-content-md-center">
+        <div class="col-md-8 order-md-1">
+            <h4 class="mb-3">Known Details</h4>
+            <div th:if="${urlReturn==null}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Hey Dude!</strong> You used an unknown or already used <em>id_back</em>. I can't make you go on!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <form class="needs-validation" method="post" action="/paypalweb/success">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="timestamp">Timestamp creation</label>
+                        <input type="text" class="form-control" id="timestamp"  name="timestamp" th:value="${timestamp}" disabled
+                               readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="ioAppIo">Id APP IO</label>
+                        <input type="text" class="form-control" id="ioAppIo" name="ioAppIo" th:value="${ioAppIo}" disabled readonly>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col mb-3">
+                        <label for="urlReturn">Return Url</label>
+                        <input type="text" class="form-control" id="urlReturn" name="urlReturn" th:value="${urlReturn}" disabled
+                               readonly>
+                    </div>
+                </div>
+                <hr class="mb-4">
+                <button class="btn btn-success btn-lg btn-block" type="submit" th:disabled="${urlReturn==null}">Login and
+                    Approve
+                </button>
+                <button class="btn btn-warning btn-lg btn-block"
+                        th:attr="onclick=${'window.location.href='''+ urlReturn + '?esito=3'''}" type="button" th:disabled="${urlReturn==null}">Cancel
+                </button>
+                <div class="btn-group dropend" role="group">
+                    <button id="btnGroupDrop1" type="button" class="btn btn-danger btn-lg btn-block dropdown-toggle"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" th:disabled="${urlReturn==null}">
+                        Go On Error
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=9&err_cod=11&err_desc=Parametri non validi'}">11 - Parametri
+                            non validi 1</a>
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=13&err_cod=11&err_desc=Autorizzazione Negata'}">13 -
+                            Autorizzazione Negata 1</a>
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=15&err_cod=11&err_desc= Autorizzazione IP Negata'}">15 -
+                            Autorizzazione IP Negata</a>
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=17&err_cod=11&err_desc=Timestamp Obsoleto'}">17 - Timestamp
+                            Obsoleto</a>
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=31&err_cod=11&err_desc=Paypal get API Token KO'}">31 - Paypal
+                            get API Token KO 1</a>
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=33&err_cod=11&err_desc=paypal create billing agr token KO'}">33
+                            - paypal create billing agr token KO 1</a>
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=34&err_cod=11&err_desc=paypal create billing agr token KO'}">34
+                            - paypal create billing agr token KO 2</a>
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=35&err_cod=11&err_desc=paypal create billing agr token KO'}">35
+                            - paypal create billing agr token KO 3</a>
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=51&err_cod=11&err_desc=Parametri non validi'}">51 - Parametri
+                            non validi 2</a>
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=53&err_cod=11&err_desc=Autorizzazione Negat'}">53 -
+                            Autorizzazione Negata 2</a>
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=57&err_cod=11&err_desc=Parametri non validi'}">57 - Ritorno
+                            paypal anomalo</a>
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=61&err_cod=11&err_desc=Ritorno paypal anomalo'}">61 - Paypal
+                            get API Token KO 2</a>
+                        <a class="dropdown-item"
+                           th:href="${urlReturn + '?esito=65&err_cod=11&err_desc=paypal api create billing agr id KO'}">65
+                            - paypal api create billing agr id KO</a>
+                        <a class="dropdown-item" th:href="${urlReturn + '?esito=67&err_cod=11&err_desc=DB Error'}">67 -
+                            DB Error</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div th:replace=" fragment/footer:: footer"></div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
+        crossorigin="anonymous"></script>
+</body>
+</html>

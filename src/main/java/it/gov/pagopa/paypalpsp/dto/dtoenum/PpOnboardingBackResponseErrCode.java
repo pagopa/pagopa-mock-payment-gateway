@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 @AllArgsConstructor
 public enum PpOnboardingBackResponseErrCode {
+    INPUT_NON_JSON("9"),
     PARAMETRI_NON_VALIDI("11"),
     AUTORIZZAZIONE_NEGATA("13"),
     AUTORIZZAZIONE_IP_NEGATA("15"),
