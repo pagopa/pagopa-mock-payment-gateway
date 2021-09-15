@@ -1,8 +1,10 @@
 package it.gov.pagopa.paypalpsp;
 
 
+import it.gov.pagopa.db.entity.TableConfig;
 import it.gov.pagopa.db.entity.TablePpOnboardingBack;
 import it.gov.pagopa.db.entity.TableUserPayPal;
+import it.gov.pagopa.db.repository.TableConfigRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
 import it.gov.pagopa.db.repository.TableUserPayPalRepository;
 import lombok.extern.log4j.Log4j2;
@@ -30,6 +32,9 @@ public class PayPalWebController {
     @Autowired
     private TableUserPayPalRepository tableUserPayPalRepository;
 
+    @Autowired
+    private TableConfigRepository configRepository;
+
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
             .withZone(ZoneId.systemDefault());
 
@@ -37,6 +42,16 @@ public class PayPalWebController {
     public String homePage(Model model, @RequestParam("id_back") String idBack, ModelMap modelMap, HttpServletRequest request) {
         request.getSession().invalidate();
         modelMap.remove(TABLE_PP_ONBOARDING_BACK_ATTRIBUTE);
+
+        TableConfig tableConfig = configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL");
+        model.addAttribute("urlReturnFallBackPaypalPsp", tableConfig != null ? tableConfig.getPropertyValue() : "");
+
+        setModelFromOoOnboardingBack(model, idBack, modelMap);
+
+        return "paypal/paypalwebpage.html";
+    }
+
+    private void setModelFromOoOnboardingBack(Model model, @RequestParam("id_back") String idBack, ModelMap modelMap) {
         TablePpOnboardingBack tablePpOnboardingBack = tablePpOnboardingBackRepository.findByIdBack(idBack);
         log.info("Onboardingback " + tablePpOnboardingBack + "with id_back" + idBack);
         if (tablePpOnboardingBack != null && !tablePpOnboardingBack.isUsed()) {
@@ -48,8 +63,6 @@ public class PayPalWebController {
             model.addAttribute("ioAppIo", tablePpOnboardingBack.getIdAppIo());
             modelMap.addAttribute(TABLE_PP_ONBOARDING_BACK_ATTRIBUTE, tablePpOnboardingBack);
         }
-
-        return "paypal/paypalwebpage.html";
     }
 
     @PostMapping("/success")

@@ -37,3 +37,12 @@ CREATE TABLE client(
 );
 CREATE UNIQUE INDEX ON client(client_name)WHERE NOT DELETED
 ;
+
+CREATE TABLE config(
+  id                        SERIAL PRIMARY KEY,
+  property_key              varchar(128) not null unique,
+  property_value            varchar(128) not null
+);
+
+INSERT INTO config(property_key, property_value)
+VALUES ('PAYPAL_PSP_DEFAULT_BACK_URL', 'http://localhost:8080/fallback');
