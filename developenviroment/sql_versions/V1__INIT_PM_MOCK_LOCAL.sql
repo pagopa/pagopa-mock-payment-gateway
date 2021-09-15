@@ -16,13 +16,13 @@ CREATE TABLE pp_oboarding_back_management(
 );
 
 CREATE TABLE user_paypal(
-  id               SERIAL PRIMARY KEY,
-  id_appio         varchar(128) not null,
+  id                   SERIAL PRIMARY KEY,
+  id_appio             varchar(128) not null,
   paypal_email         varchar(128) not null,
-  paypal_id         varchar(128) not null,
-  contract_number  varchar(128) not null unique,
-  creation_date    timestamp not null,
-  deleted          BOOLEAN NOT NULL DEFAULT FALSE
+  paypal_id            varchar(128) not null,
+  contract_number      varchar(128) not null unique,
+  creation_date        timestamp not null,
+  deleted              BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE UNIQUE INDEX ON user_paypal(id_appio, contract_number)
