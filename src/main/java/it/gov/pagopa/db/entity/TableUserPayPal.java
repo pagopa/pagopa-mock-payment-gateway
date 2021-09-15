@@ -25,6 +25,12 @@ public class TableUserPayPal {
     @Column(name = "contract_number")
     private String contractNumber;
 
+    @Column(name = "paypal_email")
+    private String paypalEmail;
+
+    @Column(name = "paypal_id")
+    private String paypalId;
+
     @Builder.Default
     @Column(name = "creation_date")
     private Instant creationDate=Instant.now();
