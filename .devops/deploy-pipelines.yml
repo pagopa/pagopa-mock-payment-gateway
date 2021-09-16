@@ -1,0 +1,227 @@
+parameters:
+  - name: SEMVER
+    displayName: "When packing a release, define the version bump to apply"
+    type: string
+    values:
+      - major
+      - minor
+      - patch
+    default: patch
+  - name: ENV
+    displayName: Target Environment
+    type: string
+    default: dev
+    values:
+      - dev
+      - prod
+  - name: APPTYPE
+    displayName: App Type
+    type: string
+    default: appservice
+    values:
+      - appservice
+  - name: MS_NAME
+    displayName: "Microservice to deploy"
+    type: string
+    values:
+      - pagopa-pm-cloud-mock
+    default: pagopa-pm-cloud-mock
+  - name: REPOSITORY
+    displayName: "Docker Repository"
+    type: string
+    values:
+      - pagopa-pm-cloud-mock
+    default: creditor
+  - name: STACK
+    displayName: "Stack of the microservice"
+    default: java
+    type: string
+    values:
+      - java
+      - node
+variables:
+  NODE_VERSION: "10.14.2"
+  ${{ if eq(parameters['ENV'], 'dev') }}:
+    AZURE_SUBSCRIPTION: $(DEV_AZURE_SUBSCRIPTION)
+    CONTAINER_REGISTRY: $(DEV_CONTAINER_REGISTRY)
+    PREFIX: "hubpa-d"
+    CONTAINER_REGISTRY_NAME: "hubpadarc"
+    BATCH_RESOURCE_GROUP: "hubpa-d-batch-rg"
+  ${{ if eq(parameters['ENV'], 'prod') }}:
+    AZURE_SUBSCRIPTION: $(PROD_AZURE_SUBSCRIPTION)
+    CONTAINER_REGISTRY: $(PROD_CONTAINER_REGISTRY)
+    PREFIX: "hubpa-p"
+    CONTAINER_REGISTRY_NAME: "hubpaparc"
+    BATCH_RESOURCE_GROUP: "hubpa-p-batch-rg"
+
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_OPTS: "-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)"
+  title: ""
+  sha: ""
+  tag: ""
+
+# Only manual triggers
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  # Create a release
+  - stage: release_service
+    condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/main'),
+      ne('${{ parameters.REPOSITORY }}', 'auth'))
+    pool:
+      vmImage: "ubuntu-latest"
+    jobs:
+      - job: releaseService
+        steps:
+          - checkout: self
+            clean: true
+            persistCredentials: true
+
+          - script: |
+              git config --global user.name "$(GIT_USERNAME)"
+              git config --global user.email "$(GIT_EMAIL)"
+
+          - template: azure-templates/maven-versioning.yml
+            parameters:
+              subproject: "${{ parameters.MS_NAME }}"
+              semver: "${{ parameters.SEMVER }}"
+
+          - task: Bash@3
+            name: pomversion
+            inputs:
+              targetType: "inline"
+              script: |
+                version=$(mvn -f ${{ parameters.MS_NAME }}/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
+                echo "##vso[task.setvariable variable=next;isOutput=true]$version"
+              failOnStderr: true
+
+          - script: |
+              HEAD_SHA=$(git rev-parse HEAD)
+              TAG="${{ parameters.MS_NAME }}/$(pomversion.next)"
+              TITLE="Release ${{ parameters.MS_NAME }}/$(pomversion.next)"
+              echo "##vso[task.setvariable variable=title]$TITLE"
+              echo "##vso[task.setvariable variable=sha]$HEAD_SHA"
+              echo "##vso[task.setvariable variable=tag]$TAG"
+
+          - script: |
+              git checkout ${{variables['Build.SourceBranchName']}}
+
+          - script: |
+              echo $(tag)
+              echo $(title)
+              echo $(sha)
+
+          - script: |
+              git add ${{ parameters.MS_NAME }}/pom.xml 
+              git commit -m "Bump version [skip ci]"
+              git push origin ${{variables['Build.SourceBranchName']}}
+              git push --tags
+
+          # create new releae
+          - task: GitHubRelease@0
+            inputs:
+              gitHubConnection: $(GITHUB_CONNECTION)
+              repositoryName: $(Build.Repository.Name)
+              action: create
+              target: $(sha)
+              tagSource: manual
+              tag: $(tag)
+              title: $(title)
+              addChangelog: true
+
+  # Create a release
+  - stage: deploy
+    # condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/main'),
+    #   not(failed('release_service')))
+    condition: not(failed('releaseService'))
+    pool:
+      vmImage: "ubuntu-latest"
+    jobs:
+      - job: deployJava
+        steps:
+          - checkout: self
+            clean: true
+            persistCredentials: true
+            submodules: true
+
+          - task: Cache@2
+            inputs:
+              key: 'maven | "$(Agent.OS)" | pom.xml'
+              restoreKeys: |
+                maven | "$(Agent.OS)"
+                maven
+              path: $(MAVEN_CACHE_FOLDER)
+            displayName: Set Maven Cache
+
+          - task: Bash@3
+            name: pomversion
+            inputs:
+              targetType: "inline"
+              script: |
+                version=$(mvn -f ${{ parameters.MS_NAME }}/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
+                echo "##vso[task.setvariable variable=next;isOutput=true]$version"
+              failOnStderr: true
+
+          - task: Bash@3
+            # When the maven task is installed, mvn can be used in a script
+            name: mvn_get_version
+            inputs:
+              targetType: "inline"
+              script: |
+                 mvn -f ${{ parameters.MS_NAME }}/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout
+              failOnStderr: true
+
+          - task: Maven@3
+            displayName: Build
+            inputs:
+              mavenPomFile: "./pom.xml"
+              mavenOptions: "-Xmx3072m $(MAVEN_OPTS)"
+              javaHomeOption: "JDKVersion"
+              jdkVersionOption: "1.11"
+              jdkArchitectureOption: "x64"
+              publishJUnitResults: false
+              testResultsFiles: "**/surefire-reports/TEST-*.xml"
+              goals: "install"
+
+          - task: Bash@3
+            name: App_Insight_Agent
+            inputs:
+              targetType: "inline"
+              script: |
+                wget https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.1.0/applicationinsights-agent-3.1.0.jar
+                mv applicationinsights-agent*jar ${{parameters.MS_NAME}}
+                ls ${{parameters.MS_NAME}}
+
+          - task: Docker@2
+            displayName: Build and Push Image
+            inputs:
+              containerRegistry: $(CONTAINER_REGISTRY)
+              repository: "${{ parameters.REPOSITORY }}"
+              command: "buildAndPush"
+              Dockerfile: "./${{ parameters.MS_NAME }}/Dockerfile.deploy"
+              tags: "$(pomversion.next)"
+
+          - task: AzureRMWebAppDeployment@4
+            displayName: Deploy Microservice
+            condition: eq('${{ parameters.APPTYPE }}', 'appservice')
+            inputs:
+              appType: webAppContainer
+              ConnectedServiceName: $(AZURE_SUBSCRIPTION)
+              WebAppName: "${{variables.PREFIX}}-${{ parameters.REPOSITORY }}-ms"
+              DockerNamespace: "${{variables.CONTAINER_REGISTRY_NAME}}.azurecr.io"
+              DockerRepository: "${{ parameters.REPOSITORY }}"
+              DockerImageTag: "$(pomversion.next)"
+          
+          - task: AzureFunctionAppContainer@1
+            displayName: Deploy Fun App
+            condition: eq('${{ parameters.APPTYPE }}', 'functionapp')
+            inputs:
+              azureSubscription: $(AZURE_SUBSCRIPTION)
+              appName: "${{variables.PREFIX}}-${{ parameters.REPOSITORY }}"
+              imageName: "${{variables.CONTAINER_REGISTRY_NAME}}.azurecr.io/${{ parameters.REPOSITORY }}:$(pomversion.next)"
+              resourceGroupName: $(BATCH_RESOURCE_GROUP)
+              slotName: production
