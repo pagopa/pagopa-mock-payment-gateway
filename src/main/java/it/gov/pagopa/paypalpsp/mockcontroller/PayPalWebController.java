@@ -1,26 +1,29 @@
-package it.gov.pagopa.paypalpsp;
+package it.gov.pagopa.paypalpsp.mockcontroller;
 
 
 import com.github.javafaker.Faker;
 import it.gov.pagopa.db.entity.TableConfig;
 import it.gov.pagopa.db.entity.TablePpOnboardingBack;
-import it.gov.pagopa.db.entity.TableUserPayPal;
 import it.gov.pagopa.db.repository.TableConfigRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
 import it.gov.pagopa.db.repository.TableUserPayPalRepository;
+import it.gov.pagopa.paypalpsp.PaypalUtils;
+import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseErrCode;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.UUID;
 
 @Log4j2
 @Controller
@@ -28,6 +31,7 @@ import java.util.UUID;
 @SessionAttributes({PayPalWebController.TABLE_PP_ONBOARDING_BACK_ATTRIBUTE})
 public class PayPalWebController {
     protected static final String TABLE_PP_ONBOARDING_BACK_ATTRIBUTE = "tablePpOnboardingBack";
+
     @Autowired
     private TablePpOnboardingBackRepository tablePpOnboardingBackRepository;
 
@@ -36,6 +40,9 @@ public class PayPalWebController {
 
     @Autowired
     private TableConfigRepository configRepository;
+
+    @Autowired
+    private PaypalUtils paypalUtils;
 
     private static final Faker FAKER = new Faker(Locale.ITALIAN);
 
@@ -48,14 +55,21 @@ public class PayPalWebController {
         modelMap.remove(TABLE_PP_ONBOARDING_BACK_ATTRIBUTE);
 
         TableConfig tableConfig = configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL");
-        model.addAttribute("urlReturnFallBackPaypalPsp", tableConfig != null ? tableConfig.getPropertyValue() : "");
+        String esito = "9";
+        PpOnboardingCallResponseErrCode idBackUsatoNonValido = PpOnboardingCallResponseErrCode.ID_BACK_USATO_NON_VALIDO;
 
-        setModelFromOoOnboardingBack(model, idBack, modelMap);
+        String hmac = paypalUtils.calculateHmac(esito, null, null, idBackUsatoNonValido, idBack);
+        String urlReturnFallBackPaypalPsp = String.format("%s?esito=%s&err_cod=%s&err_desc=%s&sha_val=%s",
+                StringUtils.defaultString(tableConfig.getPropertyValue()), esito, idBackUsatoNonValido.getCode(),
+                idBackUsatoNonValido.getDescription(), hmac);
+        model.addAttribute("urlReturnFallBackPaypalPsp", urlReturnFallBackPaypalPsp);
+
+        setModelFromOnboardingBack(model, idBack, modelMap);
 
         return "paypal/paypalwebpage.html";
     }
 
-    private void setModelFromOoOnboardingBack(Model model, @RequestParam("id_back") String idBack, ModelMap modelMap) {
+    private void setModelFromOnboardingBack(Model model, @RequestParam("id_back") String idBack, ModelMap modelMap) {
         TablePpOnboardingBack tablePpOnboardingBack = tablePpOnboardingBackRepository.findByIdBack(idBack);
         log.info("Onboardingback " + tablePpOnboardingBack + "with id_back" + idBack);
         if (tablePpOnboardingBack != null && !tablePpOnboardingBack.isUsed()) {
@@ -69,29 +83,5 @@ public class PayPalWebController {
             modelMap.addAttribute(TABLE_PP_ONBOARDING_BACK_ATTRIBUTE, tablePpOnboardingBack);
         }
     }
-
-    @PostMapping("/success")
-    public String successLoginPaypal(ModelMap modelMap, SessionStatus sessionStatus, @RequestParam String paypalEmail, @RequestParam String paypalId) {
-        String urlReturn = "";
-        try {
-            TablePpOnboardingBack tablePpOnboardingBack = (TablePpOnboardingBack) modelMap.getAttribute(TABLE_PP_ONBOARDING_BACK_ATTRIBUTE);
-            if (tablePpOnboardingBack == null) {
-                return "redirect:/paypalweb/pp_onboarding_call?id_back=unknown";
-            }
-            urlReturn = tablePpOnboardingBack.getUrlReturn();
-            TableUserPayPal tableUserPayPal = TableUserPayPal.builder()
-                    .idAppIo(tablePpOnboardingBack.getIdAppIo())
-                    .paypalEmail(paypalEmail)
-                    .paypalId(paypalId)
-                    .contractNumber(UUID.randomUUID().toString()).build();
-            log.info("Trying to create contract: " + tableUserPayPal);
-            tableUserPayPal = tableUserPayPalRepository.save(tableUserPayPal);
-            log.info("New Contract established: " + tableUserPayPal);
-            return String.format("redirect:%s?esito=1&id_pp=%s&email_pp=%s", urlReturn, paypalId, paypalEmail.replaceAll("\\b(\\w{3})[^@]+@\\S+(\\.[^\\s.]+)", "$1***@****$2"));
-        } catch (Exception e) {
-            return String.format("redirect:%s?esito=67&err_cod=11&err_desc=Unexpected DB Error", urlReturn);
-        } finally {
-            sessionStatus.setComplete();
-        }
-    }
 }
+

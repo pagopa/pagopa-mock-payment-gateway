@@ -5,7 +5,7 @@ var urlReturnFallBackPaypalPsp=document.getElementById("urlReturnFallBackPaypalP
 var downloadTimer = setInterval(function(){
   if(timeleft <= 0){
     clearInterval(downloadTimer);
-    window.location.href=urlReturnFallBackPaypalPsp+'?esito=9&err_cod=10&err_desc=id_back non valido o utilizzato'
+    window.location.href=urlReturnFallBackPaypalPsp;
   } else {
     document.getElementById("errorMessageIdBack").innerHTML = errorMessageIdBack.replace("in 3 seconds...", 'in '+timeleft+' seconds...');;
   }

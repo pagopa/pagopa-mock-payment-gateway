@@ -5,8 +5,9 @@ CREATE TABLE pp_oboarding_back(
   id_appio      varchar(128) not null,
   id_back       varchar(128) not null unique,
   used          BOOLEAN NOT NULL DEFAULT FALSE
-
 );
+CREATE UNIQUE INDEX ON pp_oboarding_back(id_appio) WHERE NOT used
+;
 
 CREATE TABLE pp_oboarding_back_management(
   id               SERIAL PRIMARY KEY,
@@ -48,6 +49,9 @@ CREATE TABLE config(
 
 INSERT INTO config(property_key, property_value)
 VALUES ('PAYPAL_PSP_DEFAULT_BACK_URL', 'http://localhost:8080/fallback');
+
+INSERT INTO config(property_key, property_value)
+VALUES ('PAYPAL_PSP_HMAC_KEY', 'hamac_key');
 
 INSERT INTO client
 (client_name, auth_key, creation_date, deleted)

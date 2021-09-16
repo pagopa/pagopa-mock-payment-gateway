@@ -20,6 +20,12 @@ public class PpOnboardingBackResponse {
     @JsonProperty("url_to_call")
     private String urlToCall;
 
+    @JsonProperty("id_pp")
+    private String idPp;
+
+    @JsonProperty("email_pp")
+    private String emailPp;
+
     @JsonProperty("err_code")
     private PpOnboardingBackResponseErrCode errCode;
 
