@@ -9,7 +9,6 @@ import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseErrCode;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 
@@ -29,14 +28,15 @@ public class PayPalWebManagementController {
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
     @PostMapping("/success")
-    public String success(ModelMap modelMap, SessionStatus sessionStatus, @RequestParam String paypalEmail, @RequestParam String paypalId, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack) {
+    public String success(SessionStatus sessionStatus, @RequestParam String paypalEmail, @RequestParam String paypalId, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack) {
         try {
             if (tablePpOnboardingBack == null) {
                 return REDIRECT_PAYPALWEB_PP_ONBOARDING_CALL_ID_BACK_UNKNOWN;
             }
             String urlReturn = tablePpOnboardingBack.getUrlReturn();
+            String idAppIo = tablePpOnboardingBack.getIdAppIo();
             TableUserPayPal tableUserPayPal = TableUserPayPal.builder()
-                    .idAppIo(tablePpOnboardingBack.getIdAppIo())
+                    .idAppIo(idAppIo)
                     .paypalEmail(paypalEmail)
                     .paypalId(paypalId)
                     .contractNumber(UUID.randomUUID().toString()).build();
@@ -47,8 +47,10 @@ public class PayPalWebManagementController {
             String esito = "1";
             String emailPpObfuscated = paypalEmail.replaceAll("\\b(\\w{3})[^@]+@\\S+(\\.[^\\s.]+)", "$1***@****$2");
             String hmac = paypalUtils.calculateHmac(esito, paypalId, emailPpObfuscated, null, tablePpOnboardingBack.getIdBack());
-            return String.format("redirect:%s?esito=%s&id_pp=%s&email_pp=%s&sha_val=%s",
+            String redirectUrl = String.format("redirect:%s?esito=%s&id_pp=%s&email_pp=%s&sha_val=%s",
                     urlReturn, esito, paypalId, emailPpObfuscated, hmac);
+            log.info(String.format("Success paypal redirect for user id: '%s' and redirect url '%s'", idAppIo, redirectUrl));
+            return redirectUrl;
         } finally {
             sessionStatus.setComplete();
         }
@@ -56,14 +58,16 @@ public class PayPalWebManagementController {
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
     @GetMapping("/cancel")
-    public String cancel(ModelMap modelMap, SessionStatus sessionStatus, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack) {
+    public String cancel(SessionStatus sessionStatus, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack) {
         try {
             if (tablePpOnboardingBack == null) {
                 return REDIRECT_PAYPALWEB_PP_ONBOARDING_CALL_ID_BACK_UNKNOWN;
             }
             String esito = "3";
             String hmac = paypalUtils.calculateHmac(esito, null, null, null, tablePpOnboardingBack.getIdBack());
-            return String.format("redirect:%s?esito=%s&sha_val=%s", tablePpOnboardingBack.getUrlReturn(), esito, hmac);
+            String redirectUrl = String.format("redirect:%s?esito=%s&sha_val=%s", tablePpOnboardingBack.getUrlReturn(), esito, hmac);
+            log.info(String.format("Cancel paypal redirect for user id: '%s' and redirect url '%s'", tablePpOnboardingBack.getIdAppIo(), redirectUrl));
+            return redirectUrl;
         } finally {
             sessionStatus.setComplete();
         }
@@ -71,7 +75,7 @@ public class PayPalWebManagementController {
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
     @GetMapping("/error/{errCode}")
-    public String error(@PathVariable String errCode, ModelMap modelMap, SessionStatus sessionStatus, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack) {
+    public String error(@PathVariable String errCode, SessionStatus sessionStatus, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack) {
         try {
             if (tablePpOnboardingBack == null) {
                 return REDIRECT_PAYPALWEB_PP_ONBOARDING_CALL_ID_BACK_UNKNOWN;
@@ -80,8 +84,10 @@ public class PayPalWebManagementController {
 
             String esito = "9";
             String hmac = paypalUtils.calculateHmac(esito, null, null, callResponseErrCode, tablePpOnboardingBack.getIdBack());
-            return String.format("redirect:%s?esito=%s&err_cod=%s&err_desc=%s&sha_val=%s",
+            String redirectUrl = String.format("redirect:%s?esito=%s&err_cod=%s&err_desc=%s&sha_val=%s",
                     tablePpOnboardingBack.getUrlReturn(), esito, callResponseErrCode.getCode(), callResponseErrCode.getDescription(), hmac);
+            log.info(String.format("Error paypal redirect for user id: '%s' and redirect url '%s'", tablePpOnboardingBack.getIdAppIo(), redirectUrl));
+            return redirectUrl;
         } finally {
             sessionStatus.setComplete();
         }
