@@ -41,7 +41,7 @@ public class PayPalPspRestController {
     @Autowired
     private TableClientRepository tableClientRepository;
 
-    private static final String BEARER_REGEX = "Bearer .*{5,}";
+    private static final String BEARER_REGEX = "Bearer\\s.{3,}";
 
     @PostMapping("/api/pp_oboarding_back")
     @Transactional
