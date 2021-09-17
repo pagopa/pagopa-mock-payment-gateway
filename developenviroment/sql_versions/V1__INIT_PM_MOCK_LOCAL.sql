@@ -19,8 +19,6 @@ CREATE TABLE pp_paypal_management(
 CREATE UNIQUE INDEX ON pp_paypal_management(id_appio, api_id)
 ;
 
-
-
 CREATE TABLE user_paypal(
   id                   SERIAL PRIMARY KEY,
   id_appio             varchar(128) not null,
