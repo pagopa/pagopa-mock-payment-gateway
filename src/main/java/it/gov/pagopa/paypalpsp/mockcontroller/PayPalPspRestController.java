@@ -2,11 +2,12 @@ package it.gov.pagopa.paypalpsp.mockcontroller;
 
 
 import it.gov.pagopa.db.entity.TablePpOnboardingBack;
-import it.gov.pagopa.db.entity.TablePpOnboardingBackManagement;
+import it.gov.pagopa.db.entity.TablePpPaypalManagement;
 import it.gov.pagopa.db.entity.TableUserPayPal;
+import it.gov.pagopa.db.entityenum.ApiPaypalIdEnum;
 import it.gov.pagopa.db.repository.TableClientRepository;
-import it.gov.pagopa.db.repository.TablePpOnboardingBackManagementRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
+import it.gov.pagopa.db.repository.TablePpPaypalManagementRepository;
 import it.gov.pagopa.db.repository.TableUserPayPalRepository;
 import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackRequest;
 import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackResponse;
@@ -30,7 +31,7 @@ import java.util.UUID;
 public class PayPalPspRestController {
 
     @Autowired
-    private TablePpOnboardingBackManagementRepository onboardingBackManagementRepository;
+    private TablePpPaypalManagementRepository onboardingBackManagementRepository;
 
     @Autowired
     private TablePpOnboardingBackRepository tablePpOnboardingBackRepository;
@@ -53,11 +54,11 @@ public class PayPalPspRestController {
         }
 
         String idAppIo = ppOnboardingBackRequest.getIdAppIo();
-        TablePpOnboardingBackManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIo(idAppIo);
+        TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiId(idAppIo, ApiPaypalIdEnum.ONBOARDING);
 
         //Manage error defined by user
-        if (onboardingBackManagement != null && onboardingBackManagement.getErrCode() != null) {
-            return manageErrorResponse(onboardingBackManagement.getErrCode());
+        if (onboardingBackManagement != null && StringUtils.isNotBlank(onboardingBackManagement.getErrCodeValue())) {
+            return manageErrorResponse(PpOnboardingBackResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
         }
 
         //manage error code 19

@@ -6,7 +6,6 @@ import it.gov.pagopa.db.entity.TableConfig;
 import it.gov.pagopa.db.entity.TablePpOnboardingBack;
 import it.gov.pagopa.db.repository.TableConfigRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
-import it.gov.pagopa.db.repository.TableUserPayPalRepository;
 import it.gov.pagopa.paypalpsp.PaypalUtils;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseErrCode;
 import lombok.extern.log4j.Log4j2;
@@ -34,9 +33,6 @@ public class PayPalWebController {
 
     @Autowired
     private TablePpOnboardingBackRepository tablePpOnboardingBackRepository;
-
-    @Autowired
-    private TableUserPayPalRepository tableUserPayPalRepository;
 
     @Autowired
     private TableConfigRepository configRepository;

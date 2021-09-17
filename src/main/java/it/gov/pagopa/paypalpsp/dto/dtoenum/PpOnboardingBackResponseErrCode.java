@@ -24,6 +24,6 @@ public enum PpOnboardingBackResponseErrCode {
         return Stream.of(PpOnboardingBackResponseErrCode.values())
                 .filter(p -> StringUtils.equalsIgnoreCase(p.getCode(), code))
                 .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new IllegalArgumentException("'" + code + "' cannot be map to 'PpOnboardingBackResponseErrCode'"));
     }
 }
