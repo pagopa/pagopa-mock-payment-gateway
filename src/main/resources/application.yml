@@ -1,6 +1,14 @@
 spring:
   application:
     name: Payment Manager Cloud Mock
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://localhost:5432/pm_mock_local
+    driverClassName: org.postgresql.Driver
+    username: pm_mock_local
+    password: pm_mock_local
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 management:
   endpoints:
     web:
@@ -9,4 +17,4 @@ management:
 
 logging:
   level:
-    root: DEBUG
+    root: INFO
