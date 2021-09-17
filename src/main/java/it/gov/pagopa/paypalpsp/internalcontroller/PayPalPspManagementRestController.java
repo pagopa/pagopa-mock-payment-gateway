@@ -28,7 +28,7 @@ public class PayPalPspManagementRestController {
     private TablePpOnboardingBackRepository tablePpOnboardingBackRepository;
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
-    @PatchMapping("/pp_oboarding_back/response")
+    @PatchMapping("/pp_onboarding_back/response")
     public PpOnboardingBackManagement changeIdUserIoResponse(@Valid @RequestBody PpOnboardingBackManagement ppOnboardingBackManagement) throws Exception {
         if (ppOnboardingBackManagement.getErrCode() == PpOnboardingBackResponseErrCode.CODICE_CONTRATTO_PRESENTE) {
             throw new Exception("Cannot set error code " + PpOnboardingBackResponseErrCode.CODICE_CONTRATTO_PRESENTE + ". Create a contract and then you'll receive the code 19");
@@ -45,7 +45,7 @@ public class PayPalPspManagementRestController {
     }
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
-    @GetMapping("/pp_oboarding_back/response/{idAppIo}")
+    @GetMapping("/pp_onboarding_back/response/{idAppIo}")
     public PpOnboardingBackManagement getIdUserIoResponse(@PathVariable String idAppIo) throws NotFoundException {
         TablePpOnboardingBackManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIo(idAppIo);
         if (onboardingBackManagement == null) {

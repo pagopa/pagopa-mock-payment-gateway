@@ -43,7 +43,7 @@ public class PayPalPspRestController {
 
     private static final String BEARER_REGEX = "Bearer\\s.{3,}";
 
-    @PostMapping("/api/pp_oboarding_back")
+    @PostMapping("/api/pp_onboarding_back")
     @Transactional
     public PpOnboardingBackResponse homePage(@RequestHeader(value = "Authorization", required = false) String authorization,
                                              @Valid @RequestBody PpOnboardingBackRequest ppOnboardingBackRequest) {
@@ -51,7 +51,7 @@ public class PayPalPspRestController {
             log.error("Invalid authorization: " + authorization);
             return manageErrorResponse(PpOnboardingBackResponseErrCode.AUTORIZZAZIONE_NEGATA);
         }
-        log.info(ppOnboardingBackRequest);
+
         String idAppIo = ppOnboardingBackRequest.getIdAppIo();
         TablePpOnboardingBackManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIo(idAppIo);
 

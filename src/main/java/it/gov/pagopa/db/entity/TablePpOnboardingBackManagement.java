@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.persistence.*;
 import java.time.Instant;
 
-@Table(name = "pp_oboarding_back_management")
+@Table(name = "pp_onboarding_back_management")
 @Entity
 @Data
 @Builder

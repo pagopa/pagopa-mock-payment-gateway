@@ -18,3 +18,13 @@ management:
 logging:
   level:
     root: INFO
+    org:
+      zalando:
+        logbook: TRACE
+
+logbook:
+  include:
+    - /paypalpsp/**
+  obfuscate:
+    headers:
+      - None

@@ -8,7 +8,7 @@ tags:
   - name: paypalmanagement
     description: todo
 paths:
-  /paypalpsp/api/pp_oboarding_back:
+  /paypalpsp/api/pp_onboarding_back:
     post:
       tags:
         - paypalmock

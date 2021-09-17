@@ -1,4 +1,4 @@
-CREATE TABLE pp_oboarding_back(
+CREATE TABLE pp_onboarding_back(
   id            SERIAL PRIMARY KEY,
   url_return    varchar(2014) not null,
   t_timestamp   timestamp not null,
@@ -6,10 +6,10 @@ CREATE TABLE pp_oboarding_back(
   id_back       varchar(128) not null unique,
   used          BOOLEAN NOT NULL DEFAULT FALSE
 );
-CREATE UNIQUE INDEX ON pp_oboarding_back(id_appio) WHERE NOT used
+CREATE UNIQUE INDEX ON pp_onboarding_back(id_appio) WHERE NOT used
 ;
 
-CREATE TABLE pp_oboarding_back_management(
+CREATE TABLE pp_onboarding_back_management(
   id               SERIAL PRIMARY KEY,
   id_appio         varchar(128) not null unique,
   err_code         varchar(10),
