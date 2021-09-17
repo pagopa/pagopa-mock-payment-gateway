@@ -55,6 +55,8 @@ public class PayPalPspManagementRestController {
     private PpOnboardingBackManagement convertToPpOnboardingBackManagement(TablePpPaypalManagement newOnboardingBackManagement) {
         return PpOnboardingBackManagement.builder().idAppIo(newOnboardingBackManagement.getIdAppIo())
                 .errCode(newOnboardingBackManagement.getErrCodeValue())
-                .apiId(newOnboardingBackManagement.getApiId()).build();
+                .apiId(newOnboardingBackManagement.getApiId())
+                .lastUpdateDate(newOnboardingBackManagement.getLastUpdateDate())
+                .build();
     }
 }
