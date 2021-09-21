@@ -15,7 +15,7 @@ import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingBackResponseCode;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingBackResponseErrCode;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +41,9 @@ public class PayPalPspRestController {
 
     @Autowired
     private TableClientRepository tableClientRepository;
+    
+    @Value("${server.port}")
+    private String port;
 
     private static final String BEARER_REGEX = "Bearer\\s.{3,}";
 
@@ -69,7 +72,7 @@ public class PayPalPspRestController {
 
         String idBack = UUID.randomUUID().toString();
         saveAndUpdateTable(ppOnboardingBackRequest, idBack);
-        return PpOnboardingBackResponse.builder().esito(PpOnboardingBackResponseCode.OK).urlToCall("/paypalweb/pp_onboarding_call?id_back=" + idBack).build();
+        return PpOnboardingBackResponse.builder().esito(PpOnboardingBackResponseCode.OK).urlToCall("http://host.docker.internal:" + port + "/paypalweb/pp_onboarding_call?id_back=" + idBack).build();
     }
 
     private void saveAndUpdateTable(PpOnboardingBackRequest ppOnboardingBackRequest, String idBack) {
