@@ -75,7 +75,7 @@ public class PayPalWebController {
             model.addAttribute("id_back", idBack);
             model.addAttribute("urlReturn", tablePpOnboardingBack.getUrlReturn());
             model.addAttribute("timestamp", DATE_TIME_FORMATTER.format(tablePpOnboardingBack.getTimestamp()));
-            model.addAttribute("ioAppIo", tablePpOnboardingBack.getIdAppIo());
+            model.addAttribute("idAppIo", tablePpOnboardingBack.getIdAppIo());
             model.addAttribute("paypalEmail", FAKER.internet().safeEmailAddress());
             modelMap.addAttribute(TABLE_PP_ONBOARDING_BACK_ATTRIBUTE, tablePpOnboardingBack);
         }

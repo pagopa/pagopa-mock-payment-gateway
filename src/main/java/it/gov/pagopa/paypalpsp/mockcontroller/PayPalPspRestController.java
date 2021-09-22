@@ -97,7 +97,7 @@ public class PayPalPspRestController {
     private PpOnboardingBackResponse manageErrorResponseAlreadyOnboarded(TableUserPayPal tableUserPayPal) {
         PpOnboardingBackResponse ppOnboardingBackResponse = manageErrorResponse(PpOnboardingBackResponseErrCode.CODICE_CONTRATTO_PRESENTE);
         ppOnboardingBackResponse.setEmailPp(paypalUtils.obfuscateEmail(tableUserPayPal.getPaypalEmail()));
-        ppOnboardingBackResponse.setIdPp(tableUserPayPal.getIdAppIo());
+        ppOnboardingBackResponse.setIdPp(tableUserPayPal.getPaypalId());
         return ppOnboardingBackResponse;
     }
 
