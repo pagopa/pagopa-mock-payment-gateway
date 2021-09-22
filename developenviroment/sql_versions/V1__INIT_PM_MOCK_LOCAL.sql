@@ -54,7 +54,7 @@ INSERT INTO config(property_key, property_value)
 VALUES ('PAYPAL_PSP_DEFAULT_BACK_URL', 'http://localhost:8080/fallback');
 
 INSERT INTO config(property_key, property_value)
-VALUES ('PAYPAL_PSP_HMAC_KEY', 'hamac_key');
+VALUES ('PAYPAL_PSP_HMAC_KEY', 'hmac_key');
 
 INSERT INTO client
 (client_name, auth_key, creation_date, deleted)

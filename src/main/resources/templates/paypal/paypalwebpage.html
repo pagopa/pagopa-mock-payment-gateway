@@ -48,7 +48,7 @@
                 </div>
                 <hr class="mb-4">
                 <div class="row">
-                    <div class="col-md-10 mb-3">
+                    <div class="col-md-12 mb-3">
                         <div class="input-group has-validation">
                             <input type="email" class="form-control" placeholder="Paypal's email"
                                    aria-label="Paypal's email" aria-describedby="button-success"
@@ -71,6 +71,9 @@
                         <div class="col">
                             <button class="btn btn-warning btn-lg btn-block me-3"
                                     onclick="window.location.href='/paypalweb/management/cancel'" type="button" th:disabled="${urlReturn==null}">Cancel
+                            </button>
+                            <button class="btn btn-dark btn-lg btn-block me-3"
+                                    onclick="window.location.href='/paypalweb/management/invalidShaVal'" type="button" th:disabled="${urlReturn==null}">Invalid Sha Value
                             </button>
                             <div class="btn-group dropend" role="group">
                                 <button id="btnGroupDrop1" type="button"

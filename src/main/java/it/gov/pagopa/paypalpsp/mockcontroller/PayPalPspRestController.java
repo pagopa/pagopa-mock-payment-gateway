@@ -13,14 +13,17 @@ import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackRequest;
 import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackResponse;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingBackResponseCode;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingBackResponseErrCode;
+import it.gov.pagopa.util.UrlUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -41,16 +44,16 @@ public class PayPalPspRestController {
 
     @Autowired
     private TableClientRepository tableClientRepository;
-    
-    @Value("${server.port}")
-    private String port;
+
+    @Value("${server.public-url}")
+    private String publicUrl;
 
     private static final String BEARER_REGEX = "Bearer\\s.{3,}";
 
     @PostMapping("/api/pp_onboarding_back")
     @Transactional
     public PpOnboardingBackResponse homePage(@RequestHeader(value = "Authorization", required = false) String authorization,
-                                             @Valid @RequestBody PpOnboardingBackRequest ppOnboardingBackRequest) {
+                                             @Valid @RequestBody PpOnboardingBackRequest ppOnboardingBackRequest) throws URISyntaxException {
         if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || !tableClientRepository.existsByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) {
             log.error("Invalid authorization: " + authorization);
             return manageErrorResponse(PpOnboardingBackResponseErrCode.AUTORIZZAZIONE_NEGATA);
@@ -72,7 +75,8 @@ public class PayPalPspRestController {
 
         String idBack = UUID.randomUUID().toString();
         saveAndUpdateTable(ppOnboardingBackRequest, idBack);
-        return PpOnboardingBackResponse.builder().esito(PpOnboardingBackResponseCode.OK).urlToCall("http://localhost:" + port + "/paypalweb/pp_onboarding_call?id_back=" + idBack).build();
+        String returnUrl = UrlUtils.normalizeUrl(publicUrl + "/paypalweb/pp_onboarding_call");
+        return PpOnboardingBackResponse.builder().esito(PpOnboardingBackResponseCode.OK).urlToCall(UrlUtils.addQueryParams(returnUrl, "id_back", idBack)).build();
     }
 
     private void saveAndUpdateTable(PpOnboardingBackRequest ppOnboardingBackRequest, String idBack) {
