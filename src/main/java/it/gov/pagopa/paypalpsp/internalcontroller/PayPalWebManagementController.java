@@ -54,8 +54,9 @@ public class PayPalWebManagementController {
                 log.info(String.format("Success paypal redirect for user id: '%s' and redirect url '%s'", idAppIo, redirectUrl));
                 return redirectUrl;
             } else {
-                modelMap.addAttribute("paypalEmail",emailPpObfuscated);
-                modelMap.addAttribute("idPayPal",paypalId);
+                modelMap.addAttribute("paypalEmail", emailPpObfuscated);
+                modelMap.addAttribute("idPayPal", paypalId);
+                modelMap.addAttribute("idAppIo", idAppIo);
                 log.info("successNoRedirect not follow the redirect");
                 return "paypal/successNoRedirect.html";
             }
