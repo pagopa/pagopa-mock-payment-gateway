@@ -36,8 +36,8 @@
                                readonly>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="ioAppIo">Id APP IO</label>
-                        <input type="text" class="form-control" id="ioAppIo" name="ioAppIo" th:value="${ioAppIo}"
+                        <label for="idAppIo">Id APP IO</label>
+                        <input type="text" class="form-control" id="idAppIo" name="idAppIo" th:value="${idAppIo}"
                                disabled readonly>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                                    required>
                             <input type="text" class="form-control" placeholder="Paypal's Id"
                                    id="paypalId" aria-describedby="button-success"
-                                   th:disabled="${urlReturn==null}" name="paypalId" th:value="${ioAppIo}" required>
+                                   th:disabled="${urlReturn==null}" name="paypalId" th:value="${paypalId}" required>
                             <select class="form-select" id="selectRedirect" name="selectRedirect">
                                 <option selected value="true">Redirect</option>
                                 <option value="false">No Redirect</option>
