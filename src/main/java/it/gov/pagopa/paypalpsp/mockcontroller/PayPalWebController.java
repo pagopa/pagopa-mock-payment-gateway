@@ -49,15 +49,10 @@ public class PayPalWebController {
     public String homePage(Model model, @RequestParam("id_back") String idBack, ModelMap modelMap, HttpServletRequest request) {
         request.getSession().invalidate();
         modelMap.remove(TABLE_PP_ONBOARDING_BACK_ATTRIBUTE);
-
-        TableConfig tableConfig = configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL");
         String esito = "9";
         PpOnboardingCallResponseErrCode idBackUsatoNonValido = PpOnboardingCallResponseErrCode.ID_BACK_USATO_NON_VALIDO;
-
-        String hmac = paypalUtils.calculateHmac(esito, null, null, idBackUsatoNonValido, idBack);
-        String urlReturnFallBackPaypalPsp = String.format("%s?esito=%s&err_cod=%s&err_desc=%s&sha_val=%s",
-                StringUtils.defaultString(tableConfig.getPropertyValue()), esito, idBackUsatoNonValido.getCode(),
-                idBackUsatoNonValido.getDescription(), hmac);
+        String hmac = paypalUtils.calculateHmac(esito, null, null, idBackUsatoNonValido.getCode(), idBackUsatoNonValido.getDescription(), idBack);
+        String urlReturnFallBackPaypalPsp = String.format(StringUtils.joinWith("=%s&", "esito", "err_cod", "err_desc", "id_back"), esito, idBackUsatoNonValido.getCode(), idBackUsatoNonValido.getDescription(), hmac);
         model.addAttribute("urlReturnFallBackPaypalPsp", urlReturnFallBackPaypalPsp);
 
         setModelFromOnboardingBack(model, idBack, modelMap);

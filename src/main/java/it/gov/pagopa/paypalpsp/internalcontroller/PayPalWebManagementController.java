@@ -46,7 +46,7 @@ public class PayPalWebManagementController {
 
             String esito = "1";
             String emailPpObfuscated = paypalEmail.replaceAll("\\b(\\w{3})[^@]+@\\S+(\\.[^\\s.]+)", "$1***@****$2");
-            String hmac = paypalUtils.calculateHmac(esito, paypalId, emailPpObfuscated, null, tablePpOnboardingBack.getIdBack());
+            String hmac = paypalUtils.calculateHmac(esito, paypalId, emailPpObfuscated, null, null, tablePpOnboardingBack.getIdBack());
             String redirectUrl = String.format("redirect:%s?esito=%s&id_pp=%s&email_pp=%s&sha_val=%s",
                     urlReturn, esito, paypalId, emailPpObfuscated, hmac);
             log.info(String.format("Success paypal redirect for user id: '%s' and redirect url '%s'", idAppIo, redirectUrl));
@@ -64,7 +64,7 @@ public class PayPalWebManagementController {
                 return REDIRECT_PAYPALWEB_PP_ONBOARDING_CALL_ID_BACK_UNKNOWN;
             }
             String esito = "3";
-            String hmac = paypalUtils.calculateHmac(esito, null, null, null, tablePpOnboardingBack.getIdBack());
+            String hmac = paypalUtils.calculateHmac(esito, null, null, null, null, tablePpOnboardingBack.getIdBack());
             String redirectUrl = String.format("redirect:%s?esito=%s&sha_val=%s", tablePpOnboardingBack.getUrlReturn(), esito, hmac);
             log.info(String.format("Cancel paypal redirect for user id: '%s' and redirect url '%s'", tablePpOnboardingBack.getIdAppIo(), redirectUrl));
             return redirectUrl;
@@ -83,7 +83,7 @@ public class PayPalWebManagementController {
             PpOnboardingCallResponseErrCode callResponseErrCode = PpOnboardingCallResponseErrCode.of(errCode);
 
             String esito = "9";
-            String hmac = paypalUtils.calculateHmac(esito, null, null, callResponseErrCode, tablePpOnboardingBack.getIdBack());
+            String hmac = paypalUtils.calculateHmac(esito, null, null, callResponseErrCode.getCode(), callResponseErrCode.getDescription(), tablePpOnboardingBack.getIdBack());
             String redirectUrl = String.format("redirect:%s?esito=%s&err_cod=%s&err_desc=%s&sha_val=%s",
                     tablePpOnboardingBack.getUrlReturn(), esito, callResponseErrCode.getCode(), callResponseErrCode.getDescription(), hmac);
             log.info(String.format("Error paypal redirect for user id: '%s' and redirect url '%s'", tablePpOnboardingBack.getIdAppIo(), redirectUrl));
