@@ -9,6 +9,7 @@ import it.gov.pagopa.db.repository.TableClientRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
 import it.gov.pagopa.db.repository.TablePpPaypalManagementRepository;
 import it.gov.pagopa.db.repository.TableUserPayPalRepository;
+import it.gov.pagopa.paypalpsp.PaypalUtils;
 import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackRequest;
 import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackResponse;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingBackResponseCode;
@@ -44,6 +45,9 @@ public class PayPalPspRestController {
 
     @Autowired
     private TableClientRepository tableClientRepository;
+
+    @Autowired
+    private PaypalUtils paypalUtils;
 
     @Value("${server.public-url}")
     private String publicUrl;
@@ -92,7 +96,7 @@ public class PayPalPspRestController {
 
     private PpOnboardingBackResponse manageErrorResponseAlreadyOnboarded(TableUserPayPal tableUserPayPal) {
         PpOnboardingBackResponse ppOnboardingBackResponse = manageErrorResponse(PpOnboardingBackResponseErrCode.CODICE_CONTRATTO_PRESENTE);
-        ppOnboardingBackResponse.setEmailPp(tableUserPayPal.getPaypalEmail());
+        ppOnboardingBackResponse.setEmailPp(paypalUtils.obfuscateEmail(tableUserPayPal.getPaypalEmail()));
         ppOnboardingBackResponse.setIdPp(tableUserPayPal.getIdAppIo());
         return ppOnboardingBackResponse;
     }

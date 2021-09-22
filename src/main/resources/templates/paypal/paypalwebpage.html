@@ -4,6 +4,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    <link th:href="@{/css/paypalwebpage.css}" rel="stylesheet"/>
+
+
 </head>
 <body class="bg-light">
 <div class="container">
@@ -55,8 +58,12 @@
                                    th:disabled="${urlReturn==null}" name="paypalEmail" th:value="${paypalEmail}"
                                    required>
                             <input type="text" class="form-control" placeholder="Paypal's Id"
-                                   aria-label="Paypal's Id" aria-describedby="button-success"
+                                   id="paypalId" aria-describedby="button-success"
                                    th:disabled="${urlReturn==null}" name="paypalId" th:value="${ioAppIo}" required>
+                            <select class="form-select" id="selectRedirect" name="selectRedirect">
+                                <option selected value="true">Redirect</option>
+                                <option value="false">No Redirect</option>
+                            </select>
                             <button class="btn btn-success btn-lg btn-block" id="button-success" type="submit"
                                     th:disabled="${urlReturn==null}">
                                 Login and
@@ -70,10 +77,12 @@
                     <div class="row">
                         <div class="col">
                             <button class="btn btn-warning btn-lg btn-block me-3"
-                                    onclick="window.location.href='/paypalweb/management/cancel'" type="button" th:disabled="${urlReturn==null}">Cancel
+                                    onclick="window.location.href='/paypalweb/management/cancel'" type="button"
+                                    th:disabled="${urlReturn==null}">Cancel
                             </button>
                             <button class="btn btn-dark btn-lg btn-block me-3"
-                                    onclick="window.location.href='/paypalweb/management/invalidShaVal'" type="button" th:disabled="${urlReturn==null}">Invalid Sha Value
+                                    onclick="window.location.href='/paypalweb/management/invalidShaVal'" type="button"
+                                    th:disabled="${urlReturn==null}">Invalid Sha Value
                             </button>
                             <div class="btn-group dropend" role="group">
                                 <button id="btnGroupDrop1" type="button"
@@ -86,7 +95,8 @@
                                     <a class="dropdown-item"
                                        th:each="err : ${T(it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseErrCode).values()}"
                                        th:href="${'/paypalweb/management/error/'+ err.code}"
-                                       th:text="${err.code + ' - ' + err.description}" th:classappend="${err.code == '10' ? 'disabled' : ''}"></a>
+                                       th:text="${err.code + ' - ' + err.description}"
+                                       th:classappend="${err.code == '10' ? 'disabled' : ''}"></a>
                                 </div>
                             </div>
                         </div>

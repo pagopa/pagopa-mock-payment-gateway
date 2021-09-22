@@ -6,12 +6,10 @@ import it.gov.pagopa.db.entity.TableUserPayPal;
 import it.gov.pagopa.db.repository.TableUserPayPalRepository;
 import it.gov.pagopa.paypalpsp.PaypalUtils;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseErrCode;
-import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseEsito;
-import it.gov.pagopa.util.UrlUtils;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 
@@ -31,11 +29,12 @@ public class PayPalWebManagementController {
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
     @PostMapping("/success")
-    public String success(SessionStatus sessionStatus, @RequestParam String paypalEmail, @RequestParam String paypalId, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack) {
+    public String success(SessionStatus sessionStatus, @RequestParam String paypalEmail, @RequestParam String paypalId, @RequestParam boolean selectRedirect, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack, ModelMap modelMap) {
         try {
             if (tablePpOnboardingBack == null) {
                 return REDIRECT_PAYPALWEB_PP_ONBOARDING_CALL_ID_BACK_UNKNOWN;
             }
+            String urlReturn = tablePpOnboardingBack.getUrlReturn();
             String idAppIo = tablePpOnboardingBack.getIdAppIo();
             TableUserPayPal tableUserPayPal = TableUserPayPal.builder()
                     .idAppIo(idAppIo)
@@ -47,13 +46,19 @@ public class PayPalWebManagementController {
             log.info("New Contract established: " + tableUserPayPal);
 
             String esito = "1";
-            String emailPpObfuscated = paypalEmail.replaceAll("\\b(\\w{3})[^@]+@\\S+(\\.[^\\s.]+)", "$1***@****$2");
-            String hmac = paypalUtils.calculateHmac(esito, paypalId, emailPpObfuscated, null, tablePpOnboardingBack.getIdBack());
-
-            String redirectUrl = createRedirectUrlSuccess(tablePpOnboardingBack.getUrlReturn(), esito, emailPpObfuscated, paypalId, hmac);
-
-            log.info(String.format("Success paypal redirect for user id: '%s' and redirect url '%s'", idAppIo, redirectUrl));
-            return redirectUrl;
+            String emailPpObfuscated = paypalUtils.obfuscateEmail(paypalEmail);
+            if (selectRedirect) {
+                String hmac = paypalUtils.calculateHmac(esito, paypalId, emailPpObfuscated, null, tablePpOnboardingBack.getIdBack());
+                String redirectUrl = String.format("redirect:%s?esito=%s&id_pp=%s&email_pp=%s&sha_val=%s",
+                        urlReturn, esito, paypalId, emailPpObfuscated, hmac);
+                log.info(String.format("Success paypal redirect for user id: '%s' and redirect url '%s'", idAppIo, redirectUrl));
+                return redirectUrl;
+            } else {
+                modelMap.addAttribute("paypalEmail",emailPpObfuscated);
+                modelMap.addAttribute("idPayPal",paypalId);
+                log.info("successNoRedirect not follow the redirect");
+                return "paypal/successNoRedirect.html";
+            }
         } finally {
             sessionStatus.setComplete();
         }
@@ -66,10 +71,9 @@ public class PayPalWebManagementController {
             if (tablePpOnboardingBack == null) {
                 return REDIRECT_PAYPALWEB_PP_ONBOARDING_CALL_ID_BACK_UNKNOWN;
             }
-            String esito = PpOnboardingCallResponseEsito.CANCEL.getCode();
+            String esito = "3";
             String hmac = paypalUtils.calculateHmac(esito, null, null, null, tablePpOnboardingBack.getIdBack());
-            String redirectUrl = createRedirectUrlError(tablePpOnboardingBack.getUrlReturn(), esito, null, null, hmac);
-
+            String redirectUrl = String.format("redirect:%s?esito=%s&sha_val=%s", tablePpOnboardingBack.getUrlReturn(), esito, hmac);
             log.info(String.format("Cancel paypal redirect for user id: '%s' and redirect url '%s'", tablePpOnboardingBack.getIdAppIo(), redirectUrl));
             return redirectUrl;
         } finally {
@@ -86,63 +90,15 @@ public class PayPalWebManagementController {
             }
             PpOnboardingCallResponseErrCode callResponseErrCode = PpOnboardingCallResponseErrCode.of(errCode);
 
-            String esito = PpOnboardingCallResponseEsito.KO.getCode();
+            String esito = "9";
             String hmac = paypalUtils.calculateHmac(esito, null, null, callResponseErrCode, tablePpOnboardingBack.getIdBack());
-            String redirectUrl = createRedirectUrlError(tablePpOnboardingBack.getUrlReturn(), esito, callResponseErrCode.getCode(), callResponseErrCode.getDescription(), hmac);
-
+            String redirectUrl = String.format("redirect:%s?esito=%s&err_cod=%s&err_desc=%s&sha_val=%s",
+                    tablePpOnboardingBack.getUrlReturn(), esito, callResponseErrCode.getCode(), callResponseErrCode.getDescription(), hmac);
             log.info(String.format("Error paypal redirect for user id: '%s' and redirect url '%s'", tablePpOnboardingBack.getIdAppIo(), redirectUrl));
             return redirectUrl;
         } finally {
             sessionStatus.setComplete();
         }
-    }
-
-    //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
-    @GetMapping("/invalidShaVal")
-    public String invalidShaVal(SessionStatus sessionStatus, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack) {
-        try {
-            if (tablePpOnboardingBack == null) {
-                return REDIRECT_PAYPALWEB_PP_ONBOARDING_CALL_ID_BACK_UNKNOWN;
-            }
-            String esito = PpOnboardingCallResponseEsito.OK.getCode();
-            String hmac = paypalUtils.calculateHmac(esito, null, null, null, "invalidShaVal" + UUID.randomUUID().toString());
-            String redirectUrl = createRedirectUrlSuccess(tablePpOnboardingBack.getUrlReturn(), esito, "sha@invalid.com", "00000", hmac);
-            log.info(String.format("invalidShaVal paypal redirect for user id: '%s' and redirect url '%s'", tablePpOnboardingBack.getIdAppIo(), redirectUrl));
-            return redirectUrl;
-        } finally {
-            sessionStatus.setComplete();
-        }
-    }
-
-
-    private String createRedirectUrlSuccess(String url, String esito, String emailPp, String idPp, String shaVal) {
-        return createRedirectUrl(url, esito, null, null, emailPp, idPp, shaVal);
-    }
-
-    private String createRedirectUrlError(String url, String esito, String errCode, String errDesc, String shaVal) {
-        return createRedirectUrl(url, esito, errCode, errDesc, null, null, shaVal);
-    }
-
-    private String createRedirectUrl(String url, String esito, String errCode, String errDesc, String emailPp, String idPp, String shaVal) {
-        String newUrl = UrlUtils.addQueryParams(url, "esito", esito);
-
-        if (StringUtils.isNotBlank(errCode)) {
-            newUrl = UrlUtils.addQueryParams(newUrl, "err_cod", errCode);
-        }
-
-        if (StringUtils.isNotBlank(errDesc)) {
-            newUrl = UrlUtils.addQueryParams(newUrl, "err_desc", errDesc);
-        }
-
-        if (StringUtils.isNotBlank(emailPp)) {
-            newUrl = UrlUtils.addQueryParams(newUrl, "email_pp", emailPp);
-        }
-
-        if (StringUtils.isNotBlank(idPp)) {
-            newUrl = UrlUtils.addQueryParams(newUrl, "id_pp", idPp);
-        }
-
-        return "redirect:" + UrlUtils.addQueryParams(newUrl, "sha_val", shaVal);
     }
 }
 
