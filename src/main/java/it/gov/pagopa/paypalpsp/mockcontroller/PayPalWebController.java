@@ -2,11 +2,13 @@ package it.gov.pagopa.paypalpsp.mockcontroller;
 
 
 import com.github.javafaker.Faker;
+import it.gov.pagopa.db.entity.TableConfig;
 import it.gov.pagopa.db.entity.TablePpOnboardingBack;
 import it.gov.pagopa.db.repository.TableConfigRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
 import it.gov.pagopa.paypalpsp.PaypalUtils;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseErrCode;
+import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseEsito;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,10 +50,15 @@ public class PayPalWebController {
     public String homePage(Model model, @RequestParam("id_back") String idBack, ModelMap modelMap, HttpServletRequest request) {
         request.getSession().invalidate();
         modelMap.remove(TABLE_PP_ONBOARDING_BACK_ATTRIBUTE);
-        String esito = "9";
+
+        TableConfig tableConfig = configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL");
+        String esito = PpOnboardingCallResponseEsito.KO.getCode();
         PpOnboardingCallResponseErrCode idBackUsatoNonValido = PpOnboardingCallResponseErrCode.ID_BACK_USATO_NON_VALIDO;
+
         String hmac = paypalUtils.calculateHmac(esito, null, null, idBackUsatoNonValido, idBack);
-        String urlReturnFallBackPaypalPsp = String.format(StringUtils.joinWith("=%s&", "esito", "err_cod", "err_desc", "id_back"), esito, idBackUsatoNonValido.getCode(), idBackUsatoNonValido.getDescription(), hmac);
+        String urlReturnFallBackPaypalPsp = String.format("%s?esito=%s&err_cod=%s&err_desc=%s&sha_val=%s",
+                StringUtils.defaultString(tableConfig.getPropertyValue()), esito, idBackUsatoNonValido.getCode(),
+                idBackUsatoNonValido.getDescription(), hmac);
         model.addAttribute("urlReturnFallBackPaypalPsp", urlReturnFallBackPaypalPsp);
 
         setModelFromOnboardingBack(model, idBack, modelMap);

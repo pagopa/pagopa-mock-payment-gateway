@@ -51,7 +51,7 @@ CREATE TABLE config(
 );
 
 INSERT INTO config(property_key, property_value)
-VALUES ('PAYPAL_PSP_DEFAULT_BACK_URL', 'http://localhost:8080/fallback');
+VALUES ('PAYPAL_PSP_DEFAULT_BACK_URL', 'http://pagopa-dev:8080/pp-restapi-CD/v3/webview/paypal/fallback');
 
 INSERT INTO config(property_key, property_value)
 VALUES ('PAYPAL_PSP_HMAC_KEY', 'hmac_key');

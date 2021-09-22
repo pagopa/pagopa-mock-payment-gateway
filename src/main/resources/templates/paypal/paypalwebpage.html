@@ -96,7 +96,7 @@
                                        th:each="err : ${T(it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseErrCode).values()}"
                                        th:href="${'/paypalweb/management/error/'+ err.code}"
                                        th:text="${err.code + ' - ' + err.description}"
-                                       th:classappend="${err.code == '10' ? 'disabled' : ''}"></a>
+                                       ></a>
                                 </div>
                             </div>
                         </div>
