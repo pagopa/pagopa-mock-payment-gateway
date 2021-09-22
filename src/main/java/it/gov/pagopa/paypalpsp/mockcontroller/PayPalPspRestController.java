@@ -72,7 +72,7 @@ public class PayPalPspRestController {
 
         String idBack = UUID.randomUUID().toString();
         saveAndUpdateTable(ppOnboardingBackRequest, idBack);
-        return PpOnboardingBackResponse.builder().esito(PpOnboardingBackResponseCode.OK).urlToCall("http://host.docker.internal:" + port + "/paypalweb/pp_onboarding_call?id_back=" + idBack).build();
+        return PpOnboardingBackResponse.builder().esito(PpOnboardingBackResponseCode.OK).urlToCall("http://localhost:" + port + "/paypalweb/pp_onboarding_call?id_back=" + idBack).build();
     }
 
     private void saveAndUpdateTable(PpOnboardingBackRequest ppOnboardingBackRequest, String idBack) {
