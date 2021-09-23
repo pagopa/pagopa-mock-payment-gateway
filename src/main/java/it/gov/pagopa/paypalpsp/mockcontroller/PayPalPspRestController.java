@@ -27,6 +27,7 @@ import javax.validation.Valid;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 @Validated
 @RestController
@@ -57,7 +58,7 @@ public class PayPalPspRestController {
     @PostMapping("/api/pp_onboarding_back")
     @Transactional
     public PpOnboardingBackResponse homePage(@RequestHeader(value = "Authorization", required = false) String authorization,
-                                             @Valid @RequestBody PpOnboardingBackRequest ppOnboardingBackRequest) throws URISyntaxException {
+                                             @Valid @RequestBody PpOnboardingBackRequest ppOnboardingBackRequest) throws URISyntaxException, InterruptedException, TimeoutException {
         if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || !tableClientRepository.existsByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) {
             log.error("Invalid authorization: " + authorization);
             return manageErrorResponse(PpOnboardingBackResponseErrCode.AUTORIZZAZIONE_NEGATA);
@@ -67,7 +68,12 @@ public class PayPalPspRestController {
         TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiId(idAppIo, ApiPaypalIdEnum.ONBOARDING);
 
         //Manage error defined by user
-        if (onboardingBackManagement != null && StringUtils.isNotBlank(onboardingBackManagement.getErrCodeValue())) {
+        if (onboardingBackManagement != null
+                && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpOnboardingBackResponseErrCode.TIMEOUT.getCode())) {
+            log.info("Going in timeout: " + ppOnboardingBackRequest.getIdAppIo());
+            Thread.sleep(20000);
+            throw new TimeoutException();
+        } else if (onboardingBackManagement != null && StringUtils.isNotBlank(onboardingBackManagement.getErrCodeValue())) {
             return manageErrorResponse(PpOnboardingBackResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
         }
 
