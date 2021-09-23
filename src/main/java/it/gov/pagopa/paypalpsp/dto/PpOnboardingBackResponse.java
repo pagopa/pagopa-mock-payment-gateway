@@ -26,8 +26,8 @@ public class PpOnboardingBackResponse {
     @JsonProperty("email_pp")
     private String emailPp;
 
-    @JsonProperty("err_code")
-    private PpOnboardingBackResponseErrCode errCode;
+    @JsonProperty("err_cod")
+    private PpOnboardingBackResponseErrCode errCod;
 
     @JsonProperty("err_desc")
     private String errDesc;

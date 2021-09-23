@@ -18,7 +18,7 @@ public class PaypalUtils {
     public String calculateHmac(String esito, String idPp, String emailPp, PpOnboardingCallResponseErrCode errCodeEnum, String idBack) {
         String errCode = errCodeEnum != null ? errCodeEnum.getCode() : "";
         String errDesc = errCodeEnum != null ? errCodeEnum.getDescription() : "";
-        String result = String.format(StringUtils.joinWith("=%s&", "esito", "id_pp", "email_pp", "err_cod", "err_desc", "id_back"), esito, StringUtils.defaultString(idPp), StringUtils.defaultString(emailPp), StringUtils.defaultString(errCode), StringUtils.defaultString(errDesc), idBack);
+        String result = String.format("esito=%s&id_pp=%s&email_pp=%s&err_cod=%s&err_desc=%s&id_back=%s", esito, StringUtils.defaultString(idPp), StringUtils.defaultString(emailPp), StringUtils.defaultString(errCode), StringUtils.defaultString(errDesc), idBack);
         String paypalPspHmacKey = tableConfigRepository.findByPropertyKey("PAYPAL_PSP_HMAC_KEY").getPropertyValue();
         return Hashing.hmacSha256(paypalPspHmacKey.getBytes()).hashString(result, StandardCharsets.UTF_8).toString();
     }

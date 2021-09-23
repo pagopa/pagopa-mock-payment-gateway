@@ -103,7 +103,7 @@ public class PayPalPspRestController {
 
     private PpOnboardingBackResponse manageErrorResponse(PpOnboardingBackResponseErrCode errCode) {
         return PpOnboardingBackResponse.builder().esito(PpOnboardingBackResponseCode.KO)
-                .errCode(errCode)
+                .errCod(errCode)
                 .errDesc(errCode.name())
                 .build();
     }
