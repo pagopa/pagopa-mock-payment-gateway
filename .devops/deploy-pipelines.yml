@@ -18,12 +18,12 @@ parameters:
 variables:
   ${{ if eq(parameters['ENV'], 'dev') }}:
     AZURE_SUBSCRIPTION: $(DEV_AZURE_SUBSCRIPTION)
-    RESOURCE_GROUP: ${DEV_WEB_APP_RESOURCE_GROUP}
-    APP_NAME: ${DEV_WEB_APP_NAME}
+    RESOURCE_GROUP: $(DEV_WEB_APP_RESOURCE_GROUP)
+    APP_NAME: $(DEV_WEB_APP_NAME)
   ${{ if eq(parameters['ENV'], 'uat') }}:
     AZURE_SUBSCRIPTION: $(UAT_AZURE_SUBSCRIPTION)
-    RESOURCE_GROUP: ${UAT_WEB_APP_RESOURCE_GROUP}
-    APP_NAME: ${UAT_WEB_APP_NAME}
+    RESOURCE_GROUP: $(UAT_WEB_APP_RESOURCE_GROUP)
+    APP_NAME: $(UAT_WEB_APP_NAME)
 
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
   MAVEN_OPTS: "-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)"
@@ -134,11 +134,10 @@ stages:
                 echo "##vso[task.setvariable variable=next;isOutput=true]$version"
               failOnStderr: true
 
-          - task: AzureCLI@2
+          - task: AzureCLI@1
             displayName: 'Deploy'
             inputs:
               azureSubscription: '$(AZURE_SUBSCRIPTION)'
-              scriptType: ps
               scriptLocation: inlineScript
               inlineScript: |
-                az webapp deploy --resource-group $(RESOURCE_GROUP) --name $(APP_NAME) --src-path ./target/pagopa-pm-cloud-mock-*.jar
+                call az webapp deploy --resource-group $(RESOURCE_GROUP) --name $(APP_NAME) --src-path ./target/pagopa-pm-cloud-mock-*.jar
