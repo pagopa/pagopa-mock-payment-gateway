@@ -3,3 +3,8 @@ pmmock.iml
 terraform/**
 !terraform/*.tf
 target/
+.classpath
+.project
+.settings
+settings.json
+
