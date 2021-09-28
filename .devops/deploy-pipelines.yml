@@ -135,19 +135,19 @@ stages:
               failOnStderr: true
 
           - task: Bash@3
+            name: build
+            inputs:
+              targetType: "inline"
+              script: |
+                mvn package
+              failOnStderr: true
+
+          - task: Bash@3
             name: testLs
             inputs:
               targetType: "inline"
               script: |
                 ls */
-              failOnStderr: true
-
-          - task: Bash@3
-            name: build
-            inputs:
-              targetType: "inline"
-              script: |
-                version=$(mvn package)
               failOnStderr: true
 
           - task: AzureCLI@1
