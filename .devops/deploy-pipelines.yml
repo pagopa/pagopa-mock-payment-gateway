@@ -134,11 +134,10 @@ stages:
                 echo "##vso[task.setvariable variable=next;isOutput=true]$version"
               failOnStderr: true
 
-          - task: AzureCLI@1
+          - task: AzureCLI@2
             displayName: 'Deploy'
             inputs:
               azureSubscription: '$(AZURE_SUBSCRIPTION)'
               scriptLocation: inlineScript
               inlineScript: |
-                call az webapp deploy --resource-group $(RESOURCE_GROUP) --name $(APP_NAME) --src-path ./target/pagopa-pm-cloud-mock-*.jar
-
+                az webapp deploy --resource-group $(RESOURCE_GROUP) --name $(APP_NAME) --src-path ./target/pagopa-pm-cloud-mock-*.jar
