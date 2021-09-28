@@ -138,6 +138,7 @@ stages:
             displayName: 'Deploy'
             inputs:
               azureSubscription: '$(AZURE_SUBSCRIPTION)'
+              scriptType: ps
               scriptLocation: inlineScript
               inlineScript: |
                 az webapp deploy --resource-group $(RESOURCE_GROUP) --name $(APP_NAME) --src-path ./target/pagopa-pm-cloud-mock-*.jar
