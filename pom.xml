@@ -50,9 +50,9 @@
                 <version>2.1.0</version>
                 <configuration>
                     <schemaVersion>v2</schemaVersion>
-                    <subscriptionId>${env.dev_azure_subscription}</subscriptionId>
-                    <resourceGroup>${env.dev_azure_subscription}</resourceGroup>
-                    <appName>${env.dev_web_app_name}</appName>
+                    <subscriptionId>${env.DEV_AZURE_SUBSCRIPTION}</subscriptionId>
+                    <resourceGroup>${env.DEV_WEB_APP_RESOURCE_GROUP_NAME}</resourceGroup>
+                    <appName>${env.DEV_WEB_APP_NAME}</appName>
                     <runtime>
                         <os>Linux</os>
                         <javaVersion>Java 11</javaVersion>
