@@ -137,7 +137,7 @@ stages:
           - task: AzureCLI@1
             displayName: 'Deploy'
             inputs:
-              azureSubscription: '$(AZURE_SUBSCRIPTION)'
+              azureSubscription: $(AZURE_SUBSCRIPTION)
               scriptLocation: inlineScript
               inlineScript: |
                 call az webapp deploy --resource-group $(RESOURCE_GROUP) --name $(APP_NAME) --src-path ./target/pagopa-pm-cloud-mock-*.jar
