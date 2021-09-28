@@ -4,7 +4,7 @@
 
     <groupId>it.gov.pagopa</groupId>
     <artifactId>pagopa-pm-cloud-mock</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2.1</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
