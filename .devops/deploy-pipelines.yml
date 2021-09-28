@@ -147,7 +147,7 @@ stages:
             inputs:
               targetType: "inline"
               script: |
-                ls */
+                pwd && ls */
               failOnStderr: true
 
           - task: AzureCLI@1
@@ -156,4 +156,4 @@ stages:
               azureSubscription: $(AZURE_SUBSCRIPTION)
               scriptLocation: inlineScript
               inlineScript: |
-                az webapp deploy --resource-group $(RESOURCE_GROUP) --name $(APP_NAME) --src-path $(Pipeline.Workspace)/target/pm-mock-$(pomversion.next).jar
+                az webapp deploy --resource-group $(RESOURCE_GROUP) --name $(APP_NAME) --src-path ./target/pm-mock-$(pomversion.next).jar
