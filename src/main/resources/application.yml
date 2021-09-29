@@ -16,7 +16,7 @@ management:
         include: "info,health,prometheus"
 server:
   port: ${SERVER_PORT:7954}
-  public-url: ${SERVER-PUBLIC-URL:http://localhost:${server.port}}
+  public-url: ${SERVER_PUBLIC_URL:http://localhost:${server.port}}
 
 logging:
   level:
