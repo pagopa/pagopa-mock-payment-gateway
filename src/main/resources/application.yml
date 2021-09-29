@@ -1,12 +1,12 @@
 spring:
   application:
-    name: Payment Manager Cloud Mock
+    name: Payment Manager Mock PSP
   datasource:
     platform: postgres
-    url: jdbc:postgresql://localhost:5432/pm_mock_local
+    url: jdbc:postgresql://${PAGOPA_MOCK_PSP_DB_URL:localhost:5432/pm_mock_local}
     driverClassName: org.postgresql.Driver
-    username: pm_mock_local
-    password: pm_mock_local
+    username: ${PAGOPA_MOCK_PSP_DB_USERNAME:pm_mock_local}
+    password: ${PAGOPA_MOCK_PSP_DB_PWD:pm_mock_local}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 management:
@@ -15,8 +15,8 @@ management:
       exposure:
         include: "info,health,prometheus"
 server:
-  port: 7954
-  public-url: http://localhost:7954/
+  port: ${SERVER_PORT:7954}
+  public-url: ${SERVER-PUBLIC-URL:http://localhost:${server.port}}
 
 logging:
   level:
