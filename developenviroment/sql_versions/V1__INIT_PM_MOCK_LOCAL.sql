@@ -1,4 +1,4 @@
-CREATE TABLE pp_oboarding_back(
+CREATE TABLE pp_onboarding_back(
   id            SERIAL PRIMARY KEY,
   url_return    varchar(2014) not null,
   t_timestamp   timestamp not null,
@@ -6,15 +6,18 @@ CREATE TABLE pp_oboarding_back(
   id_back       varchar(128) not null unique,
   used          BOOLEAN NOT NULL DEFAULT FALSE
 );
-CREATE UNIQUE INDEX ON pp_oboarding_back(id_appio) WHERE NOT used
+CREATE UNIQUE INDEX ON pp_onboarding_back(id_appio)WHERE NOT used
 ;
 
-CREATE TABLE pp_oboarding_back_management(
+CREATE TABLE pp_paypal_management(
   id               SERIAL PRIMARY KEY,
-  id_appio         varchar(128) not null unique,
+  id_appio         varchar(128) not null,
+  api_id           varchar(128) not null,
   err_code         varchar(10),
   last_update_date timestamp not null
 );
+CREATE UNIQUE INDEX ON pp_paypal_management(id_appio, api_id)
+;
 
 CREATE TABLE user_paypal(
   id                   SERIAL PRIMARY KEY,
@@ -48,12 +51,12 @@ CREATE TABLE config(
 );
 
 INSERT INTO config(property_key, property_value)
-VALUES ('PAYPAL_PSP_DEFAULT_BACK_URL', 'http://localhost:8080/fallback');
+VALUES ('PAYPAL_PSP_DEFAULT_BACK_URL', 'http://pagopa-dev:8080/pp-restapi-CD/v3/webview/paypal/fallback');
 
 INSERT INTO config(property_key, property_value)
-VALUES ('PAYPAL_PSP_HMAC_KEY', 'hamac_key');
+VALUES ('PAYPAL_PSP_HMAC_KEY', 'hmac_key');
 
 INSERT INTO client
 (client_name, auth_key, creation_date, deleted)
-VALUES('local', 'local123', NOW(), false);
+VALUES ('local', 'local123', NOW(), false);
 

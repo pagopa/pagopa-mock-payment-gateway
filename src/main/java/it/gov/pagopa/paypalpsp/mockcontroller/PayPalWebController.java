@@ -6,9 +6,9 @@ import it.gov.pagopa.db.entity.TableConfig;
 import it.gov.pagopa.db.entity.TablePpOnboardingBack;
 import it.gov.pagopa.db.repository.TableConfigRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
-import it.gov.pagopa.db.repository.TableUserPayPalRepository;
 import it.gov.pagopa.paypalpsp.PaypalUtils;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseErrCode;
+import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseEsito;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +36,6 @@ public class PayPalWebController {
     private TablePpOnboardingBackRepository tablePpOnboardingBackRepository;
 
     @Autowired
-    private TableUserPayPalRepository tableUserPayPalRepository;
-
-    @Autowired
     private TableConfigRepository configRepository;
 
     @Autowired
@@ -55,7 +52,7 @@ public class PayPalWebController {
         modelMap.remove(TABLE_PP_ONBOARDING_BACK_ATTRIBUTE);
 
         TableConfig tableConfig = configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL");
-        String esito = "9";
+        String esito = PpOnboardingCallResponseEsito.KO.getCode();
         PpOnboardingCallResponseErrCode idBackUsatoNonValido = PpOnboardingCallResponseErrCode.ID_BACK_USATO_NON_VALIDO;
 
         String hmac = paypalUtils.calculateHmac(esito, null, null, idBackUsatoNonValido, idBack);
@@ -78,7 +75,7 @@ public class PayPalWebController {
             model.addAttribute("id_back", idBack);
             model.addAttribute("urlReturn", tablePpOnboardingBack.getUrlReturn());
             model.addAttribute("timestamp", DATE_TIME_FORMATTER.format(tablePpOnboardingBack.getTimestamp()));
-            model.addAttribute("ioAppIo", tablePpOnboardingBack.getIdAppIo());
+            model.addAttribute("idAppIo", tablePpOnboardingBack.getIdAppIo());
             model.addAttribute("paypalEmail", FAKER.internet().safeEmailAddress());
             modelMap.addAttribute(TABLE_PP_ONBOARDING_BACK_ATTRIBUTE, tablePpOnboardingBack);
         }

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.Instant;
 
-@Table(name = "pp_oboarding_back")
+@Table(name = "pp_onboarding_back")
 @Entity
 @Data
 @Builder
