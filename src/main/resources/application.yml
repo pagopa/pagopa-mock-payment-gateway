@@ -9,11 +9,16 @@ spring:
     password: ${PAGOPA_MOCK_PSP_DB_PWD:pm_mock_local}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-management:
+
+  mvc:
+    static-path-pattern: /static/**
   endpoints:
     web:
       exposure:
         include: "info,health,prometheus"
+
+
+
 server:
   port: ${SERVER_PORT:7954}
   public-url: ${SERVER_PUBLIC_URL:http://localhost:${server.port}}
