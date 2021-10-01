@@ -12,18 +12,24 @@ import it.gov.pagopa.util.UrlUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 
+import javax.annotation.PostConstruct;
 import java.util.UUID;
 
 @Log4j2
 @Controller
 @RequestMapping("/paypalweb/management")
 public class PayPalWebManagementController {
-    private static final String REDIRECT_PAYPALWEB_PP_ONBOARDING_CALL_ID_BACK_UNKNOWN = "redirect:/paypalweb/pp_onboarding_call?id_back=unknown";
+
+    @Value("${server.azure-api-static-res}")
+    private String azureApiStaticRes;
+
+    private String redirectPaypalwebPpOnboardingCallIdBackUnknown;
 
     @Autowired
     private TableUserPayPalRepository tableUserPayPalRepository;
@@ -34,12 +40,17 @@ public class PayPalWebManagementController {
     @Autowired
     private TableConfigRepository configRepository;
 
+    @PostConstruct
+    protected void init() {
+        redirectPaypalwebPpOnboardingCallIdBackUnknown = "redirect:" + azureApiStaticRes + "/paypalweb/pp_onboarding_call?id_back=unknown";
+    }
+
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
     @PostMapping("/success")
     public String success(SessionStatus sessionStatus, @RequestParam String paypalEmail, @RequestParam String paypalId, @RequestParam boolean selectRedirect, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack, ModelMap modelMap) {
         try {
             if (tablePpOnboardingBack == null) {
-                return REDIRECT_PAYPALWEB_PP_ONBOARDING_CALL_ID_BACK_UNKNOWN;
+                return redirectPaypalwebPpOnboardingCallIdBackUnknown;
             }
             String urlReturn = tablePpOnboardingBack.getUrlReturn();
             String idAppIo = tablePpOnboardingBack.getIdAppIo();
@@ -76,7 +87,7 @@ public class PayPalWebManagementController {
     public String cancel(SessionStatus sessionStatus, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack) {
         try {
             if (tablePpOnboardingBack == null) {
-                return REDIRECT_PAYPALWEB_PP_ONBOARDING_CALL_ID_BACK_UNKNOWN;
+                return redirectPaypalwebPpOnboardingCallIdBackUnknown;
             }
             String esito = PpOnboardingCallResponseEsito.CANCEL.getCode();
             String hmac = paypalUtils.calculateHmac(esito, null, null, null, tablePpOnboardingBack.getIdBack());
@@ -94,7 +105,7 @@ public class PayPalWebManagementController {
     public String error(@PathVariable String errCode, SessionStatus sessionStatus, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack) {
         try {
             if (tablePpOnboardingBack == null) {
-                return REDIRECT_PAYPALWEB_PP_ONBOARDING_CALL_ID_BACK_UNKNOWN;
+                return redirectPaypalwebPpOnboardingCallIdBackUnknown;
             }
             PpOnboardingCallResponseErrCode callResponseErrCode = PpOnboardingCallResponseErrCode.of(errCode);
 
@@ -120,7 +131,7 @@ public class PayPalWebManagementController {
     public String invalidShaVal(SessionStatus sessionStatus, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack) {
         try {
             if (tablePpOnboardingBack == null) {
-                return REDIRECT_PAYPALWEB_PP_ONBOARDING_CALL_ID_BACK_UNKNOWN;
+                return redirectPaypalwebPpOnboardingCallIdBackUnknown;
             }
             String esito = PpOnboardingCallResponseEsito.OK.getCode();
             String hmac = paypalUtils.calculateHmac(esito, null, null, null, "invalidShaVal" + UUID.randomUUID().toString());

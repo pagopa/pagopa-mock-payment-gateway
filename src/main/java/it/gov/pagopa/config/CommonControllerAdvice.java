@@ -16,7 +16,6 @@ public class CommonControllerAdvice {
     @Value("${server.azure-api-static-res}")
     private String azureApiStaticRes;
 
-
     public CommonControllerAdvice() {
         super();
         String version = this.getClass().getPackage().getImplementationVersion();

@@ -11,7 +11,8 @@
 <body class="bg-light">
 <div class="container">
     <div class="py-5 text-center">
-        <img class="d-block mx-auto mb-4" th:src="@{${AZURE_API_STATIC_RES}+'/img/paypal.png'}" alt="" width="60" height="57">
+        <img class="d-block mx-auto mb-4" th:src="@{${AZURE_API_STATIC_RES}+'/img/paypal.png'}" alt="" width="60"
+             height="57">
         <h2>Mock Paypal</h2>
         <p class="lead">A simple page that allows you to simulate all the interactions of a user on the paypal page.</p>
     </div>
@@ -27,7 +28,7 @@
                 <input type="text" hidden id="urlReturnFallBackPaypalPsp" th:value="${urlReturnFallBackPaypalPsp}"
                        disabled readonly>
             </div>
-            <form class="needs-validation" method="post" action="/paypalweb/management/success" novalidate>
+            <form class="needs-validation" method="post" th:action="${AZURE_API_STATIC_RES+'/paypalweb/management/success'}" novalidate>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="timestamp">Timestamp creation</label>
@@ -77,11 +78,13 @@
                     <div class="row">
                         <div class="col">
                             <button class="btn btn-warning btn-lg btn-block me-3"
-                                    onclick="window.location.href='/paypalweb/management/cancel'" type="button"
+                                    th:attr="onclick=|window.location.href='${AZURE_API_STATIC_RES}/paypalweb/management/cancel'|"
+                                    type="button"
                                     th:disabled="${urlReturn==null}">Cancel
                             </button>
                             <button class="btn btn-dark btn-lg btn-block me-3"
-                                    onclick="window.location.href='/paypalweb/management/invalidShaVal'" type="button"
+                                    th:attr="onclick=|window.location.href='${AZURE_API_STATIC_RES}/paypalweb/management/invalidShaVal'|"
+                                    type="button"
                                     th:disabled="${urlReturn==null}">Invalid Sha Value
                             </button>
                             <div class="btn-group dropend" role="group">
@@ -94,9 +97,9 @@
                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                     <a class="dropdown-item"
                                        th:each="err : ${T(it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseErrCode).values()}"
-                                       th:href="${'/paypalweb/management/error/'+ err.code}"
+                                       th:href="${AZURE_API_STATIC_RES+'/paypalweb/management/error/'+ err.code}"
                                        th:text="${err.code + ' - ' + err.description}"
-                                       ></a>
+                                    ></a>
                                 </div>
                             </div>
                         </div>
@@ -113,6 +116,7 @@
         integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
         crossorigin="anonymous"></script>
 <script type="text/javascript" th:src="@{${AZURE_API_STATIC_RES}+'/js/form-validation.js'}"></script>
-<script th:if="${urlReturn==null}" type="text/javascript" th:src="@{${AZURE_API_STATIC_RES}+'/js/paypalwebpage-timer.js'}"></script>
+<script th:if="${urlReturn==null}" type="text/javascript"
+        th:src="@{${AZURE_API_STATIC_RES}+'/js/paypalwebpage-timer.js'}"></script>
 </body>
 </html>
