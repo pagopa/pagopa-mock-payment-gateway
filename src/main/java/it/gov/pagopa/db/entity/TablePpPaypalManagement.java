@@ -1,9 +1,10 @@
 package it.gov.pagopa.db.entity;
 
 import it.gov.pagopa.db.entityenum.ApiPaypalIdEnum;
-import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingBackResponseErrCode;
-import lombok.*;
-import org.apache.commons.lang3.StringUtils;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -20,8 +21,8 @@ public class TablePpPaypalManagement {
     private Long id;
 
     @Column(name = "id_appio")
-    private String idAppIo; 
-    
+    private String idAppIo;
+
     @Column(name = "api_id")
     @Enumerated(EnumType.STRING)
     private ApiPaypalIdEnum apiId;

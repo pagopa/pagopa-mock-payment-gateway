@@ -2,7 +2,7 @@ package it.gov.pagopa.paypalpsp;
 
 import com.google.common.hash.Hashing;
 import it.gov.pagopa.db.repository.TableConfigRepository;
-import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseErrCode;
+import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ public class PaypalUtils {
     private TableConfigRepository tableConfigRepository;
 
     @SuppressWarnings("UnstableApiUsage")
-    public String calculateHmac(String esito, String idPp, String emailPp, PpOnboardingCallResponseErrCode errCodeEnum, String idBack) {
+    public String calculateHmac(String esito, String idPp, String emailPp, PpResponseErrCode errCodeEnum, String idBack) {
         String errCode = errCodeEnum != null ? errCodeEnum.getCode() : "";
         String errDesc = errCodeEnum != null ? errCodeEnum.getDescription() : "";
         String result = String.format("esito=%s&id_pp=%s&email_pp=%s&err_cod=%s&err_desc=%s&id_back=%s", esito, StringUtils.defaultString(idPp), StringUtils.defaultString(emailPp), StringUtils.defaultString(errCode), StringUtils.defaultString(errDesc), idBack);
