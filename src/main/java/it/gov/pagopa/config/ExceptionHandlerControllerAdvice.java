@@ -1,5 +1,6 @@
 package it.gov.pagopa.config;
 
+import it.gov.pagopa.exception.BadRequestException;
 import it.gov.pagopa.exception.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -32,5 +33,16 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
         return ResponseEntity.status(internalServerError).body(defaultError);
     }
 
+    @ExceptionHandler({BadRequestException.class})
+    public ResponseEntity customBadRequest(BadRequestException ex) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        log.error(ex);
+        DefaultError defaultError = new DefaultError();
+        defaultError.setError(ExceptionUtils.getMessage(ex));
+        defaultError.setStackTrace(ExceptionUtils.getStackTrace(ex));
+        defaultError.setStatus(httpStatus);
+        defaultError.setTimestamp(Instant.now());
+        return ResponseEntity.status(httpStatus).body(defaultError);
+    }
 
 }

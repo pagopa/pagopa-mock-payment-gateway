@@ -14,4 +14,5 @@ public class DefaultError {
     private HttpStatus status;
     private String error;
     private String stackTrace;
+
 }

@@ -1,8 +1,11 @@
 package it.gov.pagopa.paypalpsp.dto.dtoenum;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import it.gov.pagopa.db.entityenum.ApiPaypalIdEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 
@@ -14,6 +17,7 @@ import java.util.stream.Stream;
 import static it.gov.pagopa.db.entityenum.ApiPaypalIdEnum.ONBOARDING;
 import static it.gov.pagopa.db.entityenum.ApiPaypalIdEnum.PAYMENT;
 
+@ToString
 @AllArgsConstructor
 public enum PpResponseErrCode {
     TIMEOUT("-1", "", HttpStatus.GATEWAY_TIMEOUT, Arrays.asList(ONBOARDING, PAYMENT)), //out of psp scope
@@ -36,6 +40,7 @@ public enum PpResponseErrCode {
     PAYPAL_CREATE_AGR_ID_KO_3("65", "paypal api create billing agr id KO", null, Arrays.asList(PAYMENT)),
     DB_INTERNAL_ERROR("67", "db internal error", HttpStatus.INTERNAL_SERVER_ERROR, Arrays.asList(ONBOARDING, PAYMENT));
 
+    @JsonValue
     @Getter
     private String code;
 
@@ -48,7 +53,9 @@ public enum PpResponseErrCode {
     @Getter
     private List<ApiPaypalIdEnum> allowed;
 
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static PpResponseErrCode of(String code) {
+        if (code == null) return null;
         return Stream.of(PpResponseErrCode.values())
                 .filter(p -> StringUtils.equalsIgnoreCase(p.getCode(), code))
                 .findFirst()
@@ -67,4 +74,6 @@ public enum PpResponseErrCode {
         return Stream.of(PpResponseErrCode.values())
                 .filter(e -> e.getAllowed().stream().anyMatch(ea -> ea.equals(apiPaypalIdEnum))).collect(Collectors.toList());
     }
+
+
 }

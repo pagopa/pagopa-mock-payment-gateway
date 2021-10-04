@@ -5,6 +5,7 @@ import it.gov.pagopa.db.entity.TablePpPaypalManagement;
 import it.gov.pagopa.db.entityenum.ApiPaypalIdEnum;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
 import it.gov.pagopa.db.repository.TablePpPaypalManagementRepository;
+import it.gov.pagopa.exception.BadRequestException;
 import it.gov.pagopa.exception.NotFoundException;
 import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackManagement;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
@@ -35,14 +36,14 @@ public class PayPalPspManagementRestController {
         ApiPaypalIdEnum apiId = ppOnboardingBackManagement.getApiId();
         PpResponseErrCode errCode = ppOnboardingBackManagement.getErrCode();
 
-        if (errCode.getAllowed().stream().noneMatch(e -> e.equals(apiId))) {
-            throw new Exception("Invalid code for apiId");
+        if (errCode != null && errCode.getAllowed().stream().noneMatch(e -> e.equals(apiId))) {
+            throw new BadRequestException(String.format("Invalid code '%s' for apiId '%s'", errCode, apiId));
         }
         TablePpPaypalManagement onboardingBackManagementSaved = tablePpPaypalManagementRepository.findByIdAppIoAndApiId(idAppIo, apiId);
         if (onboardingBackManagementSaved == null) {
             onboardingBackManagementSaved = TablePpPaypalManagement.builder().idAppIo(idAppIo).apiId(apiId).build();
         }
-        onboardingBackManagementSaved.setErrCodeValue(errCode.getCode());
+        onboardingBackManagementSaved.setErrCodeValue(errCode != null ? errCode.getCode() : null);
         onboardingBackManagementSaved.setLastUpdateDate(Instant.now());
         TablePpPaypalManagement newOnboardingBackManagement = tablePpPaypalManagementRepository.save(onboardingBackManagementSaved);
         return convertToPpOnboardingBackManagement(newOnboardingBackManagement);
