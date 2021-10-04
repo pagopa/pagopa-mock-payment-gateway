@@ -26,10 +26,6 @@ import java.util.UUID;
 @RequestMapping("/paypalweb/management")
 public class PayPalWebManagementController {
 
-//    @Value("${server.azure-api-static-res}")
-////    private String azureApiStaticRes;
-
-
     @Value("${server.public-url}")
     private String publicUrl;
 

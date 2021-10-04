@@ -1,3 +1,8 @@
-#selectRedirect, #paypalId {
+#selectRedirect {
     max-width: 140px;
 }
+
+#paypalId {
+    max-width: 200px;
+}
+

@@ -20,7 +20,6 @@ spring:
 server:
   port: ${SERVER_PORT:7954}
   public-url: ${SERVER_PUBLIC_URL:http://localhost:${server.port}}
-#  azure-api-static-res: ${AZURE_API_STATIC_RES:/}
 
 logging:
   level:
