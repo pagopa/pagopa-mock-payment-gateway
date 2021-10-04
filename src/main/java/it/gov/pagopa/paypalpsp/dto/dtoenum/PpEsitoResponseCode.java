@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
-public enum PpOnboardingBackResponseCode {
+public enum PpEsitoResponseCode {
     OK("1"),
     KO("9");
 

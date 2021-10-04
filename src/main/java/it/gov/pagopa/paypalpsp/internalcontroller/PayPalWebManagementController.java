@@ -6,8 +6,8 @@ import it.gov.pagopa.db.entity.TableUserPayPal;
 import it.gov.pagopa.db.repository.TableConfigRepository;
 import it.gov.pagopa.db.repository.TableUserPayPalRepository;
 import it.gov.pagopa.paypalpsp.PaypalUtils;
-import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseErrCode;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseEsito;
+import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
 import it.gov.pagopa.util.UrlUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +47,7 @@ public class PayPalWebManagementController {
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
 //    @PostMapping("/success")
-    @RequestMapping(value = "/success", method = { RequestMethod.GET, RequestMethod.POST })
+    @RequestMapping(value = "/success", method = {RequestMethod.GET, RequestMethod.POST})
     public String success(SessionStatus sessionStatus, @RequestParam String paypalEmail, @RequestParam String paypalId, @RequestParam boolean selectRedirect, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack, ModelMap modelMap) {
         try {
             if (tablePpOnboardingBack == null) {
@@ -108,7 +108,7 @@ public class PayPalWebManagementController {
             if (tablePpOnboardingBack == null) {
                 return redirectPaypalwebPpOnboardingCallIdBackUnknown;
             }
-            PpOnboardingCallResponseErrCode callResponseErrCode = PpOnboardingCallResponseErrCode.of(errCode);
+            PpResponseErrCode callResponseErrCode = PpResponseErrCode.of(errCode);
 
             String esito = PpOnboardingCallResponseEsito.KO.getCode();
             String hmac = paypalUtils.calculateHmac(esito, null, null, callResponseErrCode, tablePpOnboardingBack.getIdBack());
@@ -122,8 +122,8 @@ public class PayPalWebManagementController {
         }
     }
 
-    private String getPaypalBaseRedirectUrl(@SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack, PpOnboardingCallResponseErrCode callResponseErrCode) {
-        return callResponseErrCode == PpOnboardingCallResponseErrCode.ID_BACK_USATO_NON_VALIDO
+    private String getPaypalBaseRedirectUrl(@SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack, PpResponseErrCode callResponseErrCode) {
+        return callResponseErrCode == PpResponseErrCode.ID_BACK_USATO_NON_VALIDO
                 ? configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL").getPropertyValue() : tablePpOnboardingBack.getUrlReturn();
     }
 
