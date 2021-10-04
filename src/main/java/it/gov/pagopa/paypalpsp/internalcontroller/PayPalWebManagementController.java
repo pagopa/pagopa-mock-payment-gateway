@@ -26,8 +26,12 @@ import java.util.UUID;
 @RequestMapping("/paypalweb/management")
 public class PayPalWebManagementController {
 
-    @Value("${server.azure-api-static-res}")
-    private String azureApiStaticRes;
+//    @Value("${server.azure-api-static-res}")
+////    private String azureApiStaticRes;
+
+
+    @Value("${server.public-url}")
+    private String publicUrl;
 
     private String redirectPaypalwebPpOnboardingCallIdBackUnknown;
 
@@ -42,7 +46,7 @@ public class PayPalWebManagementController {
 
     @PostConstruct
     protected void init() {
-        redirectPaypalwebPpOnboardingCallIdBackUnknown = "redirect:" + azureApiStaticRes + "/paypalweb/pp_onboarding_call?id_back=unknown";
+        redirectPaypalwebPpOnboardingCallIdBackUnknown = "redirect:" + publicUrl + "/paypalweb/pp_onboarding_call?id_back=unknown";
     }
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV

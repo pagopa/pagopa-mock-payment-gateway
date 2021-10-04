@@ -14,9 +14,6 @@ public class CommonControllerAdvice {
     private static final String AZURE_API_PUBLIC_URL = "AZURE_API_PUBLIC_URL";
     private final String appVersion;
 
-//  e
-
-
     @Value("${server.public-url}")
     private String publicUrl;
 
