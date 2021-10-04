@@ -50,7 +50,8 @@ public class PayPalWebManagementController {
     }
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
-    @PostMapping("/success")
+//    @PostMapping("/success")
+    @RequestMapping(value = "/success", method = { RequestMethod.GET, RequestMethod.POST })
     public String success(SessionStatus sessionStatus, @RequestParam String paypalEmail, @RequestParam String paypalId, @RequestParam boolean selectRedirect, @SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack, ModelMap modelMap) {
         try {
             if (tablePpOnboardingBack == null) {

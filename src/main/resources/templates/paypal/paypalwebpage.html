@@ -28,7 +28,7 @@
                 <input type="text" hidden id="urlReturnFallBackPaypalPsp" th:value="${urlReturnFallBackPaypalPsp}"
                        disabled readonly>
             </div>
-            <form class="needs-validation" method="post" th:action="${AZURE_API_PUBLIC_URL+'/paypalweb/management/success'}" novalidate>
+            <form class="needs-validation" method="get" th:action="${AZURE_API_PUBLIC_URL+'/paypalweb/management/success'}" novalidate>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="timestamp">Timestamp creation</label>
