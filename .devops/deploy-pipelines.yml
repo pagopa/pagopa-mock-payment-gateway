@@ -41,8 +41,8 @@ pool:
 stages:
   # Create a release
   - stage: release_service
-  #  condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'),
-  #    ne('${{ parameters.REPOSITORY }}', 'auth'))
+    #  condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'),
+    #    ne('${{ parameters.REPOSITORY }}', 'auth'))
     pool:
       vmImage: "ubuntu-latest"
     jobs:
@@ -55,6 +55,11 @@ stages:
           - script: |
               git config --global user.name "$(GIT_USERNAME)"
               git config --global user.email "$(GIT_EMAIL)"
+            displayName: Set git name and email
+
+          - script: |
+              git checkout ${{variables['Build.SourceBranchName']}}
+            displayName: Checkout current branch
 
           - template: azure-templates/maven-versioning.yml
             parameters:
@@ -70,26 +75,26 @@ stages:
               failOnStderr: true
 
           - script: |
+              git add pom.xml
+              git commit -m "Bump version [skip ci]"
+              git push origin ${{variables['Build.SourceBranchName']}}
+              git push --tags
+            displayName: Git push new version
+
+          - script: |
               HEAD_SHA=$(git rev-parse HEAD)
               TAG="$(pomversion.next)"
               TITLE="Release $(pomversion.next)"
               echo "##vso[task.setvariable variable=title]$TITLE"
               echo "##vso[task.setvariable variable=sha]$HEAD_SHA"
               echo "##vso[task.setvariable variable=tag]$TAG"
+            displayName: Set Variable title, sha, tag
 
           - script: |
-              git checkout ${{variables['Build.SourceBranchName']}}
-
-          - script: |
-              echo $(tag)
               echo $(title)
               echo $(sha)
-
-          - script: |
-              git add pom.xml 
-              git commit -m "Bump version [skip ci]"
-              git push origin ${{variables['Build.SourceBranchName']}}
-              git push --tags
+              echo $(tag)
+            displayName: Print Variable title, sha, tag
 
           # create new releae
           - task: GitHubRelease@0
@@ -106,6 +111,8 @@ stages:
   # Create a release
   - stage: deploy
     condition: not(failed('releaseService'))
+    variables:
+      pomversionFromRelease: $[ stageDependencies.release_service.releaseService.outputs['pomversion.next'] ]
     pool:
       vmImage: "ubuntu-latest"
     jobs:
@@ -115,6 +122,10 @@ stages:
             clean: true
             persistCredentials: true
             submodules: true
+
+          - script: |
+              git checkout $(pomversionFromRelease)
+            displayName: Checkout new tag
 
           - task: Cache@2
             inputs:
@@ -135,19 +146,19 @@ stages:
               failOnStderr: true
 
           - task: Bash@3
+            name: Check_Version_Matching
+            inputs:
+              targetType: "inline"
+              script: |
+                [[ "$(pomversionFromRelease)" != "$(pomversion.next)" ]] && >&2 echo "Unmatched versions"  || echo "Maching! PomVersion $(pomversion.next)"
+              failOnStderr: true
+
+          - task: Bash@3
             name: build
             inputs:
               targetType: "inline"
               script: |
                 mvn package
-              failOnStderr: true
-
-          - task: Bash@3
-            name: testLs
-            inputs:
-              targetType: "inline"
-              script: |
-                pwd && ls */
               failOnStderr: true
 
           - task: AzureCLI@1
