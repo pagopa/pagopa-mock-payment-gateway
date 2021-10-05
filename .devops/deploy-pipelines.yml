@@ -150,7 +150,7 @@ stages:
               failOnStderr: true
 
           - task: Bash@3
-            name: Check Version matching
+            name: Check_Version_Matching
             inputs:
               targetType: "inline"
               script: |
