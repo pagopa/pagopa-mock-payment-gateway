@@ -53,14 +53,14 @@ stages:
             persistCredentials: true
 
           - script: |
-              git config --global user.name "$(GIT_USERNAME)" || error_print "Cannot set user.name"
-              git config --global user.email "$(GIT_EMAIL)" || error_print "Cannot set user.email"
+              git config --global user.name "$(GIT_USERNAME)"
+              git config --global user.email "$(GIT_EMAIL)"
             displayName: Set git name and email
-            failOnStderr: true
 
           - script: |
               git checkout ${{variables['Build.SourceBranchName']}}
             displayName: Checkout current branch
+            failOnStderr: true
 
           - template: azure-templates/maven-versioning.yml
             parameters:
@@ -81,6 +81,7 @@ stages:
               git push origin ${{variables['Build.SourceBranchName']}}
               git push --tags
             displayName: Git push new version
+            failOnStderr: true
 
           - script: |
               HEAD_SHA=$(git rev-parse HEAD)
@@ -90,6 +91,7 @@ stages:
               echo "##vso[task.setvariable variable=sha]$HEAD_SHA"
               echo "##vso[task.setvariable variable=tag]$TAG"
             displayName: Set Variable title, sha, tag
+            failOnStderr: true
 
           - script: |
               echo $(title)
@@ -113,7 +115,7 @@ stages:
   - stage: deploy
     condition: not(failed('releaseService'))
     variables:
-      pomversion: $[ stageDependencies.release_service.releaseService.outputs['pomversion.next'] ]
+      pomversionFromRelease: $[ stageDependencies.release_service.releaseService.outputs['pomversion.next'] ]
     pool:
       vmImage: "ubuntu-latest"
     jobs:
@@ -127,6 +129,7 @@ stages:
           - script: |
               git checkout $(pomversion)
             displayName: Checkout new tag
+            failOnStderr: true
 
           - task: Cache@2
             inputs:
@@ -147,22 +150,20 @@ stages:
               failOnStderr: true
 
           - task: Bash@3
+              name: Check Version matching
+              inputs:
+                targetType: "inline"
+                script: |
+                  [[ $(pomversionFromRelease) -ne 0 ]] && error_print "Unmatched versions"
+                #                  [ $(pomversionFromRelease) -ne $(pomversion.next) ] && error_print "Unmatched versions"
+                failOnStderr: true
+
+          - task: Bash@3
             name: build
             inputs:
               targetType: "inline"
               script: |
                 mvn package
-              failOnStderr: true
-
-          - task: Bash@3
-            name: testLs
-            inputs:
-              targetType: "inline"
-              script: |
-                echo $(Build.Repository.Name)
-                echo $(pomversion)
-                echo $(pomversion.next)
-
               failOnStderr: true
 
           - task: AzureCLI@1
