@@ -53,9 +53,10 @@ stages:
             persistCredentials: true
 
           - script: |
-              git config --global user.name "$(GIT_USERNAME)"
-              git config --global user.email "$(GIT_EMAIL)"
+              git config --global user.name "$(GIT_USERNAME)" || error_print "Cannot set user.name"
+              git config --global user.email "$(GIT_EMAIL)" || error_print "Cannot set user.email"
             displayName: Set git name and email
+            failOnStderr: true
 
           - script: |
               git checkout ${{variables['Build.SourceBranchName']}}
