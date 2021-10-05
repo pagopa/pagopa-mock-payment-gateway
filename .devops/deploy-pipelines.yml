@@ -150,8 +150,7 @@ stages:
             inputs:
               targetType: "inline"
               script: |
-                [[ $(pomversionFromRelease) -ne 0 ]] && error_print "Unmatched versions"
-              #                  [ $(pomversionFromRelease) -ne $(pomversion.next) ] && error_print "Unmatched versions"
+                [[ "$(pomversionFromRelease)" != "$(pomversion.next)" ]] && error_print "Unmatched versions"
               failOnStderr: true
 
           - task: Bash@3
