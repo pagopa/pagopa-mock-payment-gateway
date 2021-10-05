@@ -79,9 +79,13 @@ stages:
               HEAD_SHA=$(git rev-parse HEAD)
               TAG="$(pomversion.next)"
               TITLE="Release $(pomversion.next)"
-              echo "##vso[task.setvariable variable=title]$TITLE" &&  echo $(title)
-              echo "##vso[task.setvariable variable=sha]$HEAD_SHA" &&  echo $(sha)
-              echo "##vso[task.setvariable variable=tag]$TAG" &&  echo $(tag)
+              echo "##vso[task.setvariable variable=title]$TITLE"
+              echo "##vso[task.setvariable variable=sha]$HEAD_SHA"
+              echo "##vso[task.setvariable variable=tag]$TAG"
+          - script: |
+              echo $(title)
+              echo $(sha)
+              echo $(tag)
 
           # create new releae
           - task: GitHubRelease@0
