@@ -106,6 +106,8 @@ stages:
   # Create a release
   - stage: deploy
     condition: not(failed('releaseService'))
+    variables:
+      pomversion: $[ stageDependencies.release_service.releaseService.outputs['pomversion.next'] ]
     pool:
       vmImage: "ubuntu-latest"
     jobs:
@@ -147,7 +149,9 @@ stages:
             inputs:
               targetType: "inline"
               script: |
-                pwd && ls */
+                echo $(Build.Repository.Name)
+                echo $(pomversion)
+
               failOnStderr: true
 
           - task: AzureCLI@1
