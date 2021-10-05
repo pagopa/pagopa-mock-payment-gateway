@@ -55,7 +55,12 @@ stages:
           - script: |
               git config --global user.name "$(GIT_USERNAME)"
               git config --global user.email "$(GIT_EMAIL)"
+          displayName: Set git name and email
 
+          - script: |
+              git checkout ${{variables['Build.SourceBranchName']}}
+          displayName: Checkout current branch
+            -
           - template: azure-templates/maven-versioning.yml
             parameters:
               semver: "${{ parameters.SEMVER }}"
@@ -74,6 +79,7 @@ stages:
               git commit -m "Bump version [skip ci]"
               git push origin ${{variables['Build.SourceBranchName']}}
               git push --tags
+            displayName: Git push new version
 
           - script: |
               HEAD_SHA=$(git rev-parse HEAD)
@@ -82,10 +88,13 @@ stages:
               echo "##vso[task.setvariable variable=title]$TITLE"
               echo "##vso[task.setvariable variable=sha]$HEAD_SHA"
               echo "##vso[task.setvariable variable=tag]$TAG"
+            displayName: Set Variable title, sha, tag
+
           - script: |
               echo $(title)
               echo $(sha)
               echo $(tag)
+            displayName: Print Variable title, sha, tag
 
           # create new releae
           - task: GitHubRelease@0
