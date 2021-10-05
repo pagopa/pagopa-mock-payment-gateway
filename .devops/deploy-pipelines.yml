@@ -113,7 +113,7 @@ stages:
     jobs:
       - job: deployJava
         steps:
-          - checkout: "$(Build.Repository.Name)"@"$(pomversion)"
+          - checkout: "$(Build.Repository.Name)@$(pomversion)"
             clean: true
             persistCredentials: true
             submodules: true
