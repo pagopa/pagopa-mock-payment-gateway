@@ -60,7 +60,6 @@ stages:
           - script: |
               git checkout ${{variables['Build.SourceBranchName']}}
             displayName: Checkout current branch
-            failOnStderr: true
 
           - template: azure-templates/maven-versioning.yml
             parameters:
