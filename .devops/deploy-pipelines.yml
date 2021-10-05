@@ -150,13 +150,13 @@ stages:
               failOnStderr: true
 
           - task: Bash@3
-              name: Check Version matching
-              inputs:
-                targetType: "inline"
-                script: |
-                  [[ $(pomversionFromRelease) -ne 0 ]] && error_print "Unmatched versions"
-                #                  [ $(pomversionFromRelease) -ne $(pomversion.next) ] && error_print "Unmatched versions"
-                failOnStderr: true
+            name: Check Version matching
+            inputs:
+              targetType: "inline"
+              script: |
+                [[ $(pomversionFromRelease) -ne 0 ]] && error_print "Unmatched versions"
+              #                  [ $(pomversionFromRelease) -ne $(pomversion.next) ] && error_print "Unmatched versions"
+              failOnStderr: true
 
           - task: Bash@3
             name: build
