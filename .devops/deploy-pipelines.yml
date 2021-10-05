@@ -119,7 +119,7 @@ stages:
             submodules: true
 
           - script: |
-              git checkout $(Build.Repository.Name)@$(pomversion)
+              git checkout $(pomversion)
             displayName: Checkout new tag
 
           - task: Cache@2
@@ -155,6 +155,7 @@ stages:
               script: |
                 echo $(Build.Repository.Name)
                 echo $(pomversion)
+                echo $(pomversion.next)
 
               failOnStderr: true
 
