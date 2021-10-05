@@ -4,7 +4,7 @@
 
     <groupId>it.gov.pagopa</groupId>
     <artifactId>pm-mock</artifactId>
-    <version>1.0.22</version>
+    <version>1.0.23</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
