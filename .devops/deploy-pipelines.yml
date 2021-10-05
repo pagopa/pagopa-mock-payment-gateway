@@ -41,8 +41,8 @@ pool:
 stages:
   # Create a release
   - stage: release_service
-  #  condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'),
-  #    ne('${{ parameters.REPOSITORY }}', 'auth'))
+    #  condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'),
+    #    ne('${{ parameters.REPOSITORY }}', 'auth'))
     pool:
       vmImage: "ubuntu-latest"
     jobs:
@@ -55,12 +55,12 @@ stages:
           - script: |
               git config --global user.name "$(GIT_USERNAME)"
               git config --global user.email "$(GIT_EMAIL)"
-          displayName: Set git name and email
+            displayName: Set git name and email
 
           - script: |
               git checkout ${{variables['Build.SourceBranchName']}}
-          displayName: Checkout current branch
-            -
+            displayName: Checkout current branch
+
           - template: azure-templates/maven-versioning.yml
             parameters:
               semver: "${{ parameters.SEMVER }}"
