@@ -72,7 +72,7 @@ stages:
               script: |
                 version=$(mvn -f pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
                 echo "##vso[task.setvariable variable=next;isOutput=true]$version"
-              failOnStderr: true
+            failOnStderr: true
 
           - script: |
               git add pom.xml
@@ -80,7 +80,6 @@ stages:
               git push origin ${{variables['Build.SourceBranchName']}}
               git push --tags
             displayName: Git push new version
-            failOnStderr: true
 
           - script: |
               HEAD_SHA=$(git rev-parse HEAD)
@@ -90,7 +89,6 @@ stages:
               echo "##vso[task.setvariable variable=sha]$HEAD_SHA"
               echo "##vso[task.setvariable variable=tag]$TAG"
             displayName: Set Variable title, sha, tag
-            failOnStderr: true
 
           - script: |
               echo $(title)
@@ -128,7 +126,6 @@ stages:
           - script: |
               git checkout $(pomversion)
             displayName: Checkout new tag
-            failOnStderr: true
 
           - task: Cache@2
             inputs:
