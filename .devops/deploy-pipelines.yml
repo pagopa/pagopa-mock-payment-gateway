@@ -113,10 +113,14 @@ stages:
     jobs:
       - job: deployJava
         steps:
-          - checkout: "$(Build.Repository.Name)@$(pomversion)"
+          - checkout: self
             clean: true
             persistCredentials: true
             submodules: true
+
+          - script: |
+              git checkout $(Build.Repository.Name)@$(pomversion)
+            displayName: Checkout new tag
 
           - task: Cache@2
             inputs:
