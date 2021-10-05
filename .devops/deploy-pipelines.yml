@@ -70,26 +70,18 @@ stages:
               failOnStderr: true
 
           - script: |
-              HEAD_SHA=$(git rev-parse HEAD)
-              TAG="$(pomversion.next)"
-              TITLE="Release $(pomversion.next)"
-              echo "##vso[task.setvariable variable=title]$TITLE"
-              echo "##vso[task.setvariable variable=sha]$HEAD_SHA"
-              echo "##vso[task.setvariable variable=tag]$TAG"
-
-          - script: |
-              git checkout ${{variables['Build.SourceBranchName']}}
-
-          - script: |
-              echo $(tag)
-              echo $(title)
-              echo $(sha)
-
-          - script: |
-              git add pom.xml 
+              git add pom.xml
               git commit -m "Bump version [skip ci]"
               git push origin ${{variables['Build.SourceBranchName']}}
               git push --tags
+
+          - script: |
+              HEAD_SHA=$(git rev-parse HEAD)
+              TAG="$(pomversion.next)"
+              TITLE="Release $(pomversion.next)"
+              echo "##vso[task.setvariable variable=title]$TITLE" &&  echo $(title)
+              echo "##vso[task.setvariable variable=sha]$HEAD_SHA" &&  echo $(sha)
+              echo "##vso[task.setvariable variable=tag]$TAG" &&  echo $(tag)
 
           # create new releae
           - task: GitHubRelease@0
