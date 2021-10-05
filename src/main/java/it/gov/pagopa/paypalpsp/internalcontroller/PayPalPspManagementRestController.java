@@ -8,6 +8,7 @@ import it.gov.pagopa.db.repository.TablePpPaypalManagementRepository;
 import it.gov.pagopa.exception.BadRequestException;
 import it.gov.pagopa.exception.NotFoundException;
 import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackManagement;
+import it.gov.pagopa.paypalpsp.dto.PpResponseErrorInfo;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Validated
 @RestController
@@ -58,6 +62,12 @@ public class PayPalPspManagementRestController {
             throw new NotFoundException();
         }
         return convertToPpOnboardingBackManagement(onboardingBackManagement);
+    }
+
+
+    @GetMapping("/response")
+    public List<PpResponseErrorInfo> getErrorList() {
+        return Stream.of(PpResponseErrCode.values()).map(PpResponseErrorInfo::new).collect(Collectors.toList());
     }
 
     private PpOnboardingBackManagement convertToPpOnboardingBackManagement(TablePpPaypalManagement

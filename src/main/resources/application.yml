@@ -23,7 +23,7 @@ server:
 
 logging:
   level:
-    root: DEBUG
+    root: ${LOGGING_ROOT_LEVEL:INFO}
     org:
       zalando:
         logbook: TRACE
