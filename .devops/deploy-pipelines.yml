@@ -150,7 +150,7 @@ stages:
             inputs:
               targetType: "inline"
               script: |
-                [[ "$(pomversionFromRelease)" != "$(pomversion.next)" ]] && >&2 echo "Unmatched versions"
+                [[ "$(pomversionFromRelease)" != "$(pomversion.next)" ]] && >&2 echo "Unmatched versions"  || echo "Maching! PomVersion $(pomversion.next)"
               failOnStderr: true
 
           - task: Bash@3
