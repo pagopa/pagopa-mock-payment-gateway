@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.List;
 
 @Table(name = "user_paypal")
 @Entity
@@ -36,4 +37,7 @@ public class TableUserPayPal {
     private Instant creationDate=Instant.now();
 
     private boolean deleted;
+
+    @OneToMany(mappedBy = "tableUserPayPal", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<TablePaymentPayPal> paymentPayPal;
 }

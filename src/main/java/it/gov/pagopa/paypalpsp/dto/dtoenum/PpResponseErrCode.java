@@ -28,6 +28,7 @@ public enum PpResponseErrCode {
     AUTORIZZAZIONE_IP_NEGATA("15", "autorizzazione ip negata", HttpStatus.UNAUTHORIZED, Arrays.asList(ONBOARDING, PAYMENT)),
     TOKEN_PAYPAL_NON_VALIDO("16", " token paypal non valido", HttpStatus.UNPROCESSABLE_ENTITY, Arrays.asList(ONBOARDING)),
     TIMESTAMP_SCADUTO("17", "timestamp scaduto", null, Arrays.asList(PAYMENT)),
+    ID_APP_IO_NON_ESISTE("18", " id_appio non esiste", HttpStatus.UNPROCESSABLE_ENTITY, Arrays.asList(PAYMENT)),
     CODICE_CONTRATTO_PRESENTE("19", "id_appio con bilagr già associato", HttpStatus.UNPROCESSABLE_ENTITY, null),
     PAYPAL_GET_TOKEN_KO("31", " paypal get api token KO", null, Arrays.asList(PAYMENT)),
     PAYPAL_CREATE_AGR_TOKEN_KO("33", " paypal create billing agr token KO", null, Arrays.asList(PAYMENT)),
