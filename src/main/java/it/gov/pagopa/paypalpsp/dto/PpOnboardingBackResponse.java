@@ -2,11 +2,14 @@ package it.gov.pagopa.paypalpsp.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@NoArgsConstructor
 public class PpOnboardingBackResponse extends PpDefaultErrorResponse {
     @JsonProperty("url_to_call")
     private String urlToCall;
@@ -16,4 +19,9 @@ public class PpOnboardingBackResponse extends PpDefaultErrorResponse {
 
     @JsonProperty("email_pp")
     private String emailPp;
+
+    public PpOnboardingBackResponse(PpDefaultErrorResponse ppDefaultErrorResponse) {
+        this.setPpDefaultErrorResponse(ppDefaultErrorResponse);
+    }
+
 }

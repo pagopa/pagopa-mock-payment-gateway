@@ -17,4 +17,9 @@ public class PpDefaultErrorResponse {
     @JsonProperty("err_desc")
     private String errDesc;
 
+    public void setPpDefaultErrorResponse(PpDefaultErrorResponse ppDefaultErrorResponse) {
+        this.setErrCod(ppDefaultErrorResponse.getErrCod());
+        this.setErrDesc(ppDefaultErrorResponse.getErrDesc());
+        this.setEsito(ppDefaultErrorResponse.getEsito());
+    }
 }
