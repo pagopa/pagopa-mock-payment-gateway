@@ -195,17 +195,17 @@ public class PayPalPspRestController {
 
     private ResponseEntity<PpPayDirectResponse> createSuccessPaymentResponse(PpPayDirectRequest ppPayDirectRequest) {
 
-        PpPayDirectResponse build = PpPayDirectResponse.builder().esito(PpEsitoResponseCode.OK)
-                .idTrsPaypal(StringUtils.leftPad(ppPayDirectRequest.getIdTrsAppIo(), 20, "0"))
-                .build();
-        return ResponseEntity.ok(build);
+        PpPayDirectResponse response = new PpPayDirectResponse();
+        response.setEsito(PpEsitoResponseCode.OK);
+        response.setIdTrsPaypal(StringUtils.leftPad(ppPayDirectRequest.getIdTrsAppIo(), 20, "0"));
+        return ResponseEntity.ok(response);
     }
 
     private ResponseEntity<PpRefundDirectResponse> createSuccessRefundResponse() {
 
-        PpRefundDirectResponse build = PpRefundDirectResponse.builder().esito(PpEsitoResponseCode.OK)
-                .build();
-        return ResponseEntity.ok(build);
+        PpRefundDirectResponse response = new PpRefundDirectResponse();
+        response.setEsito(PpEsitoResponseCode.OK);
+        return ResponseEntity.ok(response);
     }
 
     private void saveAndUpdateTable(PpOnboardingBackRequest ppOnboardingBackRequest, String idBack) {
