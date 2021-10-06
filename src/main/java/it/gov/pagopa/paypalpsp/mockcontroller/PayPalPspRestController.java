@@ -120,7 +120,7 @@ public class PayPalPspRestController {
             } else if (onboardingBackManagement != null && StringUtils.isNotBlank(onboardingBackManagement.getErrCodeValue())) {
                 ppPayDirectResponse = createResponseErrorPayment(PpResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
             } else {
-                ppPayDirectResponse = createSuccessPaymentResponse();
+                ppPayDirectResponse = createSuccessPaymentResponse(ppPayDirectRequest);
             }
             return ppPayDirectResponse;
         } finally {
@@ -143,10 +143,10 @@ public class PayPalPspRestController {
         tablePaymentPayPalRepository.save(tablePaymentPayPal);
     }
 
-    private ResponseEntity<PpPayDirectResponse> createSuccessPaymentResponse() {
+    private ResponseEntity<PpPayDirectResponse> createSuccessPaymentResponse(PpPayDirectRequest ppPayDirectRequest) {
 
         PpPayDirectResponse build = PpPayDirectResponse.builder().esito(PpEsitoResponseCode.OK)
-                .idTrsPaypal(UUID.randomUUID().toString())
+                .idTrsPaypal(StringUtils.leftPad(ppPayDirectRequest.getIdTrsAppIo(), 20, "0"))
                 .build();
         return ResponseEntity.ok(build);
     }

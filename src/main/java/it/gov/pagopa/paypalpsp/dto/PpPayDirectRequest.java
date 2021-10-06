@@ -29,5 +29,6 @@ public class PpPayDirectRequest {
     private BigDecimal importo;
 
     @NotNull
+    @Digits(fraction = 2, integer = Integer.MAX_VALUE)
     private BigDecimal fee;
 }
