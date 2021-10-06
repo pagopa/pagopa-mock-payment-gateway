@@ -130,6 +130,56 @@ public class PayPalPspRestController {
         }
     }
 
+    @Transactional
+    @PostMapping("/api/pp_refund_direct")
+    public ResponseEntity<PpRefundDirectResponse> refund(@RequestHeader(value = "Authorization", required = false) String authorization,
+           @Valid @RequestBody PpRefundDirectRequest ppPayDirectRequest) throws InterruptedException, TimeoutException {
+
+        ResponseEntity<PpRefundDirectResponse> response = null;
+        String idTrsAppIo = ppPayDirectRequest.getIdTrsAppIo();
+        TablePaymentPayPal tablePaymentPayPal = tablePaymentPayPalRepository.findByIdTrsAppIo(idTrsAppIo);
+
+        try {
+            if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || !tableClientRepository.existsByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) {
+                log.error("Invalid authorization: " + authorization);
+                return createRefundResponseError(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
+            }
+
+            if(tablePaymentPayPal == null){
+                log.error("Payment not found for idTrsAppIo: " + idTrsAppIo);
+                return createRefundResponseError(PpResponseErrCode.ID_APP_IO_NON_ESISTE);
+            }
+            String idAppIo = tablePaymentPayPal.getTableUserPayPal().getIdAppIo();
+            TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiId(idAppIo, ApiPaypalIdEnum.REFUND);
+
+            if (onboardingBackManagement != null
+                    && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode())) {
+                log.info("Going in timeout: " + idAppIo);
+                response = createRefundResponseError(PpResponseErrCode.TIMEOUT);
+                Thread.sleep(20000);
+                throw new TimeoutException();
+            } else if (onboardingBackManagement != null && StringUtils.isNotBlank(onboardingBackManagement.getErrCodeValue())) {
+                response = createRefundResponseError(PpResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
+            } else {
+                response = createSuccessRefundResponse();
+            }
+            return response;
+        } finally {
+            if (response != null) {
+                PpRefundDirectResponse responseBody = response.getBody();
+                if (responseBody != null) {
+                    updatePayment(responseBody, tablePaymentPayPal);
+                }
+            }
+        }
+    }
+
+    private void updatePayment(PpRefundDirectResponse body, TablePaymentPayPal tablePaymentPayPal) {
+        tablePaymentPayPal.setEsitoRefund(body.getEsito());
+        tablePaymentPayPal.setErrCodeRefund(body.getErrCod());
+        tablePaymentPayPalRepository.save(tablePaymentPayPal);
+    }
+
     private void savePayment(PpPayDirectRequest ppPayDirectRequest, PpPayDirectResponse ppPayDirectResponse, TableUserPayPal byIdAppIoAndDeletedFalse) {
         TablePaymentPayPal tablePaymentPayPal = TablePaymentPayPal.builder()
                 .errCode(ppPayDirectResponse.getErrCod())
@@ -147,6 +197,13 @@ public class PayPalPspRestController {
 
         PpPayDirectResponse build = PpPayDirectResponse.builder().esito(PpEsitoResponseCode.OK)
                 .idTrsPaypal(StringUtils.leftPad(ppPayDirectRequest.getIdTrsAppIo(), 20, "0"))
+                .build();
+        return ResponseEntity.ok(build);
+    }
+
+    private ResponseEntity<PpRefundDirectResponse> createSuccessRefundResponse() {
+
+        PpRefundDirectResponse build = PpRefundDirectResponse.builder().esito(PpEsitoResponseCode.OK)
                 .build();
         return ResponseEntity.ok(build);
     }
@@ -189,5 +246,10 @@ public class PayPalPspRestController {
     private ResponseEntity<PpPayDirectResponse> createResponseErrorPayment(PpResponseErrCode ppResponseErrCode) {
         PpDefaultErrorResponse ppDefaultErrorResponse = manageErrorResponse(ppResponseErrCode);
         return ResponseEntity.status(ppResponseErrCode.getHttpStatus()).body(new PpPayDirectResponse(ppDefaultErrorResponse));
+    }
+
+    private ResponseEntity<PpRefundDirectResponse> createRefundResponseError(PpResponseErrCode ppResponseErrCode) {
+        PpDefaultErrorResponse ppDefaultErrorResponse = manageErrorResponse(ppResponseErrCode);
+        return ResponseEntity.status(ppResponseErrCode.getHttpStatus()).body(new PpRefundDirectResponse(ppDefaultErrorResponse));
     }
 }

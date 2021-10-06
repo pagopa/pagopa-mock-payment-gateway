@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TablePaymentPayPalRepository extends JpaRepository<TablePaymentPayPal, Long> {
+    TablePaymentPayPal findByIdTrsAppIo(String idTrsAppIo);
 }

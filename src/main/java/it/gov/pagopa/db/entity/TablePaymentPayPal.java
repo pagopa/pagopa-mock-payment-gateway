@@ -41,4 +41,12 @@ public class TablePaymentPayPal {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_paypal_id")
     private TableUserPayPal tableUserPayPal;
+
+    @Enumerated(EnumType.STRING)
+    private PpEsitoResponseCode esitoRefund;
+
+    @Column(name = "err_cod_refund")
+    @Enumerated(EnumType.STRING)
+    private PpResponseErrCode errCodeRefund;
+
 }
