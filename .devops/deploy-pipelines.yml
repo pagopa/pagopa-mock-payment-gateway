@@ -58,7 +58,7 @@ stages:
             displayName: Set git name and email
 
           - script: |
-              git checkout ${{variables['Build.SourceBranchName']}}
+              git checkout ${{variables['Build.SourceBranch']}}
             displayName: Checkout current branch
 
           - template: azure-templates/maven-versioning.yml
@@ -77,7 +77,7 @@ stages:
           - script: |
               git add pom.xml
               git commit -m "Bump version [skip ci]"
-              git push origin ${{variables['Build.SourceBranchName']}}
+              git push origin ${{variables['Build.SourceBranch']}}
               git push --tags
             displayName: Git push new version
 
