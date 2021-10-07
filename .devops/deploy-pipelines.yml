@@ -52,11 +52,6 @@ stages:
             clean: true
             persistCredentials: true
 
-          - script: |
-              echo $(Build.SourceVersion)
-              echo $(Build.SourceBranchName)
-            displayName: Print Test
-
           - powershell: |
               $branch = "$(Build.SourceBranch)" -replace "refs/tags/", ""
               $branch = "$(Build.SourceBranch)" -replace "refs/heads/", ""
