@@ -2,17 +2,15 @@ package it.gov.pagopa.db.entity;
 
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpEsitoResponseCode;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Table(name = "payment_paypal")
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
