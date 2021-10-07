@@ -58,13 +58,11 @@ stages:
             displayName: Print Test
 
           - powershell: |
-              #get the branch name
-              $branch = git branch -r --contains $(Build.SourceBranchName) | grep -v $(Build.SourceVersion)
+              $branch = "$(Build.SourceBranch)" -replace "refs/tags/", ""
+              $branch = "$(Build.SourceBranch)" -replace "refs/heads/", ""
 
-              #define varialbe CurrentBranch to hold the value.
               echo "##vso[task.setvariable variable=CurrentBranch]$branch"
-
-          - powershell: echo "$(CurrentBranch)"  #use the branch name in the following steps by referring to $(CurrentBranch)
+            displayName: Get Current Branch/Tag name
 
           - script: |
               git config --global user.name "$(GIT_USERNAME)"
@@ -72,7 +70,7 @@ stages:
             displayName: Set git name and email
 
           - script: |
-              git checkout ${{variables['Build.SourceBranch']}}
+              git checkout ${CurrentBranch}
             displayName: Checkout current branch
 
           - template: azure-templates/maven-versioning.yml
@@ -91,7 +89,7 @@ stages:
           - script: |
               git add pom.xml
               git commit -m "Bump version [skip ci]"
-              git push origin ${{variables['Build.SourceBranch']}}
+              git push origin ${CurrentBranch}
               git push --tags
             displayName: Git push new version
 
