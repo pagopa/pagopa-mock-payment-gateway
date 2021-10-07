@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,31 +20,36 @@ import static it.gov.pagopa.db.entityenum.ApiPaypalIdEnum.*;
 @ToString
 @AllArgsConstructor
 public enum PpResponseErrCode {
-    TIMEOUT("-1", "", HttpStatus.GATEWAY_TIMEOUT, Arrays.asList(ONBOARDING, PAYMENT, REFUND)), //out of psp scope
-    INPUT_NON_JSON("9", "input non in formato json", HttpStatus.BAD_REQUEST, Arrays.asList(ONBOARDING, PAYMENT, REFUND)),
-    ID_BACK_USATO_NON_VALIDO("10", " id_back non valido o utilizzato", null, Arrays.asList(ONBOARDING, PAYMENT)),
-    PARAMETRI_NON_VALIDI("11", "parametri non validi", HttpStatus.BAD_REQUEST, Arrays.asList(ONBOARDING, PAYMENT, REFUND)),
-    AUTORIZZAZIONE_NEGATA("13", "autorizzazione negata", HttpStatus.UNAUTHORIZED, Arrays.asList(ONBOARDING, PAYMENT, REFUND)),
-    AUTORIZZAZIONE_IP_NEGATA("15", "autorizzazione ip negata", HttpStatus.UNAUTHORIZED, Arrays.asList(ONBOARDING, PAYMENT, REFUND)),
-    TOKEN_PAYPAL_NON_VALIDO("16", " token paypal non valido", HttpStatus.UNPROCESSABLE_ENTITY, Arrays.asList(ONBOARDING)),
-    TIMESTAMP_SCADUTO("17", "timestamp scaduto", null, Arrays.asList(PAYMENT)),
-    ID_APP_IO_NON_ESISTE("18", " id_appio non esiste", HttpStatus.UNPROCESSABLE_ENTITY, Arrays.asList(PAYMENT)),
-    CODICE_CONTRATTO_PRESENTE("19", "id_appio con bilagr già associato", HttpStatus.UNPROCESSABLE_ENTITY, null),
-    ID_TRS_NON_VALIDO("22", " id_trs_appio non valido", HttpStatus.UNPROCESSABLE_ENTITY, Arrays.asList(REFUND)),
-    ACQUIRE_REFUND_NON_VALIDO("24", " acquire_refund non valido", HttpStatus.UNPROCESSABLE_ENTITY, Arrays.asList(REFUND)),
-    PAYPAL_GET_TOKEN_KO("31", " paypal get api token KO", null, Arrays.asList(PAYMENT, REFUND)),
-    PAYPAL_CREATE_AGR_TOKEN_KO("33", " paypal create billing agr token KO", null, Arrays.asList(PAYMENT)),
-    PAYPAL_CREATE_AGR_TOKEN_KO_2("34", "paypal create billing agr token KO", null, Arrays.asList(PAYMENT)),
-    PAYPAL_CREATE_AGR_TOKEN_KO_3("35", "paypal create billing agr token KO", null, Arrays.asList(PAYMENT)),
-    PARAMETRI_NON_VALIDI_2("51", "parametri non validi", null, Arrays.asList(PAYMENT)),
-    AUTORIZZAZIONE_NEGATA_2("53", "autorizzazione negata", null, Arrays.asList(PAYMENT)),
-    RITORNO_ANOMALO("57", "ritorno paypal anomalo", null, Arrays.asList(PAYMENT)),
-    PAYPAL_GET_TOKEN_KO_2("61", " paypal get api token KO", null, Arrays.asList(PAYMENT)),
-    PAYPAL_REFUND_KO_1("63", "refund error KO", null, Arrays.asList(REFUND)),
-    PAYPAL_REFUND_KO_2("64", "refund error KO", null, Arrays.asList(REFUND)),
-    PAYPAL_CREATE_AGR_ID_KO_3("65", "paypal api create billing agr id KO", null, Arrays.asList(PAYMENT, REFUND)),
-    PAYPAL_REFUND_KO_3("69", "refund error KO", null, Arrays.asList(REFUND)),
-    DB_INTERNAL_ERROR("67", "db internal error", HttpStatus.INTERNAL_SERVER_ERROR, Arrays.asList(ONBOARDING, PAYMENT, REFUND));
+    TIMEOUT("-1", "", HttpStatus.GATEWAY_TIMEOUT, Arrays.asList(ONBOARDING, PAYMENT, REFUND, DELETE)), //out of psp scope
+    INPUT_NON_JSON("901", "input non in formato json", HttpStatus.BAD_REQUEST, Arrays.asList(ONBOARDING, PAYMENT, REFUND, DELETE)),
+    PARAMETRI_NON_VALIDI("911", "parametri non validi", HttpStatus.BAD_REQUEST, Arrays.asList(ONBOARDING, PAYMENT, REFUND, DELETE)),
+    AUTORIZZAZIONE_NEGATA("913", "autorizzazione negata", HttpStatus.UNAUTHORIZED, Arrays.asList(ONBOARDING, PAYMENT, REFUND, DELETE)),
+    AUTORIZZAZIONE_IP_NEGATA("915", "autorizzazione ip negata", HttpStatus.UNAUTHORIZED, Arrays.asList(ONBOARDING, PAYMENT, REFUND, DELETE)),
+    PAYPAL_GET_TOKEN_KO("931", "paypal get api token KO", HttpStatus.INTERNAL_SERVER_ERROR, Arrays.asList(ONBOARDING, PAYMENT, REFUND, DELETE)),
+    DB_INTERNAL_ERROR("967", "db internal error", HttpStatus.INTERNAL_SERVER_ERROR, Arrays.asList(ONBOARDING, PAYMENT, REFUND, DELETE)),
+
+    TOKEN_PAYPAL_NON_VALIDO("116", "token paypal non valido", HttpStatus.INTERNAL_SERVER_ERROR, Collections.singletonList(ONBOARDING)),
+    CODICE_CONTRATTO_PRESENTE("119", "id_appio con bilagr già associato", HttpStatus.UNPROCESSABLE_ENTITY, Collections.singletonList(ONBOARDING)),
+
+    ID_BACK_NON_VALIDO("210", "id_back non valido o utilizzato", null, Collections.singletonList(ONBOARDING_REDIRECT)),
+    TIMESTAMP_SCADUTO("217", "timestamp scaduto", null, Collections.singletonList(ONBOARDING_REDIRECT)),
+    PAYPAL_CREATE_AGR_TOKEN_KO("233", " paypal create billing agr token KO", null, Collections.singletonList(ONBOARDING_REDIRECT)),
+    RITORNO_PAYPAL_ANOMALO("257", "ritorno paypal anomalo", null, Collections.singletonList(ONBOARDING_REDIRECT)),
+    PAYPAL_CREATE_AGR_ID_KO_3("265", "paypal api create billing agr id KO", null, Collections.singletonList(ONBOARDING_REDIRECT)),
+
+    DELETE_ID_APP_IO_NON_ESISTE("318", "id_appio non esiste o bilagr non valido", HttpStatus.NOT_FOUND, Collections.singletonList(DELETE)),
+    DELETE_BILAGR_KO("31", "paypal bilagr delete KO", HttpStatus.INTERNAL_SERVER_ERROR, Collections.singletonList(DELETE)),
+
+    PAYMENT_ID_APP_IO_NON_ESISTE("318", "id_appio non esiste", HttpStatus.NOT_FOUND, Collections.singletonList(PAYMENT)),
+    FEE_NON_VALIDA("419", "fee non valida", HttpStatus.BAD_REQUEST, Collections.singletonList(PAYMENT)),
+    BILL_AGR_NON_TROVATO("421", "bilagr non trovato", HttpStatus.NOT_FOUND, Collections.singletonList(PAYMENT)),
+    LIMITE_IMPORTO_SUPERATO("423", "limite importo superato", HttpStatus.UNPROCESSABLE_ENTITY, Collections.singletonList(PAYMENT)),
+    PAGAMENTO_DIRETTO_KO_BILL_AGR("463", "paypal pagamento diretto KO (Invalid billing_agreement_id)", HttpStatus.UNPROCESSABLE_ENTITY, Arrays.asList(PAYMENT)),
+    PAGAMENTO_DIRETTO_KO("465", "paypal pagamento diretto KO", HttpStatus.UNPROCESSABLE_ENTITY, Collections.singletonList(PAYMENT)),
+
+    ID_TRS_NON_VALIDO("518", " id_trs_appio non valido", HttpStatus.NOT_FOUND, Collections.singletonList(REFUND)),
+    ACQUIRE_REFUND_NON_VALIDO("521", " acquire_refund non valido", HttpStatus.UNPROCESSABLE_ENTITY, Collections.singletonList(REFUND)),
+    PAYPAL_REFUND_KO("565", "refund error KO", HttpStatus.UNPROCESSABLE_ENTITY, Collections.singletonList(REFUND));
 
     @JsonValue
     @Getter
@@ -67,12 +73,8 @@ public enum PpResponseErrCode {
                 .orElseThrow(IllegalArgumentException::new);
     }
 
-    public static List<PpResponseErrCode> onboardingValues() {
-        return valuesByApiId(ONBOARDING);
-    }
-
-    public static List<PpResponseErrCode> paymentValues() {
-        return valuesByApiId(PAYMENT);
+    public static List<PpResponseErrCode> onboardingRedirectValues() {
+        return valuesByApiId(ONBOARDING_REDIRECT);
     }
 
     private static List<PpResponseErrCode> valuesByApiId(ApiPaypalIdEnum apiPaypalIdEnum) {

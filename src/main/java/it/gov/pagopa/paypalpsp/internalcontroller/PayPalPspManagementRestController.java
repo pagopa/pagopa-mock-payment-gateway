@@ -3,7 +3,6 @@ package it.gov.pagopa.paypalpsp.internalcontroller;
 
 import it.gov.pagopa.db.entity.TablePpPaypalManagement;
 import it.gov.pagopa.db.entityenum.ApiPaypalIdEnum;
-import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
 import it.gov.pagopa.db.repository.TablePpPaypalManagementRepository;
 import it.gov.pagopa.exception.BadRequestException;
 import it.gov.pagopa.exception.NotFoundException;
@@ -30,17 +29,16 @@ public class PayPalPspManagementRestController {
     @Autowired
     private TablePpPaypalManagementRepository tablePpPaypalManagementRepository;
 
-    @Autowired
-    private TablePpOnboardingBackRepository tablePpOnboardingBackRepository;
-
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
     @PatchMapping("/response")
-    public PpOnboardingBackManagement changeIdUserIoResponse(@Valid @RequestBody PpOnboardingBackManagement ppOnboardingBackManagement) throws Exception {
+    public PpOnboardingBackManagement changeIdUserIoResponse(@Valid @RequestBody PpOnboardingBackManagement ppOnboardingBackManagement) throws BadRequestException {
         String idAppIo = ppOnboardingBackManagement.getIdAppIo();
         ApiPaypalIdEnum apiId = ppOnboardingBackManagement.getApiId();
         PpResponseErrCode errCode = ppOnboardingBackManagement.getErrCode();
 
-        if (errCode != null && errCode.getAllowed().stream().noneMatch(e -> e.equals(apiId))) {
+        if (apiId == ApiPaypalIdEnum.ONBOARDING_REDIRECT) {
+            throw new BadRequestException(String.format("Cannot be set response for apiId '%s', please use the web page", apiId));
+        } else if (errCode != null && errCode.getAllowed().stream().noneMatch(e -> e.equals(apiId))) {
             throw new BadRequestException(String.format("Invalid code '%s' for apiId '%s'", errCode, apiId));
         }
         TablePpPaypalManagement onboardingBackManagementSaved = tablePpPaypalManagementRepository.findByIdAppIoAndApiId(idAppIo, apiId);

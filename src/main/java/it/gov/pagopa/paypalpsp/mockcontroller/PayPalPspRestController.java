@@ -110,7 +110,7 @@ public class PayPalPspRestController {
         TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiId(idAppIo, ApiPaypalIdEnum.PAYMENT);
         try {
             if (byIdAppIoAndDeletedFalse == null) {
-                ppPayDirectResponse = createResponseErrorPayment(PpResponseErrCode.ID_APP_IO_NON_ESISTE);
+                ppPayDirectResponse = createResponseErrorPayment(PpResponseErrCode.PAYMENT_ID_APP_IO_NON_ESISTE);
             } else if (onboardingBackManagement != null
                     && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode())) {
                 log.info("Going in timeout: " + idAppIo);
@@ -147,7 +147,7 @@ public class PayPalPspRestController {
 
             if(tablePaymentPayPal == null){
                 log.error("Payment not found for idTrsAppIo: " + idTrsAppIo);
-                return createRefundResponseError(PpResponseErrCode.ID_APP_IO_NON_ESISTE);
+                return createRefundResponseError(PpResponseErrCode.ID_TRS_NON_VALIDO);
             }
             String idAppIo = tablePaymentPayPal.getTableUserPayPal().getIdAppIo();
             TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiId(idAppIo, ApiPaypalIdEnum.REFUND);
