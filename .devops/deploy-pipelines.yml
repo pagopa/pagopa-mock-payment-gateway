@@ -57,6 +57,15 @@ stages:
               echo $(Build.SourceBranchName)
             displayName: Print Test
 
+          - powershell: |
+              #get the branch name
+              $branch = git branch -r --contains $(Build.SourceBranchName) | grep -v $(Build.SourceVersion)
+
+              #define varialbe CurrentBranch to hold the value.
+              echo "##vso[task.setvariable variable=CurrentBranch]$branch"
+
+          - powershell: echo "$(CurrentBranch)"  #use the branch name in the following steps by referring to $(CurrentBranch)
+
           - script: |
               git config --global user.name "$(GIT_USERNAME)"
               git config --global user.email "$(GIT_EMAIL)"
