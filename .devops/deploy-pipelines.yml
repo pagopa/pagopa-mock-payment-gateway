@@ -53,6 +53,11 @@ stages:
             persistCredentials: true
 
           - script: |
+              echo $(Build.SourceVersion)
+              echo $(Build.SourceBranchName)
+            displayName: Print Test
+
+          - script: |
               git config --global user.name "$(GIT_USERNAME)"
               git config --global user.email "$(GIT_EMAIL)"
             displayName: Set git name and email
