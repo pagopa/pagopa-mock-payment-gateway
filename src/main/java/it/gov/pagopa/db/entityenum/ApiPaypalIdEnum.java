@@ -4,5 +4,6 @@ public enum ApiPaypalIdEnum {
     ONBOARDING,
     PAYMENT,
     REFUND,
-    DELETE;
+    DELETE,
+    ONBOARDING_REDIRECT;
 }

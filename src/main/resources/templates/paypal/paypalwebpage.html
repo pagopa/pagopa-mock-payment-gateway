@@ -94,7 +94,7 @@
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                     <a class="dropdown-item"
-                                       th:each="err : ${T(it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode).paymentValues()}"
+                                       th:each="err : ${T(it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode).onboardingRedirectValues()}"
                                        th:href="${AZURE_API_PUBLIC_URL+'/paypalweb/management/error/'+ err.code}"
                                        th:text="${err.code + ' - ' + err.description}"
                                        th:hidden="${T(Integer).valueOf(err.code) <= 0}"
