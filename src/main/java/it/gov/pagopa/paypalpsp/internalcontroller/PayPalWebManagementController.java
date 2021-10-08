@@ -123,7 +123,7 @@ public class PayPalWebManagementController {
     }
 
     private String getPaypalBaseRedirectUrl(@SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack, PpResponseErrCode callResponseErrCode) {
-        return callResponseErrCode == PpResponseErrCode.ID_BACK_USATO_NON_VALIDO
+        return callResponseErrCode == PpResponseErrCode.ID_BACK_NON_VALIDO
                 ? configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL").getPropertyValue() : tablePpOnboardingBack.getUrlReturn();
     }
 

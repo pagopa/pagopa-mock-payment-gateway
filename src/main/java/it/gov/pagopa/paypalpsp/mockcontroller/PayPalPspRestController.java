@@ -72,9 +72,9 @@ public class PayPalPspRestController {
         //Manage error defined by user
         if (onboardingBackManagement != null
                 && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode())) {
-            log.info("Going in timeout: " + ppOnboardingBackRequest.getIdAppIo());
+            log.info("Going in timeout for idAppIo: " + ppOnboardingBackRequest.getIdAppIo());
             Thread.sleep(20000);
-            throw new TimeoutException();
+            throw new TimeoutException("Simulate PayPal psp Timeout");
         } else if (onboardingBackManagement != null && StringUtils.isNotBlank(onboardingBackManagement.getErrCodeValue())) {
             return createResponseErrorOnboarding(PpResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
         }
@@ -110,10 +110,10 @@ public class PayPalPspRestController {
         TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiId(idAppIo, ApiPaypalIdEnum.PAYMENT);
         try {
             if (byIdAppIoAndDeletedFalse == null) {
-                ppPayDirectResponse = createResponseErrorPayment(PpResponseErrCode.ID_APP_IO_NON_ESISTE);
+                ppPayDirectResponse = createResponseErrorPayment(PpResponseErrCode.PAYMENT_ID_APP_IO_NON_ESISTE);
             } else if (onboardingBackManagement != null
                     && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode())) {
-                log.info("Going in timeout: " + idAppIo);
+                log.info("Going in timeout for idAppIo " + idAppIo);
                 ppPayDirectResponse = createResponseErrorPayment(PpResponseErrCode.TIMEOUT);
                 Thread.sleep(20000);
                 throw new TimeoutException();
@@ -133,7 +133,7 @@ public class PayPalPspRestController {
     @Transactional
     @PostMapping("/api/pp_refund_direct")
     public ResponseEntity<PpRefundDirectResponse> refund(@RequestHeader(value = "Authorization", required = false) String authorization,
-           @Valid @RequestBody PpRefundDirectRequest ppPayDirectRequest) throws InterruptedException, TimeoutException {
+                                                         @Valid @RequestBody PpRefundDirectRequest ppPayDirectRequest) throws InterruptedException, TimeoutException {
 
         ResponseEntity<PpRefundDirectResponse> response = null;
         String idTrsAppIo = ppPayDirectRequest.getIdTrsAppIo();
@@ -145,16 +145,16 @@ public class PayPalPspRestController {
                 return createRefundResponseError(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
             }
 
-            if(tablePaymentPayPal == null){
+            if (tablePaymentPayPal == null) {
                 log.error("Payment not found for idTrsAppIo: " + idTrsAppIo);
-                return createRefundResponseError(PpResponseErrCode.ID_APP_IO_NON_ESISTE);
+                return createRefundResponseError(PpResponseErrCode.ID_TRS_NON_VALIDO);
             }
             String idAppIo = tablePaymentPayPal.getTableUserPayPal().getIdAppIo();
             TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiId(idAppIo, ApiPaypalIdEnum.REFUND);
 
             if (onboardingBackManagement != null
                     && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode())) {
-                log.info("Going in timeout: " + idAppIo);
+                log.info("Going in timeout for idAppIo " + idAppIo);
                 response = createRefundResponseError(PpResponseErrCode.TIMEOUT);
                 Thread.sleep(20000);
                 throw new TimeoutException();

@@ -3,20 +3,22 @@ package it.gov.pagopa.paypalpsp.internalcontroller;
 
 import it.gov.pagopa.db.entity.TablePpPaypalManagement;
 import it.gov.pagopa.db.entityenum.ApiPaypalIdEnum;
-import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
 import it.gov.pagopa.db.repository.TablePpPaypalManagementRepository;
 import it.gov.pagopa.exception.BadRequestException;
 import it.gov.pagopa.exception.NotFoundException;
-import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackManagement;
+import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackManagementRequest;
+import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackManagementResponse;
 import it.gov.pagopa.paypalpsp.dto.PpResponseErrorInfo;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,17 +32,16 @@ public class PayPalPspManagementRestController {
     @Autowired
     private TablePpPaypalManagementRepository tablePpPaypalManagementRepository;
 
-    @Autowired
-    private TablePpOnboardingBackRepository tablePpOnboardingBackRepository;
-
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
     @PatchMapping("/response")
-    public PpOnboardingBackManagement changeIdUserIoResponse(@Valid @RequestBody PpOnboardingBackManagement ppOnboardingBackManagement) throws Exception {
-        String idAppIo = ppOnboardingBackManagement.getIdAppIo();
-        ApiPaypalIdEnum apiId = ppOnboardingBackManagement.getApiId();
-        PpResponseErrCode errCode = ppOnboardingBackManagement.getErrCode();
+    public PpOnboardingBackManagementResponse changeIdUserIoResponse(@Valid @RequestBody PpOnboardingBackManagementRequest ppOnboardingBackManagementRequest) throws BadRequestException {
+        String idAppIo = ppOnboardingBackManagementRequest.getIdAppIo();
+        ApiPaypalIdEnum apiId = ppOnboardingBackManagementRequest.getApiId();
+        PpResponseErrCode errCode = ppOnboardingBackManagementRequest.getErrCode();
 
-        if (errCode != null && errCode.getAllowed().stream().noneMatch(e -> e.equals(apiId))) {
+        if (apiId == ApiPaypalIdEnum.ONBOARDING_REDIRECT) {
+            throw new BadRequestException(String.format("Cannot be set response for apiId '%s', please use the web page", apiId));
+        } else if (errCode != null && errCode.getAllowed().stream().noneMatch(e -> e.equals(apiId))) {
             throw new BadRequestException(String.format("Invalid code '%s' for apiId '%s'", errCode, apiId));
         }
         TablePpPaypalManagement onboardingBackManagementSaved = tablePpPaypalManagementRepository.findByIdAppIoAndApiId(idAppIo, apiId);
@@ -54,28 +55,40 @@ public class PayPalPspManagementRestController {
     }
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
-    @GetMapping("/response/{idAppIo}/{apiId}")
-    public PpOnboardingBackManagement getIdUserIoResponse(@PathVariable String
-                                                                  idAppIo, @PathVariable ApiPaypalIdEnum apiId) throws NotFoundException {
-        TablePpPaypalManagement onboardingBackManagement = tablePpPaypalManagementRepository.findByIdAppIoAndApiId(idAppIo, apiId);
-        if (onboardingBackManagement == null) {
+    @GetMapping(value = {"/response/{idAppIo}/{apiId}", "/response/{idAppIo}"})
+    public List<PpOnboardingBackManagementResponse> getIdUserIoResponse(@PathVariable String idAppIo,
+                                                                        @PathVariable(required = false) ApiPaypalIdEnum apiId) throws NotFoundException {
+        List<TablePpPaypalManagement> paypalManagements;
+        if (apiId != null) {
+            TablePpPaypalManagement byIdAppIoAndApiId = tablePpPaypalManagementRepository.findByIdAppIoAndApiId(idAppIo, apiId);
+            paypalManagements = byIdAppIoAndApiId != null ? Collections.singletonList(byIdAppIoAndApiId) : null;
+        } else {
+            paypalManagements = tablePpPaypalManagementRepository.findByIdAppIo(idAppIo);
+        }
+
+        if (CollectionUtils.isEmpty(paypalManagements)) {
             throw new NotFoundException();
         }
-        return convertToPpOnboardingBackManagement(onboardingBackManagement);
+        return paypalManagements.stream().map(this::convertToPpOnboardingBackManagement).collect(Collectors.toList());
     }
-
 
     @GetMapping("/response")
-    public List<PpResponseErrorInfo> getErrorList() {
-        return Stream.of(PpResponseErrCode.values()).map(PpResponseErrorInfo::new).collect(Collectors.toList());
+    public List<PpResponseErrorInfo> getErrorList(@RequestParam(required = false, name = "apiId") ApiPaypalIdEnum apiPaypalIdEnum) {
+        Stream<PpResponseErrCode> values;
+        if (apiPaypalIdEnum != null) {
+            values = PpResponseErrCode.valuesByApiId(apiPaypalIdEnum).stream();
+        } else {
+            values = Stream.of(PpResponseErrCode.values());
+        }
+        return values.map(PpResponseErrorInfo::new).collect(Collectors.toList());
     }
 
-    private PpOnboardingBackManagement convertToPpOnboardingBackManagement(TablePpPaypalManagement
-                                                                                   newOnboardingBackManagement) {
-        return PpOnboardingBackManagement.builder().idAppIo(newOnboardingBackManagement.getIdAppIo())
-                .errCode(PpResponseErrCode.of(newOnboardingBackManagement.getErrCodeValue()))
-                .apiId(newOnboardingBackManagement.getApiId())
-                .lastUpdateDate(newOnboardingBackManagement.getLastUpdateDate())
-                .build();
+    private PpOnboardingBackManagementResponse convertToPpOnboardingBackManagement(TablePpPaypalManagement newOnboardingBackManagement) {
+        PpOnboardingBackManagementResponse ppOnboardingBackManagementResponse = new PpOnboardingBackManagementResponse();
+        ppOnboardingBackManagementResponse.setErrorInfo(PpResponseErrCode.of(newOnboardingBackManagement.getErrCodeValue()));
+        ppOnboardingBackManagementResponse.setApiId(newOnboardingBackManagement.getApiId());
+        ppOnboardingBackManagementResponse.setLastUpdateDate(newOnboardingBackManagement.getLastUpdateDate());
+        ppOnboardingBackManagementResponse.setIdAppIo(newOnboardingBackManagement.getIdAppIo());
+        return ppOnboardingBackManagementResponse;
     }
 }

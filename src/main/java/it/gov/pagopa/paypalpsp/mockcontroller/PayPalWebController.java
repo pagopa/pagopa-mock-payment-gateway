@@ -53,7 +53,7 @@ public class PayPalWebController {
 
         TableConfig tableConfig = configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL");
         String esito = PpOnboardingCallResponseEsito.KO.getCode();
-        PpResponseErrCode idBackUsatoNonValido = PpResponseErrCode.ID_BACK_USATO_NON_VALIDO;
+        PpResponseErrCode idBackUsatoNonValido = PpResponseErrCode.ID_BACK_NON_VALIDO;
 
         String hmac = paypalUtils.calculateHmac(esito, null, null, idBackUsatoNonValido, idBack);
         String urlReturnFallBackPaypalPsp = String.format("%s?esito=%s&err_cod=%s&err_desc=%s&sha_val=%s",
