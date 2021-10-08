@@ -133,7 +133,7 @@ public class PayPalPspRestController {
     @Transactional
     @PostMapping("/api/pp_refund_direct")
     public ResponseEntity<PpRefundDirectResponse> refund(@RequestHeader(value = "Authorization", required = false) String authorization,
-           @Valid @RequestBody PpRefundDirectRequest ppPayDirectRequest) throws InterruptedException, TimeoutException {
+                                                         @Valid @RequestBody PpRefundDirectRequest ppPayDirectRequest) throws InterruptedException, TimeoutException {
 
         ResponseEntity<PpRefundDirectResponse> response = null;
         String idTrsAppIo = ppPayDirectRequest.getIdTrsAppIo();
@@ -145,7 +145,7 @@ public class PayPalPspRestController {
                 return createRefundResponseError(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
             }
 
-            if(tablePaymentPayPal == null){
+            if (tablePaymentPayPal == null) {
                 log.error("Payment not found for idTrsAppIo: " + idTrsAppIo);
                 return createRefundResponseError(PpResponseErrCode.ID_TRS_NON_VALIDO);
             }

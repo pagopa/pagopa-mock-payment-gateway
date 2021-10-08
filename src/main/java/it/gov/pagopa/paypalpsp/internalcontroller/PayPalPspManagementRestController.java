@@ -62,14 +62,18 @@ public class PayPalPspManagementRestController {
         return convertToPpOnboardingBackManagement(onboardingBackManagement);
     }
 
-
     @GetMapping("/response")
-    public List<PpResponseErrorInfo> getErrorList() {
-        return Stream.of(PpResponseErrCode.values()).map(PpResponseErrorInfo::new).collect(Collectors.toList());
+    public List<PpResponseErrorInfo> getErrorList(@RequestParam(required = false, name = "apiId") ApiPaypalIdEnum apiPaypalIdEnum) {
+        Stream<PpResponseErrCode> values;
+        if (apiPaypalIdEnum != null) {
+            values = PpResponseErrCode.valuesByApiId(apiPaypalIdEnum).stream();
+        } else {
+            values = Stream.of(PpResponseErrCode.values());
+        }
+        return values.map(PpResponseErrorInfo::new).collect(Collectors.toList());
     }
 
-    private PpOnboardingBackManagement convertToPpOnboardingBackManagement(TablePpPaypalManagement
-                                                                                   newOnboardingBackManagement) {
+    private PpOnboardingBackManagement convertToPpOnboardingBackManagement(TablePpPaypalManagement newOnboardingBackManagement) {
         return PpOnboardingBackManagement.builder().idAppIo(newOnboardingBackManagement.getIdAppIo())
                 .errCode(PpResponseErrCode.of(newOnboardingBackManagement.getErrCodeValue()))
                 .apiId(newOnboardingBackManagement.getApiId())
