@@ -39,9 +39,9 @@ public enum PpResponseErrCode {
     PAYPAL_CREATE_AGR_ID_KO_3("265", "paypal api create billing agr id KO", null, Collections.singletonList(ONBOARDING_REDIRECT)),
 
     DELETE_ID_APP_IO_NON_ESISTE("318", "id_appio non esiste o bilagr non valido", HttpStatus.NOT_FOUND, Collections.singletonList(DELETE)),
-    DELETE_BILAGR_KO("31", "paypal bilagr delete KO", HttpStatus.INTERNAL_SERVER_ERROR, Collections.singletonList(DELETE)),
+    DELETE_BILAGR_KO("365", "paypal bilagr delete KO", HttpStatus.INTERNAL_SERVER_ERROR, Collections.singletonList(DELETE)),
 
-    PAYMENT_ID_APP_IO_NON_ESISTE("318", "id_appio non esiste", HttpStatus.NOT_FOUND, Collections.singletonList(PAYMENT)),
+    PAYMENT_ID_APP_IO_NON_ESISTE("418", "id_appio non esiste", HttpStatus.NOT_FOUND, Collections.singletonList(PAYMENT)),
     FEE_NON_VALIDA("419", "fee non valida", HttpStatus.BAD_REQUEST, Collections.singletonList(PAYMENT)),
     BILL_AGR_NON_TROVATO("421", "bilagr non trovato", HttpStatus.NOT_FOUND, Collections.singletonList(PAYMENT)),
     LIMITE_IMPORTO_SUPERATO("423", "limite importo superato", HttpStatus.UNPROCESSABLE_ENTITY, Collections.singletonList(PAYMENT)),
