@@ -72,9 +72,9 @@ public class PayPalPspRestController {
         //Manage error defined by user
         if (onboardingBackManagement != null
                 && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode())) {
-            log.info("Going in timeout: " + ppOnboardingBackRequest.getIdAppIo());
+            log.info("Going in timeout for idAppIo: " + ppOnboardingBackRequest.getIdAppIo());
             Thread.sleep(20000);
-            throw new TimeoutException();
+            throw new TimeoutException("Simulate PayPal psp Timeout");
         } else if (onboardingBackManagement != null && StringUtils.isNotBlank(onboardingBackManagement.getErrCodeValue())) {
             return createResponseErrorOnboarding(PpResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
         }
@@ -113,7 +113,7 @@ public class PayPalPspRestController {
                 ppPayDirectResponse = createResponseErrorPayment(PpResponseErrCode.PAYMENT_ID_APP_IO_NON_ESISTE);
             } else if (onboardingBackManagement != null
                     && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode())) {
-                log.info("Going in timeout: " + idAppIo);
+                log.info("Going in timeout for idAppIo " + idAppIo);
                 ppPayDirectResponse = createResponseErrorPayment(PpResponseErrCode.TIMEOUT);
                 Thread.sleep(20000);
                 throw new TimeoutException();
@@ -154,7 +154,7 @@ public class PayPalPspRestController {
 
             if (onboardingBackManagement != null
                     && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode())) {
-                log.info("Going in timeout: " + idAppIo);
+                log.info("Going in timeout for idAppIo " + idAppIo);
                 response = createRefundResponseError(PpResponseErrCode.TIMEOUT);
                 Thread.sleep(20000);
                 throw new TimeoutException();

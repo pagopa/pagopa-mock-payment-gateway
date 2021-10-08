@@ -1,6 +1,7 @@
 package it.gov.pagopa.paypalpsp.dto.dtoenum;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
 import it.gov.pagopa.db.entityenum.ApiPaypalIdEnum;
 import lombok.AllArgsConstructor;
