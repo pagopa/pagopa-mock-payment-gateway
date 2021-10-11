@@ -24,3 +24,4 @@ ALTER TABLE client ADD base_url varchar(256);
 ALTER TABLE client ADD CONSTRAINT client_un UNIQUE (client_name);
 
 UPDATE client SET base_url='http://localhost:8080' WHERE client_name='local';
+INSERT INTO config ( property_key, property_value) VALUES('PAYPAL_PSP_FALLBACK_PATH', '/pp-restapi-CD/v3/webview/paypal/fallback');
