@@ -25,4 +25,5 @@ public class PpOnboardingBackManagementRequest {
     @NotNull
     @JsonProperty("api_id")
     private ApiPaypalIdEnum apiId;
+
 }

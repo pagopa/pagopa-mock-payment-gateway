@@ -1,5 +1,6 @@
 package it.gov.pagopa.db.repository;
 
+import it.gov.pagopa.db.entity.TableClient;
 import it.gov.pagopa.db.entity.TablePpOnboardingBack;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,6 +13,6 @@ public interface TablePpOnboardingBackRepository extends JpaRepository<TablePpOn
     TablePpOnboardingBack findByIdBack(String idBack);
 
     @Modifying
-    @Query("update TablePpOnboardingBack po set po.used = true where po.idAppIo= :idAppIo and po.used = false ")
-    void setUsedTrueByIdBack(@Param("idAppIo") String idAppIo);
+    @Query("update TablePpOnboardingBack po set po.used = true where po.idAppIo= :idAppIo and client=:client and po.used = false ")
+    void setUsedTrueByIdBack(@Param("idAppIo") String idAppIo, @Param("client") TableClient client);
 }
