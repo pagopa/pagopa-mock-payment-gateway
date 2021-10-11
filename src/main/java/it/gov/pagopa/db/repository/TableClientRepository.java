@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TableClientRepository extends JpaRepository<TableClient, Long> {
-    boolean existsByAuthKeyAndDeletedFalse(String key);
+    TableClient findByAuthKeyAndDeletedFalse(String key);
 }

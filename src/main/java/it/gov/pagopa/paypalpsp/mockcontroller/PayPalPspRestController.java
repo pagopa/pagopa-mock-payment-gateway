@@ -1,10 +1,7 @@
 package it.gov.pagopa.paypalpsp.mockcontroller;
 
 
-import it.gov.pagopa.db.entity.TablePaymentPayPal;
-import it.gov.pagopa.db.entity.TablePpOnboardingBack;
-import it.gov.pagopa.db.entity.TablePpPaypalManagement;
-import it.gov.pagopa.db.entity.TableUserPayPal;
+import it.gov.pagopa.db.entity.*;
 import it.gov.pagopa.db.entityenum.ApiPaypalIdEnum;
 import it.gov.pagopa.db.repository.*;
 import it.gov.pagopa.paypalpsp.PaypalUtils;
@@ -61,13 +58,14 @@ public class PayPalPspRestController {
     @Transactional
     public ResponseEntity<PpOnboardingBackResponse> homePage(@RequestHeader(value = "Authorization", required = false) String authorization,
                                                              @Valid @RequestBody PpOnboardingBackRequest ppOnboardingBackRequest) throws URISyntaxException, InterruptedException, TimeoutException {
-        if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || !tableClientRepository.existsByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) {
+        TableClient tableClient;
+        if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || (tableClient = tableClientRepository.findByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) == null) {
             log.error("Invalid authorization: " + authorization);
             return createResponseErrorOnboarding(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
         }
 
         String idAppIo = ppOnboardingBackRequest.getIdAppIo();
-        TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiId(idAppIo, ApiPaypalIdEnum.ONBOARDING);
+        TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, ApiPaypalIdEnum.ONBOARDING, tableClient);
 
         //Manage error defined by user
         if (onboardingBackManagement != null
@@ -80,13 +78,13 @@ public class PayPalPspRestController {
         }
 
         //manage error code 19
-        TableUserPayPal byIdAppIoAndDeletedFalse = tableUserPayPalRepository.findByIdAppIoAndDeletedFalse(idAppIo);
+        TableUserPayPal byIdAppIoAndDeletedFalse = tableUserPayPalRepository.findByIdAppIoAndClientAndDeletedFalse(idAppIo, tableClient);
         if (byIdAppIoAndDeletedFalse != null) {
             return manageErrorResponseAlreadyOnboarded(byIdAppIoAndDeletedFalse);
         }
 
         String idBack = UUID.randomUUID().toString();
-        saveAndUpdateTable(ppOnboardingBackRequest, idBack);
+        saveAndUpdateTable(ppOnboardingBackRequest, idBack, tableClient);
         String returnUrl = UrlUtils.normalizeUrl(publicUrl + "/paypalweb/pp_onboarding_call");
         PpOnboardingBackResponse ppOnboardingBackResponse = new PpOnboardingBackResponse();
         ppOnboardingBackResponse.setEsito(PpEsitoResponseCode.OK);
@@ -100,14 +98,15 @@ public class PayPalPspRestController {
                                                              @Valid @RequestBody PpPayDirectRequest ppPayDirectRequest) throws InterruptedException, TimeoutException {
         String idAppIo = ppPayDirectRequest.getIdAppIo();
 
-        if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || !tableClientRepository.existsByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) {
+        TableClient tableClient;
+        if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || (tableClient = tableClientRepository.findByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) == null) {
             log.error("Invalid authorization: " + authorization);
             return createResponseErrorPayment(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
         }
 
         ResponseEntity<PpPayDirectResponse> ppPayDirectResponse = null;
-        TableUserPayPal byIdAppIoAndDeletedFalse = tableUserPayPalRepository.findByIdAppIoAndDeletedFalse(idAppIo);
-        TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiId(idAppIo, ApiPaypalIdEnum.PAYMENT);
+        TableUserPayPal byIdAppIoAndDeletedFalse = tableUserPayPalRepository.findByIdAppIoAndClientAndDeletedFalse(idAppIo, tableClient);
+        TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, ApiPaypalIdEnum.PAYMENT, tableClient);
         try {
             if (byIdAppIoAndDeletedFalse == null) {
                 ppPayDirectResponse = createResponseErrorPayment(PpResponseErrCode.PAYMENT_ID_APP_IO_NON_ESISTE);
@@ -140,7 +139,8 @@ public class PayPalPspRestController {
         TablePaymentPayPal tablePaymentPayPal = tablePaymentPayPalRepository.findByIdTrsAppIo(idTrsAppIo);
 
         try {
-            if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || !tableClientRepository.existsByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) {
+            TableClient tableClient;
+            if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || (tableClient = tableClientRepository.findByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) == null) {
                 log.error("Invalid authorization: " + authorization);
                 return createRefundResponseError(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
             }
@@ -150,7 +150,7 @@ public class PayPalPspRestController {
                 return createRefundResponseError(PpResponseErrCode.ID_TRS_NON_VALIDO);
             }
             String idAppIo = tablePaymentPayPal.getTableUserPayPal().getIdAppIo();
-            TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiId(idAppIo, ApiPaypalIdEnum.REFUND);
+            TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, ApiPaypalIdEnum.REFUND, tableClient);
 
             if (onboardingBackManagement != null
                     && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode())) {
@@ -208,14 +208,15 @@ public class PayPalPspRestController {
         return ResponseEntity.ok(response);
     }
 
-    private void saveAndUpdateTable(PpOnboardingBackRequest ppOnboardingBackRequest, String idBack) {
+    private void saveAndUpdateTable(PpOnboardingBackRequest ppOnboardingBackRequest, String idBack, TableClient tableClient) {
         String idAppIo = ppOnboardingBackRequest.getIdAppIo();
-        tablePpOnboardingBackRepository.setUsedTrueByIdBack(idAppIo);
+        tablePpOnboardingBackRepository.setUsedTrueByIdBack(idAppIo, tableClient);
         TablePpOnboardingBack tablePpOnboardingBack = new TablePpOnboardingBack();
         tablePpOnboardingBack.setIdAppIo(idAppIo);
         tablePpOnboardingBack.setTimestamp(Instant.now());
         tablePpOnboardingBack.setUrlReturn(ppOnboardingBackRequest.getUrlReturn());
         tablePpOnboardingBack.setIdBack(idBack);
+        tablePpOnboardingBack.setClient(tableClient);
         tablePpOnboardingBackRepository.save(tablePpOnboardingBack);
     }
 
