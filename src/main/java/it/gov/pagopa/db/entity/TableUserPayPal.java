@@ -40,4 +40,8 @@ public class TableUserPayPal {
 
     @OneToMany(mappedBy = "tableUserPayPal", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<TablePaymentPayPal> paymentPayPal;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    private TableClient client;
 }

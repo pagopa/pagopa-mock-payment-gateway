@@ -2,6 +2,7 @@ package it.gov.pagopa.config;
 
 import it.gov.pagopa.exception.BadRequestException;
 import it.gov.pagopa.exception.NotFoundException;
+import it.gov.pagopa.exception.UnauthorizedException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.TypeMismatchException;
@@ -42,6 +43,12 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
     @ExceptionHandler({BadRequestException.class})
     public ResponseEntity<Object> customBadRequest(BadRequestException ex) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        return getResponseEntity(ex, httpStatus);
+    }
+
+    @ExceptionHandler({UnauthorizedException.class})
+    public ResponseEntity<Object> unauthorized(UnauthorizedException ex) {
+        HttpStatus httpStatus = HttpStatus.UNAUTHORIZED;
         return getResponseEntity(ex, httpStatus);
     }
 

@@ -29,5 +29,8 @@ public class TableClient {
     @Column(name = "creation_date")
     private Instant creationDate=Instant.now();
 
+    @Column(name = "base_url")
+    private String baseUrl;
+
     private boolean deleted;
 }

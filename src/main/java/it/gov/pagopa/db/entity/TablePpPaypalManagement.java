@@ -33,4 +33,8 @@ public class TablePpPaypalManagement {
 
     @Column(name = "err_code")
     private String errCodeValue;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    private TableClient client;
 }

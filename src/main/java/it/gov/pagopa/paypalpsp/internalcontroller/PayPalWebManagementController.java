@@ -59,7 +59,8 @@ public class PayPalWebManagementController {
                     .idAppIo(idAppIo)
                     .paypalEmail(paypalEmail)
                     .paypalId(paypalId)
-                    .contractNumber(UUID.randomUUID().toString()).build();
+                    .contractNumber(UUID.randomUUID().toString())
+                    .client(tablePpOnboardingBack.getClient()).build();
             log.info("Trying to create contract: " + tableUserPayPal);
             tableUserPayPal = tableUserPayPalRepository.save(tableUserPayPal);
             log.info("New Contract established: " + tableUserPayPal);
@@ -122,9 +123,16 @@ public class PayPalWebManagementController {
         }
     }
 
-    private String getPaypalBaseRedirectUrl(@SessionAttribute(required = false) TablePpOnboardingBack tablePpOnboardingBack, PpResponseErrCode callResponseErrCode) {
-        return callResponseErrCode == PpResponseErrCode.ID_BACK_NON_VALIDO
-                ? configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL").getPropertyValue() : tablePpOnboardingBack.getUrlReturn();
+    private String getPaypalBaseRedirectUrl(TablePpOnboardingBack tablePpOnboardingBack, PpResponseErrCode callResponseErrCode) {
+        String redirectUrl = null;
+        if (tablePpOnboardingBack != null) {
+            redirectUrl = tablePpOnboardingBack.getClient().getBaseUrl() + configRepository.findByPropertyKey("PAYPAL_PSP_FALLBACK_PATH").getPropertyValue();
+        }
+
+        if (StringUtils.isBlank(redirectUrl)) {
+            redirectUrl = configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL").getPropertyValue();
+        }
+        return callResponseErrCode == PpResponseErrCode.ID_BACK_NON_VALIDO ? redirectUrl : tablePpOnboardingBack.getUrlReturn();
     }
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
