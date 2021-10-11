@@ -19,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.Objects;
@@ -136,7 +137,7 @@ public class PayPalPspRestController {
 
         ResponseEntity<PpRefundDirectResponse> response = null;
         String idTrsAppIo = ppPayDirectRequest.getIdTrsAppIo();
-        TablePaymentPayPal tablePaymentPayPal = tablePaymentPayPalRepository.findByIdTrsAppIo(idTrsAppIo);
+        TablePaymentPayPal tablePaymentPayPal = null;
 
         try {
             TableClient tableClient;
@@ -144,10 +145,13 @@ public class PayPalPspRestController {
                 log.error("Invalid authorization: " + authorization);
                 return createRefundResponseError(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
             }
+            tablePaymentPayPal = tablePaymentPayPalRepository.findByIdTrsAppIoAndTableUserPayPal_client(idTrsAppIo, tableClient);
 
             if (tablePaymentPayPal == null) {
                 log.error("Payment not found for idTrsAppIo: " + idTrsAppIo);
                 return createRefundResponseError(PpResponseErrCode.ID_TRS_NON_VALIDO);
+            } else if (!checkRequestAndDataOnDatabase(ppPayDirectRequest, tablePaymentPayPal)) {
+                return createRefundResponseError(PpResponseErrCode.ID_TRS_OR_IMPORT_NOT_MATCH);
             }
             String idAppIo = tablePaymentPayPal.getTableUserPayPal().getIdAppIo();
             TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, ApiPaypalIdEnum.REFUND, tableClient);
@@ -172,6 +176,12 @@ public class PayPalPspRestController {
                 }
             }
         }
+    }
+
+    private boolean checkRequestAndDataOnDatabase(PpRefundDirectRequest ppPayDirectRequest, TablePaymentPayPal tablePaymentPayPal) {
+        String idAppIo = tablePaymentPayPal.getTableUserPayPal().getIdAppIo();
+        BigDecimal importo = tablePaymentPayPal.getImporto();
+        return StringUtils.equals(idAppIo, ppPayDirectRequest.getIdAppIo()) && importo.equals(ppPayDirectRequest.getImporto());
     }
 
     private void updatePayment(PpRefundDirectResponse body, TablePaymentPayPal tablePaymentPayPal) {
@@ -235,7 +245,7 @@ public class PayPalPspRestController {
         PpDefaultErrorResponse build = new PpOnboardingBackResponse();
         build.setEsito(PpEsitoResponseCode.KO);
         build.setErrCod(errCode);
-        build.setErrDesc(errCode.name());
+        build.setErrDesc(errCode.getDescription());
         return build;
     }
 
