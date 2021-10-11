@@ -50,6 +50,7 @@ public enum PpResponseErrCode {
 
     ID_TRS_NON_VALIDO("518", "id_trs_appio non valido", HttpStatus.NOT_FOUND, Collections.singletonList(REFUND)),
     ACQUIRE_REFUND_NON_VALIDO("521", "acquire_refund non valido", HttpStatus.UNPROCESSABLE_ENTITY, Collections.singletonList(REFUND)),
+    ID_TRS_OR_IMPORT_NOT_MATCH("522", "id_trs_appio o importo non coerente", HttpStatus.UNPROCESSABLE_ENTITY, Collections.singletonList(REFUND)),
     PAYPAL_REFUND_KO("565", "refund error KO", HttpStatus.UNPROCESSABLE_ENTITY, Collections.singletonList(REFUND));
 
     @JsonValue
