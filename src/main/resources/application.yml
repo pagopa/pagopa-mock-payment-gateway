@@ -12,6 +12,8 @@ spring:
 
   mvc:
     static-path-pattern: /static/**
+
+management:
   endpoints:
     web:
       exposure:
@@ -34,3 +36,9 @@ logbook:
   obfuscate:
     headers:
       - None
+
+info:
+  app:
+    name: ${spring.application.name}
+    java-version: ${java.version}
+    logging-level: ${logging.level.root}
