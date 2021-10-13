@@ -25,6 +25,8 @@ public class PpOnboardingBackManagementResponse {
     private PpResponseErrorInfo errorInfo;
 
     public void setErrorInfo(PpResponseErrCode ppResponseErrCode) {
-        this.errorInfo = new PpResponseErrorInfo(ppResponseErrCode);
+        if (ppResponseErrCode != null) {
+            this.errorInfo = new PpResponseErrorInfo(ppResponseErrCode);
+        }
     }
 }
