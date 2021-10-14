@@ -33,7 +33,7 @@ import java.util.concurrent.TimeoutException;
 @RestController
 @RequestMapping("/paypalpsp")
 @Log4j2
-public class PayPalPspRestControllerA {
+public class PayPalPspRestController {
 
     private static final int TIMEOUT = 20000;
 

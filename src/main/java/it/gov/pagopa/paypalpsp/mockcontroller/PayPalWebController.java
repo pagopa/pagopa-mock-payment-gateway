@@ -28,8 +28,8 @@ import java.util.Locale;
 @Log4j2
 @Controller
 @RequestMapping("/paypalweb")
-@SessionAttributes({PayPalWebControllerA.TABLE_PP_ONBOARDING_BACK_ATTRIBUTE})
-public class PayPalWebControllerA {
+@SessionAttributes({PayPalWebController.TABLE_PP_ONBOARDING_BACK_ATTRIBUTE})
+public class PayPalWebController {
     protected static final String TABLE_PP_ONBOARDING_BACK_ATTRIBUTE = "tablePpOnboardingBack";
 
     @Autowired
