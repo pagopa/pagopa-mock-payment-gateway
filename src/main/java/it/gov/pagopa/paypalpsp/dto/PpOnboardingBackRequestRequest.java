@@ -1,10 +1,7 @@
 package it.gov.pagopa.paypalpsp.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 
@@ -12,13 +9,10 @@ import javax.validation.constraints.NotNull;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PpOnboardingBackRequest {
+@EqualsAndHashCode(callSuper = true)
+public class PpOnboardingBackRequestRequest extends PPPayPalIdAppIoRequest {
     @NotNull
     @JsonProperty("url_return")
     private String urlReturn;
-
-    @NotNull
-    @JsonProperty("id_appio")
-    private String idAppIo;
 
 }

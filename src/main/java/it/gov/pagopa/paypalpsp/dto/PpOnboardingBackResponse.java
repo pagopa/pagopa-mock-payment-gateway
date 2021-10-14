@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @NoArgsConstructor
-public class PpOnboardingBackResponse extends PpDefaultErrorResponse {
+public class PpOnboardingBackResponse extends PpDefaultResponse {
     @JsonProperty("url_to_call")
     private String urlToCall;
 
@@ -20,8 +20,8 @@ public class PpOnboardingBackResponse extends PpDefaultErrorResponse {
     @JsonProperty("email_pp")
     private String emailPp;
 
-    public PpOnboardingBackResponse(PpDefaultErrorResponse ppDefaultErrorResponse) {
-        this.setPpDefaultErrorResponse(ppDefaultErrorResponse);
+    public PpOnboardingBackResponse(PpDefaultResponse ppDefaultResponse) {
+        this.setPpDefaultErrorResponse(ppDefaultResponse);
     }
 
 }

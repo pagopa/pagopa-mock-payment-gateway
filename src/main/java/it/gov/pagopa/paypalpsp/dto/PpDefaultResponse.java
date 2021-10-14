@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpEsitoResponseCode;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PpDefaultErrorResponse {
+@NoArgsConstructor
+public class PpDefaultResponse {
     private PpEsitoResponseCode esito = PpEsitoResponseCode.KO;
 
     @JsonProperty("err_cod")
@@ -17,9 +19,13 @@ public class PpDefaultErrorResponse {
     @JsonProperty("err_desc")
     private String errDesc;
 
-    public void setPpDefaultErrorResponse(PpDefaultErrorResponse ppDefaultErrorResponse) {
-        this.setErrCod(ppDefaultErrorResponse.getErrCod());
-        this.setErrDesc(ppDefaultErrorResponse.getErrDesc());
-        this.setEsito(ppDefaultErrorResponse.getEsito());
+    public PpDefaultResponse(PpEsitoResponseCode ppEsitoResponseCode) {
+        this.esito = ppEsitoResponseCode;
+    }
+
+    public void setPpDefaultErrorResponse(PpDefaultResponse ppDefaultResponse) {
+        this.setErrCod(ppDefaultResponse.getErrCod());
+        this.setErrDesc(ppDefaultResponse.getErrDesc());
+        this.setEsito(ppDefaultResponse.getEsito());
     }
 }

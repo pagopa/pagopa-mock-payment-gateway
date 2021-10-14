@@ -28,8 +28,8 @@ public class PayPalCreateResponse {
 
     public static ResponseEntity<PpOnboardingBackResponse> manageErrorResponseAlreadyOnboarded(TableUserPayPal tableUserPayPal) {
         PpResponseErrCode codiceContrattoPresente = PpResponseErrCode.CODICE_CONTRATTO_PRESENTE;
-        PpDefaultErrorResponse onboardingBackResponseResponseEntity = manageErrorResponse(codiceContrattoPresente);
-        PpDefaultErrorResponse ppOnboardingBackResponse = Objects.requireNonNull(onboardingBackResponseResponseEntity);
+        PpDefaultResponse onboardingBackResponseResponseEntity = manageErrorResponse(codiceContrattoPresente);
+        PpDefaultResponse ppOnboardingBackResponse = Objects.requireNonNull(onboardingBackResponseResponseEntity);
         PpOnboardingBackResponse ppOnboardingBackResponse1 = new PpOnboardingBackResponse();
         ppOnboardingBackResponse1.setEmailPp(PaypalUtils.obfuscateEmail(tableUserPayPal.getPaypalEmail()));
         ppOnboardingBackResponse1.setIdPp(tableUserPayPal.getPaypalId());
@@ -37,8 +37,8 @@ public class PayPalCreateResponse {
         return ResponseEntity.status(codiceContrattoPresente.getHttpStatus()).body(ppOnboardingBackResponse1);
     }
 
-    private static PpDefaultErrorResponse manageErrorResponse(PpResponseErrCode errCode) {
-        PpDefaultErrorResponse build = new PpOnboardingBackResponse();
+    private static PpDefaultResponse manageErrorResponse(PpResponseErrCode errCode) {
+        PpDefaultResponse build = new PpOnboardingBackResponse();
         build.setEsito(PpEsitoResponseCode.KO);
         build.setErrCod(errCode);
         build.setErrDesc(errCode.getDescription());
@@ -46,18 +46,22 @@ public class PayPalCreateResponse {
     }
 
     public static ResponseEntity<PpOnboardingBackResponse> createResponseErrorOnboarding(PpResponseErrCode ppResponseErrCode) {
-        PpDefaultErrorResponse ppDefaultErrorResponse = manageErrorResponse(ppResponseErrCode);
-        return ResponseEntity.status(ppResponseErrCode.getHttpStatus()).body(new PpOnboardingBackResponse(ppDefaultErrorResponse));
+        PpDefaultResponse ppDefaultResponse = manageErrorResponse(ppResponseErrCode);
+        return ResponseEntity.status(ppResponseErrCode.getHttpStatus()).body(new PpOnboardingBackResponse(ppDefaultResponse));
     }
 
     public static ResponseEntity<PpPayDirectResponse> createResponseErrorPayment(PpResponseErrCode ppResponseErrCode) {
-        PpDefaultErrorResponse ppDefaultErrorResponse = manageErrorResponse(ppResponseErrCode);
-        return ResponseEntity.status(ppResponseErrCode.getHttpStatus()).body(new PpPayDirectResponse(ppDefaultErrorResponse));
+        PpDefaultResponse ppDefaultResponse = manageErrorResponse(ppResponseErrCode);
+        return ResponseEntity.status(ppResponseErrCode.getHttpStatus()).body(new PpPayDirectResponse(ppDefaultResponse));
     }
 
     public static ResponseEntity<PpRefundDirectResponse> createRefundResponseError(PpResponseErrCode ppResponseErrCode) {
-        PpDefaultErrorResponse ppDefaultErrorResponse = manageErrorResponse(ppResponseErrCode);
-        return ResponseEntity.status(ppResponseErrCode.getHttpStatus()).body(new PpRefundDirectResponse(ppDefaultErrorResponse));
+        PpDefaultResponse ppDefaultResponse = manageErrorResponse(ppResponseErrCode);
+        return ResponseEntity.status(ppResponseErrCode.getHttpStatus()).body(new PpRefundDirectResponse(ppDefaultResponse));
     }
 
+    public static ResponseEntity<PpDefaultResponse> createResponseErrorDeleteContract(PpResponseErrCode ppResponseErrCode) {
+        PpDefaultResponse ppDefaultResponse = manageErrorResponse(ppResponseErrCode);
+        return ResponseEntity.status(ppResponseErrCode.getHttpStatus()).body(ppDefaultResponse);
+    }
 }
