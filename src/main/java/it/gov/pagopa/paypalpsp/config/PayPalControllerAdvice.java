@@ -2,7 +2,7 @@ package it.gov.pagopa.paypalpsp.config;
 
 import it.gov.pagopa.paypalpsp.dto.PpDefaultErrorResponse;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
-import it.gov.pagopa.paypalpsp.mockcontroller.PayPalPspRestController;
+import it.gov.pagopa.paypalpsp.mockcontroller.PayPalPspRestControllerA;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -15,7 +15,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @Log4j2
-@ControllerAdvice(assignableTypes = {PayPalPspRestController.class})
+@ControllerAdvice(assignableTypes = {PayPalPspRestControllerA.class})
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class PayPalControllerAdvice extends ResponseEntityExceptionHandler {
 
