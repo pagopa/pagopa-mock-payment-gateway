@@ -3,11 +3,15 @@ package it.gov.pagopa.paypalpsp.mockcontroller;
 
 import it.gov.pagopa.db.entity.*;
 import it.gov.pagopa.db.entityenum.ApiPaypalIdEnum;
-import it.gov.pagopa.db.repository.*;
-import it.gov.pagopa.paypalpsp.PaypalUtils;
+import it.gov.pagopa.db.repository.TablePaymentPayPalRepository;
+import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
+import it.gov.pagopa.db.repository.TablePpPaypalManagementRepository;
+import it.gov.pagopa.db.repository.TableUserPayPalRepository;
 import it.gov.pagopa.paypalpsp.dto.*;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpEsitoResponseCode;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
+import it.gov.pagopa.paypalpsp.util.PayPalCreateResponse;
+import it.gov.pagopa.paypalpsp.util.PaypalUtils;
 import it.gov.pagopa.util.UrlUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +26,6 @@ import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -32,8 +35,10 @@ import java.util.concurrent.TimeoutException;
 @Log4j2
 public class PayPalPspRestController {
 
+    private static final int TIMEOUT = 20000;
+
     @Autowired
-    private TablePpPaypalManagementRepository onboardingBackManagementRepository;
+    private TablePpPaypalManagementRepository managementRepository;
 
     @Autowired
     private TablePpOnboardingBackRepository tablePpOnboardingBackRepository;
@@ -45,43 +50,37 @@ public class PayPalPspRestController {
     private TablePaymentPayPalRepository tablePaymentPayPalRepository;
 
     @Autowired
-    private TableClientRepository tableClientRepository;
-
-    @Autowired
     private PaypalUtils paypalUtils;
 
     @Value("${server.public-url}")
     private String publicUrl;
 
-    private static final String BEARER_REGEX = "Bearer\\s.{3,}";
-
     @PostMapping("/api/pp_onboarding_back")
     @Transactional
-    public ResponseEntity<PpOnboardingBackResponse> homePage(@RequestHeader(value = "Authorization", required = false) String authorization,
-                                                             @Valid @RequestBody PpOnboardingBackRequest ppOnboardingBackRequest) throws URISyntaxException, InterruptedException, TimeoutException {
-        TableClient tableClient;
-        if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || (tableClient = tableClientRepository.findByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) == null) {
+    public ResponseEntity<PpOnboardingBackResponse> onboardingBack(@RequestHeader(value = "Authorization", required = false) String authorization,
+                                                                   @Valid @RequestBody PpOnboardingBackRequestRequest ppOnboardingBackRequest) throws URISyntaxException, InterruptedException, TimeoutException {
+        TableClient tableClient = paypalUtils.getClientAuthenticated(authorization);
+        if (tableClient == null) {
             log.error("Invalid authorization: " + authorization);
-            return createResponseErrorOnboarding(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
+            return PayPalCreateResponse.createResponseErrorOnboarding(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
         }
 
         String idAppIo = ppOnboardingBackRequest.getIdAppIo();
-        TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, ApiPaypalIdEnum.ONBOARDING, tableClient);
+        TablePpPaypalManagement onboardingBackManagement = managementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, ApiPaypalIdEnum.ONBOARDING, tableClient);
 
         //Manage error defined by user
-        if (onboardingBackManagement != null
-                && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode())) {
-            log.info("Going in timeout for idAppIo: " + ppOnboardingBackRequest.getIdAppIo());
-            Thread.sleep(20000);
+        if (isTimeout(onboardingBackManagement)) {
+            log.info("Going 'onboardingBack' in timeout for idAppIo: " + ppOnboardingBackRequest.getIdAppIo());
+            Thread.sleep(TIMEOUT);
             throw new TimeoutException("Simulate PayPal psp Timeout");
-        } else if (onboardingBackManagement != null && StringUtils.isNotBlank(onboardingBackManagement.getErrCodeValue())) {
-            return createResponseErrorOnboarding(PpResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
+        } else if (isCustomError(onboardingBackManagement)) {
+            return PayPalCreateResponse.createResponseErrorOnboarding(PpResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
         }
 
         //manage error code 19
         TableUserPayPal byIdAppIoAndDeletedFalse = tableUserPayPalRepository.findByIdAppIoAndClientAndDeletedFalse(idAppIo, tableClient);
         if (byIdAppIoAndDeletedFalse != null) {
-            return manageErrorResponseAlreadyOnboarded(byIdAppIoAndDeletedFalse);
+            return PayPalCreateResponse.manageErrorResponseAlreadyOnboarded(byIdAppIoAndDeletedFalse);
         }
 
         String idBack = UUID.randomUUID().toString();
@@ -99,28 +98,27 @@ public class PayPalPspRestController {
                                                              @Valid @RequestBody PpPayDirectRequest ppPayDirectRequest) throws InterruptedException, TimeoutException {
         String idAppIo = ppPayDirectRequest.getIdAppIo();
 
-        TableClient tableClient;
-        if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || (tableClient = tableClientRepository.findByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) == null) {
+        TableClient tableClient = paypalUtils.getClientAuthenticated(authorization);
+        if (tableClient == null) {
             log.error("Invalid authorization: " + authorization);
-            return createResponseErrorPayment(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
+            return PayPalCreateResponse.createResponseErrorPayment(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
         }
 
         ResponseEntity<PpPayDirectResponse> ppPayDirectResponse = null;
         TableUserPayPal byIdAppIoAndDeletedFalse = tableUserPayPalRepository.findByIdAppIoAndClientAndDeletedFalse(idAppIo, tableClient);
-        TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, ApiPaypalIdEnum.PAYMENT, tableClient);
+        TablePpPaypalManagement onboardingBackManagement = managementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, ApiPaypalIdEnum.PAYMENT, tableClient);
         try {
             if (byIdAppIoAndDeletedFalse == null) {
-                ppPayDirectResponse = createResponseErrorPayment(PpResponseErrCode.PAYMENT_ID_APP_IO_NON_ESISTE);
-            } else if (onboardingBackManagement != null
-                    && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode())) {
-                log.info("Going in timeout for idAppIo " + idAppIo);
-                ppPayDirectResponse = createResponseErrorPayment(PpResponseErrCode.TIMEOUT);
-                Thread.sleep(20000);
+                ppPayDirectResponse = PayPalCreateResponse.createResponseErrorPayment(PpResponseErrCode.PAYMENT_ID_APP_IO_NON_ESISTE);
+            } else if (isTimeout(onboardingBackManagement)) {
+                log.info("Going 'directPayment' in timeout for idAppIo " + idAppIo);
+                ppPayDirectResponse = PayPalCreateResponse.createResponseErrorPayment(PpResponseErrCode.TIMEOUT);
+                Thread.sleep(TIMEOUT);
                 throw new TimeoutException();
-            } else if (onboardingBackManagement != null && StringUtils.isNotBlank(onboardingBackManagement.getErrCodeValue())) {
-                ppPayDirectResponse = createResponseErrorPayment(PpResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
+            } else if (isCustomError(onboardingBackManagement)) {
+                ppPayDirectResponse = PayPalCreateResponse.createResponseErrorPayment(PpResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
             } else {
-                ppPayDirectResponse = createSuccessPaymentResponse(ppPayDirectRequest);
+                ppPayDirectResponse = PayPalCreateResponse.createSuccessPaymentResponse(ppPayDirectRequest);
             }
             return ppPayDirectResponse;
         } finally {
@@ -140,32 +138,31 @@ public class PayPalPspRestController {
         TablePaymentPayPal tablePaymentPayPal = null;
 
         try {
-            TableClient tableClient;
-            if (StringUtils.isBlank(authorization) || !authorization.matches(BEARER_REGEX) || (tableClient = tableClientRepository.findByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "))) == null) {
+            TableClient tableClient = paypalUtils.getClientAuthenticated(authorization);
+            if (tableClient == null) {
                 log.error("Invalid authorization: " + authorization);
-                return createRefundResponseError(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
+                return PayPalCreateResponse.createRefundResponseError(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
             }
             tablePaymentPayPal = tablePaymentPayPalRepository.findByIdTrsAppIoAndTableUserPayPal_client(idTrsAppIo, tableClient);
 
             if (tablePaymentPayPal == null) {
                 log.error("Payment not found for idTrsAppIo: " + idTrsAppIo);
-                return createRefundResponseError(PpResponseErrCode.ID_TRS_NON_VALIDO);
+                return PayPalCreateResponse.createRefundResponseError(PpResponseErrCode.ID_TRS_NON_VALIDO);
             } else if (!checkRequestAndDataOnDatabase(ppPayDirectRequest, tablePaymentPayPal)) {
-                return createRefundResponseError(PpResponseErrCode.ID_TRS_OR_IMPORT_NOT_MATCH);
+                return PayPalCreateResponse.createRefundResponseError(PpResponseErrCode.ID_TRS_OR_IMPORT_NOT_MATCH);
             }
             String idAppIo = tablePaymentPayPal.getTableUserPayPal().getIdAppIo();
-            TablePpPaypalManagement onboardingBackManagement = onboardingBackManagementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, ApiPaypalIdEnum.REFUND, tableClient);
+            TablePpPaypalManagement onboardingBackManagement = managementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, ApiPaypalIdEnum.REFUND, tableClient);
 
-            if (onboardingBackManagement != null
-                    && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode())) {
-                log.info("Going in timeout for idAppIo " + idAppIo);
-                response = createRefundResponseError(PpResponseErrCode.TIMEOUT);
-                Thread.sleep(20000);
+            if (isTimeout(onboardingBackManagement)) {
+                log.info("Going 'refund' in timeout for idAppIo " + idAppIo);
+                response = PayPalCreateResponse.createRefundResponseError(PpResponseErrCode.TIMEOUT);
+                Thread.sleep(TIMEOUT);
                 throw new TimeoutException();
-            } else if (onboardingBackManagement != null && StringUtils.isNotBlank(onboardingBackManagement.getErrCodeValue())) {
-                response = createRefundResponseError(PpResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
+            } else if (isCustomError(onboardingBackManagement)) {
+                response = PayPalCreateResponse.createRefundResponseError(PpResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
             } else {
-                response = createSuccessRefundResponse();
+                response = PayPalCreateResponse.createSuccessRefundResponse();
             }
             return response;
         } finally {
@@ -176,6 +173,47 @@ public class PayPalPspRestController {
                 }
             }
         }
+    }
+
+    @PostMapping("/api/pp_bilagr_del")
+    public ResponseEntity<PpDefaultResponse> deleteContract(@RequestHeader(value = "Authorization", required = false) String authorization,
+                                                            @Valid @RequestBody PPPayPalIdAppIoRequest ppPayPalIdAppIoRequest) throws InterruptedException, TimeoutException {
+
+        TableClient tableClient = paypalUtils.getClientAuthenticated(authorization);
+        if (tableClient == null) {
+            log.error("Invalid authorization: " + authorization);
+            return PayPalCreateResponse.createResponseErrorDeleteContract(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
+        }
+
+        String idAppIo = ppPayPalIdAppIoRequest.getIdAppIo();
+        TableUserPayPal byIdAppIoAndDeletedFalse = tableUserPayPalRepository.findByIdAppIoAndClientAndDeletedFalse(idAppIo, tableClient);
+        if (byIdAppIoAndDeletedFalse == null) {
+            return PayPalCreateResponse.createResponseErrorDeleteContract(PpResponseErrCode.DELETE_ID_APP_IO_NON_ESISTE);
+        }
+
+        TablePpPaypalManagement onboardingBackManagement = managementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, ApiPaypalIdEnum.DELETE, tableClient);
+
+        //Manage error defined by user
+        if (isTimeout(onboardingBackManagement)) {
+            log.info("Going 'deleteContract' in timeout for idAppIo: " + idAppIo);
+            Thread.sleep(TIMEOUT);
+            throw new TimeoutException("Simulate PayPal psp Timeout");
+        } else if (isCustomError(onboardingBackManagement)) {
+            return PayPalCreateResponse.createResponseErrorDeleteContract(PpResponseErrCode.of(onboardingBackManagement.getErrCodeValue()));
+        }
+
+        byIdAppIoAndDeletedFalse.setDeleted(true);
+        tableUserPayPalRepository.save(byIdAppIoAndDeletedFalse);
+
+        return ResponseEntity.ok(new PpDefaultResponse(PpEsitoResponseCode.OK));
+    }
+
+    private boolean isCustomError(TablePpPaypalManagement onboardingBackManagement) {
+        return onboardingBackManagement != null && StringUtils.isNotBlank(onboardingBackManagement.getErrCodeValue());
+    }
+
+    private boolean isTimeout(TablePpPaypalManagement onboardingBackManagement) {
+        return onboardingBackManagement != null && StringUtils.equals(onboardingBackManagement.getErrCodeValue(), PpResponseErrCode.TIMEOUT.getCode());
     }
 
     private boolean checkRequestAndDataOnDatabase(PpRefundDirectRequest ppPayDirectRequest, TablePaymentPayPal tablePaymentPayPal) {
@@ -203,22 +241,7 @@ public class PayPalPspRestController {
         tablePaymentPayPalRepository.save(tablePaymentPayPal);
     }
 
-    private ResponseEntity<PpPayDirectResponse> createSuccessPaymentResponse(PpPayDirectRequest ppPayDirectRequest) {
-
-        PpPayDirectResponse response = new PpPayDirectResponse();
-        response.setEsito(PpEsitoResponseCode.OK);
-        response.setIdTrsPaypal(StringUtils.leftPad(ppPayDirectRequest.getIdTrsAppIo(), 20, "0"));
-        return ResponseEntity.ok(response);
-    }
-
-    private ResponseEntity<PpRefundDirectResponse> createSuccessRefundResponse() {
-
-        PpRefundDirectResponse response = new PpRefundDirectResponse();
-        response.setEsito(PpEsitoResponseCode.OK);
-        return ResponseEntity.ok(response);
-    }
-
-    private void saveAndUpdateTable(PpOnboardingBackRequest ppOnboardingBackRequest, String idBack, TableClient tableClient) {
+    private void saveAndUpdateTable(PpOnboardingBackRequestRequest ppOnboardingBackRequest, String idBack, TableClient tableClient) {
         String idAppIo = ppOnboardingBackRequest.getIdAppIo();
         tablePpOnboardingBackRepository.setUsedTrueByIdBack(idAppIo, tableClient);
         TablePpOnboardingBack tablePpOnboardingBack = new TablePpOnboardingBack();
@@ -228,39 +251,5 @@ public class PayPalPspRestController {
         tablePpOnboardingBack.setIdBack(idBack);
         tablePpOnboardingBack.setClient(tableClient);
         tablePpOnboardingBackRepository.save(tablePpOnboardingBack);
-    }
-
-    private ResponseEntity<PpOnboardingBackResponse> manageErrorResponseAlreadyOnboarded(TableUserPayPal tableUserPayPal) {
-        PpResponseErrCode codiceContrattoPresente = PpResponseErrCode.CODICE_CONTRATTO_PRESENTE;
-        PpDefaultErrorResponse onboardingBackResponseResponseEntity = manageErrorResponse(codiceContrattoPresente);
-        PpDefaultErrorResponse ppOnboardingBackResponse = Objects.requireNonNull(onboardingBackResponseResponseEntity);
-        PpOnboardingBackResponse ppOnboardingBackResponse1 = new PpOnboardingBackResponse();
-        ppOnboardingBackResponse1.setEmailPp(paypalUtils.obfuscateEmail(tableUserPayPal.getPaypalEmail()));
-        ppOnboardingBackResponse1.setIdPp(tableUserPayPal.getPaypalId());
-        ppOnboardingBackResponse1.setPpDefaultErrorResponse(ppOnboardingBackResponse);
-        return ResponseEntity.status(codiceContrattoPresente.getHttpStatus()).body(ppOnboardingBackResponse1);
-    }
-
-    private PpDefaultErrorResponse manageErrorResponse(PpResponseErrCode errCode) {
-        PpDefaultErrorResponse build = new PpOnboardingBackResponse();
-        build.setEsito(PpEsitoResponseCode.KO);
-        build.setErrCod(errCode);
-        build.setErrDesc(errCode.getDescription());
-        return build;
-    }
-
-    private ResponseEntity<PpOnboardingBackResponse> createResponseErrorOnboarding(PpResponseErrCode ppResponseErrCode) {
-        PpDefaultErrorResponse ppDefaultErrorResponse = manageErrorResponse(ppResponseErrCode);
-        return ResponseEntity.status(ppResponseErrCode.getHttpStatus()).body(new PpOnboardingBackResponse(ppDefaultErrorResponse));
-    }
-
-    private ResponseEntity<PpPayDirectResponse> createResponseErrorPayment(PpResponseErrCode ppResponseErrCode) {
-        PpDefaultErrorResponse ppDefaultErrorResponse = manageErrorResponse(ppResponseErrCode);
-        return ResponseEntity.status(ppResponseErrCode.getHttpStatus()).body(new PpPayDirectResponse(ppDefaultErrorResponse));
-    }
-
-    private ResponseEntity<PpRefundDirectResponse> createRefundResponseError(PpResponseErrCode ppResponseErrCode) {
-        PpDefaultErrorResponse ppDefaultErrorResponse = manageErrorResponse(ppResponseErrCode);
-        return ResponseEntity.status(ppResponseErrCode.getHttpStatus()).body(new PpRefundDirectResponse(ppDefaultErrorResponse));
     }
 }
