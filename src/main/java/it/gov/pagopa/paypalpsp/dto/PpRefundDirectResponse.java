@@ -8,9 +8,9 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PpRefundDirectResponse extends PpDefaultErrorResponse {
+public class PpRefundDirectResponse extends PpDefaultResponse {
 
-    public PpRefundDirectResponse(PpDefaultErrorResponse ppDefaultErrorResponse) {
-        this.setPpDefaultErrorResponse(ppDefaultErrorResponse);
+    public PpRefundDirectResponse(PpDefaultResponse ppDefaultResponse) {
+        this.setPpDefaultErrorResponse(ppDefaultResponse);
     }
 }

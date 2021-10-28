@@ -6,7 +6,7 @@ import it.gov.pagopa.db.entity.TableConfig;
 import it.gov.pagopa.db.entity.TablePpOnboardingBack;
 import it.gov.pagopa.db.repository.TableConfigRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
-import it.gov.pagopa.paypalpsp.PaypalUtils;
+import it.gov.pagopa.paypalpsp.util.PaypalUtils;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseEsito;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
 import lombok.extern.log4j.Log4j2;

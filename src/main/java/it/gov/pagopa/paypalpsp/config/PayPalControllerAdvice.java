@@ -1,6 +1,6 @@
 package it.gov.pagopa.paypalpsp.config;
 
-import it.gov.pagopa.paypalpsp.dto.PpDefaultErrorResponse;
+import it.gov.pagopa.paypalpsp.dto.PpDefaultResponse;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
 import it.gov.pagopa.paypalpsp.mockcontroller.PayPalPspRestController;
 import lombok.extern.log4j.Log4j2;
@@ -23,7 +23,7 @@ public class PayPalControllerAdvice extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         log.error(ex);
         PpResponseErrCode parametriNonValidi = PpResponseErrCode.PARAMETRI_NON_VALIDI;
-        PpDefaultErrorResponse ppErrorResponse = new PpDefaultErrorResponse();
+        PpDefaultResponse ppErrorResponse = new PpDefaultResponse();
         ppErrorResponse.setErrCod(parametriNonValidi);
         ppErrorResponse.setErrDesc(parametriNonValidi.getDescription());
 

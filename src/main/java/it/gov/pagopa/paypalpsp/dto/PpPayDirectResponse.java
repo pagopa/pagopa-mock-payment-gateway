@@ -10,12 +10,12 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PpPayDirectResponse extends PpDefaultErrorResponse {
+public class PpPayDirectResponse extends PpDefaultResponse {
 
     @JsonProperty("id_trs_paypal")
     private String idTrsPaypal;
 
-    public PpPayDirectResponse(PpDefaultErrorResponse ppDefaultErrorResponse) {
-        this.setPpDefaultErrorResponse(ppDefaultErrorResponse);
+    public PpPayDirectResponse(PpDefaultResponse ppDefaultResponse) {
+        this.setPpDefaultErrorResponse(ppDefaultResponse);
     }
 }

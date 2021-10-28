@@ -5,7 +5,7 @@ import it.gov.pagopa.db.entity.TablePpOnboardingBack;
 import it.gov.pagopa.db.entity.TableUserPayPal;
 import it.gov.pagopa.db.repository.TableConfigRepository;
 import it.gov.pagopa.db.repository.TableUserPayPalRepository;
-import it.gov.pagopa.paypalpsp.PaypalUtils;
+import it.gov.pagopa.paypalpsp.util.PaypalUtils;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseEsito;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
 import it.gov.pagopa.util.UrlUtils;
