@@ -14,14 +14,14 @@ public enum EsitoEnum {
     private final String codice;
     private final String messaggio;
 
-    public static EsitoEnum fromCode(String code) throws Exception {
+    public static EsitoEnum fromCode(String code) {
         EsitoEnum[] values = EsitoEnum.values();
         for (EsitoEnum item : values) {
             if (item.codice.equals(code)) {
                 return item;
             }
         }
-        throw new Exception("Cannot find code " + code);
+        throw new IllegalArgumentException("Cannot find code " + code);
     }
 
 }

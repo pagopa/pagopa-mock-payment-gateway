@@ -9,4 +9,6 @@ public interface BPayPaymentRepository extends JpaRepository<BPayPayment, Long> 
 
     BPayPayment findByCorrelationId(String correlationId);
 
+    BPayPayment findByIdPagoPa(String idPagoPa);
+
 }

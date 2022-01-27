@@ -31,7 +31,7 @@ public class BPayPayment {
     @Column(name = "correlation_id")
     private String correlationId;
 
-    @Column(name = "refunded")
-    private Boolean refunded;
+    @Column(name = "refund_outcome")
+    private String refundOutcome;
 
 }
