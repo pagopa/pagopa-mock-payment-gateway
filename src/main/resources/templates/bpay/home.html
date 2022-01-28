@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <div th:replace="fragment/head :: head"></div>
+</head>
+<body class="bg-light">
+    <div class="container">
+        <h2>Mock BPay</h2>
+        <form th:action="@{/bpayweb/management/outcome}" th:method="post" th:object="${callBPayRequest}">
+            <label>Request body</label>
+            <input type="text" th:field="*{request}"/>
+            <br>
+            <label>Outcome</label>
+            <select th:field="*{outcome}">
+                <option th:each="i : ${T(it.gov.pagopa.bpay.dto.EsitoEnum).values()}" th:value="${i}" th:text="${i.codice + ' - ' + i.messaggio}">
+                </option>
+            </select>
+            <br>
+            <label>Timeout</label>
+            <input type="checkbox" th:field="*{timeout}"/>
+            <br>
+            <input type="submit" value="Submit">
+        </form>
+        <br>
+        <h3>Result:</h3>
+        <label th:text="${result}"></label>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
+            crossorigin="anonymous"></script>
+</body>
+</html>
