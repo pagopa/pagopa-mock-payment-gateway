@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
 <head>
     <div th:replace="fragment/head :: head"></div>
 </head>
@@ -8,9 +8,10 @@
         <h2>Mock BPay</h2>
         <form th:action="@{/bpayweb/management/outcome}" th:method="post" th:object="${callBPayRequest}">
             <label>Request body</label>
-            <input type="text" th:field="*{request}"/>
             <br>
-            <label>Outcome</label>
+            <textarea th:field="*{request}" style="width:600px; height:300px;">Request body</textarea>
+            <br>
+            <label>Outcome (only for Payment and Refund requests)</label>
             <select th:field="*{outcome}">
                 <option th:each="i : ${T(it.gov.pagopa.bpay.dto.EsitoEnum).values()}" th:value="${i}" th:text="${i.codice + ' - ' + i.messaggio}">
                 </option>
@@ -23,7 +24,7 @@
         </form>
         <br>
         <h3>Result:</h3>
-        <label th:text="${result}"></label>
+        <pre lang="xml" th:text="${result}"></pre>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
             integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
