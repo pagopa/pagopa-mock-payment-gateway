@@ -3,16 +3,14 @@ package it.gov.pagopa.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 @Configuration
 public class CustomConfiguration {
+
     @Bean
     public SimpleUrlHandlerMapping customFaviconHandlerMapping() {
         SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
@@ -28,8 +26,8 @@ public class CustomConfiguration {
                 = new ResourceHttpRequestHandler();
         ClassPathResource classPathResource
                 = new ClassPathResource("com/baeldung/images/");
-        List<Resource> locations = Arrays.asList(classPathResource);
-        requestHandler.setLocations(locations);
+        requestHandler.setLocations(Collections.singletonList(classPathResource));
         return requestHandler;
     }
+
 }

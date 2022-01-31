@@ -5,31 +5,32 @@
 </head>
 <body class="bg-light">
     <div class="container">
-        <h2>Mock BPay</h2>
-        <form th:action="@{/bpayweb/management/outcome}" th:method="post" th:object="${callBPayRequest}">
-            <label>Request body</label>
+        <h2>BancomatPay Mock</h2>
+        <br>
+        <button onclick="changeRequestTextarea('payment')">Payment</button>
+        <button onclick="changeRequestTextarea('inquiry')">Inquiry</button>
+        <button onclick="changeRequestTextarea('refund')">Refund</button>
+        <br><br>
+        <form th:action="@{/bpayweb/management/home}" th:method="post" th:object="${callBPayRequest}">
+            Request body:
             <br>
-            <textarea th:field="*{request}" style="width:600px; height:300px;">Request body</textarea>
-            <br>
-            <label>Outcome (only for Payment and Refund requests)</label>
+            <textarea id="requestTextarea" th:field="*{request}" style="width:100%; height:200px; resize:both;"></textarea>
+            <br><br>
+            Outcome (only for Payment and Refund requests):
             <select th:field="*{outcome}">
-                <option th:each="i : ${T(it.gov.pagopa.bpay.dto.EsitoEnum).values()}" th:value="${i}" th:text="${i.codice + ' - ' + i.messaggio}">
+                <option th:each="i : ${T(it.gov.pagopa.bpay.dto.EsitoEnum).values()}" th:value="${i.codice}" th:text="${i.codice + ' - ' + i.messaggio}">
                 </option>
             </select>
-            <br>
-            <label>Timeout</label>
+            <br><br>
+            Timeout (y/n):&nbsp;
             <input type="checkbox" th:field="*{timeout}"/>
-            <br>
+            <br><br>
             <input type="submit" value="Submit">
         </form>
         <br>
         <h3>Result:</h3>
         <pre lang="xml" th:text="${result}"></pre>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
-            crossorigin="anonymous"></script>
+    <script th:src="@{${AZURE_API_PUBLIC_URL}+'/static/js/bpay.js'}"></script>
 </body>
 </html>

@@ -57,7 +57,7 @@ public class InternalBPayController {
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
     }
 
-    @PostMapping(value = "/outcome", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    @PostMapping(value = "/home", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public String changeOutcome(CallBPayRequest request, Model model) throws Exception {
         String code = request.getOutcome();
         if (!code.equals(EsitoEnum.OK.getCodice())) {
@@ -71,16 +71,13 @@ public class InternalBPayController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_XML);
         HttpEntity<String> soapRequest = new HttpEntity<>(request.getRequest(), headers);
-        String result = new RestTemplate().postForObject(publicUrl + "/bpay", soapRequest, String.class);
+        String result;
+        try {
+            result = new RestTemplate().postForObject(publicUrl + "/bpay", soapRequest, String.class);
+        } catch (Exception e) {
+            result = ((HttpServerErrorException.InternalServerError)e).getResponseBodyAsString();
+        }
         model.addAttribute("result", formatXml(result));
-        if (!code.equals(EsitoEnum.OK.getCodice())) {
-            outcomeConfig.setPropertyValue(EsitoEnum.OK.getCodice());
-            configRepository.save(outcomeConfig);
-        }
-        if (request.isTimeout()) {
-            timeoutConfig.setPropertyValue("false");
-            configRepository.save(timeoutConfig);
-        }
         return "bpay/home.html";
     }
 
