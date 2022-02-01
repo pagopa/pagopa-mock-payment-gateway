@@ -1,10 +1,9 @@
 package it.gov.pagopa.bpay.controller;
 
 import it.gov.pagopa.bpay.dto.*;
-import it.gov.pagopa.db.entity.*;
-import it.gov.pagopa.db.repository.*;
 import lombok.extern.log4j.*;
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.context.*;
 import org.springframework.http.*;
 import org.springframework.stereotype.*;
 import org.springframework.ui.*;
@@ -27,23 +26,16 @@ import java.io.*;
 public class InternalBPayController {
 
     @Autowired
-    private TableConfigRepository configRepository;
-
-    @Autowired
-    private BPayController bPayController;
+    ApplicationContext context;
 
     @Value("${server.public-url}")
     private String publicUrl;
 
-    private TableConfig outcomeConfig;
-    private TableConfig timeoutConfig;
     private DocumentBuilder documentBuilder;
     private Transformer transformer;
 
     @PostConstruct
     public void init() throws ParserConfigurationException, TransformerConfigurationException {
-        outcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME");
-        timeoutConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT");
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setValidating(false);
         documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
@@ -59,15 +51,9 @@ public class InternalBPayController {
 
     @PostMapping(value = "/home", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public String changeOutcome(CallBPayRequest request, Model model) throws Exception {
-        String code = request.getOutcome();
-        if (!code.equals(EsitoEnum.OK.getCodice())) {
-            outcomeConfig.setPropertyValue(code);
-            configRepository.save(outcomeConfig);
-        }
-        if (request.isTimeout()) {
-            timeoutConfig.setPropertyValue("true");
-            configRepository.save(timeoutConfig);
-        }
+        CallBPayRequest requestBean = context.getBean(CallBPayRequest.class);
+        requestBean.setOutcome(request.getOutcome());
+        requestBean.setTimeout(request.isTimeout());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_XML);
         HttpEntity<String> soapRequest = new HttpEntity<>(request.getRequest(), headers);
@@ -78,6 +64,7 @@ public class InternalBPayController {
             result = ((HttpServerErrorException.InternalServerError)e).getResponseBodyAsString();
         }
         model.addAttribute("result", formatXml(result));
+        requestBean.reset();
         return "bpay/home.html";
     }
 
