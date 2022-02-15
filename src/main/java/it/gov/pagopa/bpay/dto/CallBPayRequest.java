@@ -8,13 +8,7 @@ import lombok.*;
 public class CallBPayRequest {
 
     private String request;
-    private String outcome = EsitoEnum.OK.getCodice();
+    private String outcome;
     private boolean timeout;
-
-    public void reset() {
-        request = null;
-        outcome = EsitoEnum.OK.getCodice();
-        timeout = false;
-    }
 
 }

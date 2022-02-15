@@ -27,8 +27,7 @@ public class BPayController {
     @Autowired
     private PmClientImpl pmClient;
 
-    @Autowired
-    private CallBPayRequest changeRequest;
+    private String outcomeConfig;
 
     private static final String NAMESPACE_URI = "http://p2b.gft.it/srv/pp";
 
@@ -36,8 +35,8 @@ public class BPayController {
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "inquiryTransactionStatus")
     @ResponsePayload
-    public JAXBElement<InquiryTransactionStatusResponse> inquiryTransactionStatus(@RequestPayload InquiryTransactionStatus request) {
-        shouldTimeout(changeRequest);
+    public JAXBElement inquiryTransactionStatus(@RequestPayload InquiryTransactionStatus request) {
+        refreshConfigs();
         RequestInquiryTransactionStatusVO requestData = request.getArg0();
         BPayPayment payment = findPayment(requestData.getIdPagoPa(), requestData.getCorrelationId());
         ResponseInquiryTransactionStatusVO responseData = new ResponseInquiryTransactionStatusVO();
@@ -49,20 +48,19 @@ public class BPayController {
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "inserimentoRichiestaPagamentoPagoPa")
     @ResponsePayload
-    public JAXBElement<InserimentoRichiestaPagamentoPagoPaResponse> inserimentoRichiestaPagamentoPagoPa(@RequestPayload InserimentoRichiestaPagamentoPagoPa request) {
-        shouldTimeout(changeRequest);
-        String outcome = changeRequest.getOutcome();
+    public JAXBElement inserimentoRichiestaPagamentoPagoPa(@RequestPayload InserimentoRichiestaPagamentoPagoPa request) {
+        refreshConfigs();
         RichiestaPagamentoPagoPaVO requestData = request.getArg0().getRichiestaPagamentoPagoPa();
         BPayPayment payment = new BPayPayment();
         payment.setIdPagoPa(requestData.getIdPagoPa());
         payment.setAmount(requestData.getImporto());
-        payment.setOutcome(outcome);
+        payment.setOutcome(outcomeConfig);
         payment.setIdPsp(requestData.getIdPSP());
         String correlationId = UUID.randomUUID().toString();
         payment.setCorrelationId(correlationId);
         paymentRepository.save(payment);
         ResponseInserimentoRichiestaPagamentoPagoPaVO responseData = new ResponseInserimentoRichiestaPagamentoPagoPaVO();
-        responseData.setEsito(generateEsito(EsitoEnum.fromCode(outcome)));
+        responseData.setEsito(generateEsito(EsitoEnum.fromCode(outcomeConfig)));
         responseData.setCorrelationId(correlationId);
         InserimentoRichiestaPagamentoPagoPaResponse response = new InserimentoRichiestaPagamentoPagoPaResponse();
         response.setReturn(responseData);
@@ -72,23 +70,23 @@ public class BPayController {
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "stornoPagamento")
     @ResponsePayload
-    public JAXBElement<StornoPagamentoResponse> refundRequest(@RequestPayload StornoPagamento request) {
-        shouldTimeout(changeRequest);
-        String outcome = changeRequest.getOutcome();
+    public JAXBElement refundRequest(@RequestPayload StornoPagamento request) {
+        refreshConfigs();
         RequestStornoPagamentoVO requestData = request.getArg0();
         BPayPayment payment = findPayment(requestData.getIdPagoPa(), requestData.getEndToEndId());
-        payment.setRefundOutcome(outcome);
+        payment.setRefundOutcome(outcomeConfig);
         paymentRepository.save(payment);
         ResponseStornoPagamentoVO responseData = new ResponseStornoPagamentoVO();
-        responseData.setEsito(generateEsito(EsitoEnum.fromCode(outcome)));
+        responseData.setEsito(generateEsito(EsitoEnum.fromCode(outcomeConfig)));
         StornoPagamentoResponse response = new StornoPagamentoResponse();
         response.setReturn(responseData);
         pmClient.callbackPm(payment);
         return factory.createStornoPagamentoResponse(response);
     }
 
-    private void shouldTimeout(CallBPayRequest changeRequest) {
-        if (changeRequest.isTimeout()) {
+    private void refreshConfigs() {
+        outcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME").getPropertyValue();
+        if (BooleanUtils.toBoolean(configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT").getPropertyValue())) {
             throw new RuntimeException("Timeout");
         }
     }

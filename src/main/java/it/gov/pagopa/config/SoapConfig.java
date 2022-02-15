@@ -1,6 +1,5 @@
 package it.gov.pagopa.config;
 
-import it.gov.pagopa.bpay.dto.*;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -20,11 +19,11 @@ import org.springframework.xml.xsd.XsdSchema;
 public class SoapConfig extends WsConfigurerAdapter {
 
     @Bean
-    public ServletRegistrationBean<MessageDispatcherServlet> messageDispatcherServlet(ApplicationContext applicationContext) {
+    public ServletRegistrationBean messageDispatcherServlet(ApplicationContext applicationContext) {
         MessageDispatcherServlet servlet = new MessageDispatcherServlet();
         servlet.setApplicationContext(applicationContext);
         servlet.setTransformWsdlLocations(true);
-        return new ServletRegistrationBean<>(servlet, "/bpay/*");
+        return new ServletRegistrationBean(servlet, "/bpay/*");
     }
 
     @Bean(name = "pagoPaServiceFacade")
@@ -40,11 +39,6 @@ public class SoapConfig extends WsConfigurerAdapter {
     @Bean
     public XsdSchema schema() {
         return new SimpleXsdSchema(new ClassPathResource("PagoPaServiceFacade.xsd"));
-    }
-
-    @Bean
-    public CallBPayRequest changeRequest() {
-        return new CallBPayRequest();
     }
 
 }
