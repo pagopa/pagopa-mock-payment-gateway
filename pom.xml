@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.3.1</version>
+            <version>42.3.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -77,12 +77,12 @@
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-core</artifactId>
-            <version>11.7</version>
+            <version>11.8</version>
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-jackson</artifactId>
-            <version>11.7</version>
+            <version>11.8</version>
         </dependency>
     </dependencies>
     <build>
@@ -148,8 +148,8 @@
                 </executions>
                 <configuration>
                     <schemaDirectory>${project.basedir}/src/main/resources/</schemaDirectory>
-                    <outputDirectory>${project.basedir}/src/main/java</outputDirectory>
-                    <clearOutputDir>false</clearOutputDir>
+                    <outputDirectory>${project.basedir}/src/main/java/generated</outputDirectory>
+                    <clearOutputDir>true</clearOutputDir>
                 </configuration>
             </plugin>
         </plugins>

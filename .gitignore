@@ -9,3 +9,4 @@ target/
 .vscode/settings.json
 pom.xml.versionsBackup
 pm-mock.iml
+/src/main/java/generated/
