@@ -170,7 +170,6 @@ stages:
               publishJUnitResults: false
               testResultsFiles: '**/surefire-reports/TEST-*.xml'
               goals: 'clean verify'
-              sonarQubeRunAnalysis: true
 
           - task: AzureCLI@1
             displayName: 'Deploy'
