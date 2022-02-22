@@ -104,6 +104,7 @@
                 <configuration>
                     <source>8</source>
                     <target>8</target>
+                    <generatedSourcesDirectory>src/generated</generatedSourcesDirectory>
                 </configuration>
             </plugin>
             <plugin>
@@ -148,7 +149,7 @@
                 </executions>
                 <configuration>
                     <schemaDirectory>${project.basedir}/src/main/resources/</schemaDirectory>
-                    <outputDirectory>${project.basedir}/src/main/java/generated</outputDirectory>
+                    <outputDirectory>${project.basedir}/src/generated/java</outputDirectory>
                     <clearOutputDir>true</clearOutputDir>
                 </configuration>
             </plugin>
