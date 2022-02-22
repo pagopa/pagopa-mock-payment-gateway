@@ -33,7 +33,7 @@ public class PmClientImpl {
     public void callbackPm(BPayPayment payment) {
         log.info("Calling PM...");
         TransactionUpdateRequest request = new TransactionUpdateRequest(payment.getCorrelationId());
-        pmClient.updateTransaction(payment.getIdPagoPa(), request);
+        //pmClient.updateTransaction(payment.getIdPagoPa(), request);
     }
 
 }
