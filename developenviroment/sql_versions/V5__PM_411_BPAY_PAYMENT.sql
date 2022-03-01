@@ -1,5 +1,5 @@
 INSERT INTO config(property_key, property_value)
-VALUES ('BPAY_CALLBACK_BASE_PATH', 'http://pagopa-dev:8080/pp-restapi-CD/v3');
+VALUES ('BPAY_CALLBACK_BASE_PATH', '/pp-restapi-CD/v3');
 
 INSERT INTO config(property_key, property_value)
 VALUES ('BPAY_PAYMENT_OUTCOME', '0');
@@ -14,5 +14,6 @@ CREATE TABLE payment_bpay(
 	id_psp varchar(10),
 	outcome varchar(5) not null,
 	correlation_id varchar(128) not null unique,
-	refund_outcome varchar(5)
+	refund_outcome varchar(5),
+	client_hostname varchar(128)
 );
