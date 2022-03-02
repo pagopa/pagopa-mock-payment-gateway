@@ -6,7 +6,7 @@ import it.gov.pagopa.bpay.dto.*;
 @Headers({"Content-Type: application/json"})
 public interface PmClient {
 
-    @RequestLine("PUT /payment-gateway/request-payments/bancomatpay/{id}")
-    void updateTransaction(@Param String id, TransactionUpdateRequest transactionUpdateRequest);
+    @RequestLine("PUT /payment-gateway/request-payments/bancomatpay")
+    void updateTransaction(TransactionUpdateRequest transactionUpdateRequest);
 
 }

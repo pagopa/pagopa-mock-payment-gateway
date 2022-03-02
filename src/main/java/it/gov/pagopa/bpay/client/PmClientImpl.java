@@ -23,9 +23,10 @@ public class PmClientImpl {
         PmClient pmClient = Feign.builder()
                 .encoder(new JacksonEncoder())
                 .decoder(new JacksonDecoder())
+                .requestInterceptor(t -> t.header("X-Correlation-ID", payment.getCorrelationId()))
                 .target(PmClient.class, payment.getClientHostname() + tableConfigRepository.findByPropertyKey("BPAY_CALLBACK_BASE_PATH").getPropertyValue());
         TransactionUpdateRequest request = new TransactionUpdateRequest(payment.getCorrelationId());
-        pmClient.updateTransaction(payment.getIdPagoPa(), request);
+        pmClient.updateTransaction(request);
     }
 
 }
