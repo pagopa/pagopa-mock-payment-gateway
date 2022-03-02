@@ -11,6 +11,7 @@ import org.apache.commons.lang3.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.ws.server.endpoint.annotation.*;
 
+import javax.servlet.http.*;
 import javax.xml.bind.*;
 import java.util.*;
 
@@ -29,13 +30,21 @@ public class BPayController {
 
     private String outcomeConfig;
 
+    private String currentClient;
+
     private static final String NAMESPACE_URI = "http://p2b.gft.it/srv/pp";
 
     private static final ObjectFactory factory = new ObjectFactory();
 
+    private final HttpServletRequest servletRequest;
+
+    public BPayController(HttpServletRequest servletRequest) {
+        this.servletRequest = servletRequest;
+    }
+
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "inquiryTransactionStatus")
     @ResponsePayload
-    public JAXBElement inquiryTransactionStatus(@RequestPayload InquiryTransactionStatus request) {
+    public JAXBElement<InquiryTransactionStatusResponse> inquiryTransactionStatus(@RequestPayload InquiryTransactionStatus request) {
         refreshConfigs();
         RequestInquiryTransactionStatusVO requestData = request.getArg0();
         BPayPayment payment = findPayment(requestData.getIdPagoPa(), requestData.getCorrelationId());
@@ -48,7 +57,7 @@ public class BPayController {
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "inserimentoRichiestaPagamentoPagoPa")
     @ResponsePayload
-    public JAXBElement inserimentoRichiestaPagamentoPagoPa(@RequestPayload InserimentoRichiestaPagamentoPagoPa request) {
+    public JAXBElement<InserimentoRichiestaPagamentoPagoPaResponse> inserimentoRichiestaPagamentoPagoPa(@RequestPayload InserimentoRichiestaPagamentoPagoPa request) {
         refreshConfigs();
         RichiestaPagamentoPagoPaVO requestData = request.getArg0().getRichiestaPagamentoPagoPa();
         BPayPayment payment = new BPayPayment();
@@ -58,6 +67,7 @@ public class BPayController {
         payment.setIdPsp(requestData.getIdPSP());
         String correlationId = UUID.randomUUID().toString();
         payment.setCorrelationId(correlationId);
+        payment.setClientHostname(currentClient);
         paymentRepository.save(payment);
         ResponseInserimentoRichiestaPagamentoPagoPaVO responseData = new ResponseInserimentoRichiestaPagamentoPagoPaVO();
         responseData.setEsito(generateEsito(EsitoEnum.fromCode(outcomeConfig)));
@@ -70,7 +80,7 @@ public class BPayController {
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "stornoPagamento")
     @ResponsePayload
-    public JAXBElement refundRequest(@RequestPayload StornoPagamento request) {
+    public JAXBElement<StornoPagamentoResponse> refundRequest(@RequestPayload StornoPagamento request) {
         refreshConfigs();
         RequestStornoPagamentoVO requestData = request.getArg0();
         BPayPayment payment = findPayment(requestData.getIdPagoPa(), requestData.getEndToEndId());
@@ -85,6 +95,7 @@ public class BPayController {
     }
 
     private void refreshConfigs() {
+        currentClient = configRepository.findByPropertyKey("BPAY_CURRENT_CLIENT").getPropertyValue();
         outcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME").getPropertyValue();
         if (BooleanUtils.toBoolean(configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT").getPropertyValue())) {
             throw new RuntimeException("Timeout");
