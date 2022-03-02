@@ -25,7 +25,7 @@ public class PmClientImpl {
                 .decoder(new JacksonDecoder())
                 .requestInterceptor(t -> t.header("X-Correlation-ID", payment.getCorrelationId()))
                 .target(PmClient.class, payment.getClientHostname());
-        TransactionUpdateRequest request = new TransactionUpdateRequest(payment.getCorrelationId());
+        TransactionUpdateRequest request = new TransactionUpdateRequest(payment.getOutcome().equals("0") ? "OK" : "KO", payment.getOutcome().equals("0") ? "authcode" : null);
         pmClient.updateTransaction(request);
     }
 
