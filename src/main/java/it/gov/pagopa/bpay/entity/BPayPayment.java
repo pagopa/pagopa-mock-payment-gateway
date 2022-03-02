@@ -1,5 +1,6 @@
 package it.gov.pagopa.bpay.entity;
 
+import it.gov.pagopa.db.entity.*;
 import lombok.*;
 
 import javax.persistence.*;
@@ -33,5 +34,8 @@ public class BPayPayment {
 
     @Column(name = "refund_outcome")
     private String refundOutcome;
+
+    @Column(name = "client_hostname")
+    private String clientHostname;
 
 }

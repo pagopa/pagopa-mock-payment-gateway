@@ -1,5 +1,6 @@
 package it.gov.pagopa.bpay.dto;
 
+import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 
 @Data
@@ -7,6 +8,10 @@ import lombok.*;
 @NoArgsConstructor
 public class TransactionUpdateRequest {
 
-    private String end2EndId;
+    @JsonProperty("auth_outcome")
+    private String authOutcome;
+
+    @JsonProperty("auth_code")
+    private String authCode;
 
 }
