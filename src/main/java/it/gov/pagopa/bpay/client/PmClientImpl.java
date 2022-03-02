@@ -4,9 +4,7 @@ import feign.*;
 import feign.jackson.*;
 import it.gov.pagopa.bpay.dto.*;
 import it.gov.pagopa.bpay.entity.*;
-import it.gov.pagopa.db.repository.*;
 import lombok.extern.log4j.*;
-import org.springframework.beans.factory.annotation.*;
 import org.springframework.scheduling.annotation.*;
 import org.springframework.stereotype.*;
 
@@ -14,17 +12,19 @@ import org.springframework.stereotype.*;
 @Component
 public class PmClientImpl {
 
-    @Autowired
-    private TableConfigRepository tableConfigRepository;
-
     @Async
     public void callbackPm(BPayPayment payment) {
+        try {
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            log.error(e);
+        }
         log.info("Calling PM...");
         PmClient pmClient = Feign.builder()
                 .encoder(new JacksonEncoder())
                 .decoder(new JacksonDecoder())
                 .requestInterceptor(t -> t.header("X-Correlation-ID", payment.getCorrelationId()))
-                .target(PmClient.class, payment.getClientHostname() + tableConfigRepository.findByPropertyKey("BPAY_CALLBACK_BASE_PATH").getPropertyValue());
+                .target(PmClient.class, payment.getClientHostname());
         TransactionUpdateRequest request = new TransactionUpdateRequest(payment.getCorrelationId());
         pmClient.updateTransaction(request);
     }

@@ -30,6 +30,8 @@ public class BPayController {
 
     private String outcomeConfig;
 
+    private String currentClient;
+
     private static final String NAMESPACE_URI = "http://p2b.gft.it/srv/pp";
 
     private static final ObjectFactory factory = new ObjectFactory();
@@ -65,7 +67,7 @@ public class BPayController {
         payment.setIdPsp(requestData.getIdPSP());
         String correlationId = UUID.randomUUID().toString();
         payment.setCorrelationId(correlationId);
-        payment.setClientHostname(servletRequest.getRequestURL().toString().replace(servletRequest.getRequestURI(), ""));
+        payment.setClientHostname(currentClient);
         paymentRepository.save(payment);
         ResponseInserimentoRichiestaPagamentoPagoPaVO responseData = new ResponseInserimentoRichiestaPagamentoPagoPaVO();
         responseData.setEsito(generateEsito(EsitoEnum.fromCode(outcomeConfig)));
@@ -93,6 +95,7 @@ public class BPayController {
     }
 
     private void refreshConfigs() {
+        currentClient = configRepository.findByPropertyKey("BPAY_CURRENT_CLIENT").getPropertyValue();
         outcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME").getPropertyValue();
         if (BooleanUtils.toBoolean(configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT").getPropertyValue())) {
             throw new RuntimeException("Timeout");

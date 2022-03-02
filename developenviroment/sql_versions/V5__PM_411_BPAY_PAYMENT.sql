@@ -1,11 +1,11 @@
 INSERT INTO config(property_key, property_value)
-VALUES ('BPAY_CALLBACK_BASE_PATH', '/pp-restapi-CD/v3');
-
-INSERT INTO config(property_key, property_value)
 VALUES ('BPAY_PAYMENT_OUTCOME', '0');
 
 INSERT INTO config(property_key, property_value)
 VALUES ('BPAY_PAYMENT_TIMEOUT', 'false');
+
+INSERT INTO config(property_key, property_value)
+VALUES ('BPAY_CURRENT_CLIENT', 'http://host.docker.internal:8080');
 
 CREATE TABLE payment_bpay(
 	id SERIAL PRIMARY KEY,
