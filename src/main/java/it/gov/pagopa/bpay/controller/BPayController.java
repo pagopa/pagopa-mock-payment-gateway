@@ -11,7 +11,6 @@ import org.apache.commons.lang3.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.ws.server.endpoint.annotation.*;
 
-import javax.servlet.http.*;
 import javax.xml.bind.*;
 import java.util.*;
 
@@ -35,12 +34,6 @@ public class BPayController {
     private static final String NAMESPACE_URI = "http://p2b.gft.it/srv/pp";
 
     private static final ObjectFactory factory = new ObjectFactory();
-
-    private final HttpServletRequest servletRequest;
-
-    public BPayController(HttpServletRequest servletRequest) {
-        this.servletRequest = servletRequest;
-    }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "inquiryTransactionStatus")
     @ResponsePayload
