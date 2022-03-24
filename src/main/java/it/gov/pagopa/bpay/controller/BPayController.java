@@ -90,8 +90,10 @@ public class BPayController {
     private void refreshConfigs() {
         currentClient = configRepository.findByPropertyKey("BPAY_CURRENT_CLIENT").getPropertyValue();
         outcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME").getPropertyValue();
-        if (BooleanUtils.toBoolean(configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT").getPropertyValue())) {
-            throw new RuntimeException("Timeout");
+        try {
+            Thread.sleep(Integer.parseInt(configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT_MS").getPropertyValue()));
+        } catch (InterruptedException e) {
+            log.warn(e);
         }
     }
 

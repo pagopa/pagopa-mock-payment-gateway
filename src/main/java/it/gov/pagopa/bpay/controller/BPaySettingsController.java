@@ -11,7 +11,7 @@ import javax.annotation.*;
 @Log4j2
 @RestController
 @RequestMapping("/bpayweb/change")
-public class BPayClientController {
+public class BPaySettingsController {
 
     @Autowired
     private TableConfigRepository configRepository;
@@ -22,7 +22,7 @@ public class BPayClientController {
     @PostConstruct
     public void init() {
         outcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME");
-        timeoutConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT");
+        timeoutConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT_MS");
     }
 
     @PostMapping("/client")
@@ -33,10 +33,10 @@ public class BPayClientController {
     }
 
     @PostMapping("/outcome")
-    public void changeOutcome(@RequestParam(required = false) String code, @RequestParam(required = false) String timeout) {
+    public void changeOutcome(@RequestParam(required = false) String code, @RequestParam(required = false) Integer timeoutMs) {
         outcomeConfig.setPropertyValue(code);
         configRepository.save(outcomeConfig);
-        timeoutConfig.setPropertyValue(timeout != null ? timeout : "false");
+        timeoutConfig.setPropertyValue(timeoutMs != null ? timeoutMs.toString() : "5000");
         configRepository.save(timeoutConfig);
     }
 
