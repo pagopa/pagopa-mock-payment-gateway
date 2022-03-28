@@ -61,7 +61,9 @@ public class InternalBPayController {
     public String changeOutcome(CallBPayRequest request, Model model) throws Exception {
         outcomeConfig.setPropertyValue(request.getOutcome());
         configRepository.save(outcomeConfig);
-        timeoutConfig.setPropertyValue(request.getTimeout().toString());
+        if (request.getTimeout() != null) {
+            timeoutConfig.setPropertyValue(request.getTimeout().toString());
+        }
         configRepository.save(timeoutConfig);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_XML);
