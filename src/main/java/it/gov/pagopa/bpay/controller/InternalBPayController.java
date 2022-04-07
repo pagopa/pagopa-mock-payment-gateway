@@ -43,7 +43,7 @@ public class InternalBPayController {
     @PostConstruct
     public void init() throws ParserConfigurationException, TransformerConfigurationException {
         outcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME");
-        timeoutConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT");
+        timeoutConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT_MS");
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setValidating(false);
         documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
@@ -59,15 +59,12 @@ public class InternalBPayController {
 
     @PostMapping(value = "/home", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public String changeOutcome(CallBPayRequest request, Model model) throws Exception {
-        String code = request.getOutcome();
-        if (!code.equals(EsitoEnum.OK.getCodice())) {
-            outcomeConfig.setPropertyValue(code);
-            configRepository.save(outcomeConfig);
+        outcomeConfig.setPropertyValue(request.getOutcome());
+        configRepository.save(outcomeConfig);
+        if (request.getTimeout() != null) {
+            timeoutConfig.setPropertyValue(request.getTimeout().toString());
         }
-        if (request.isTimeout()) {
-            timeoutConfig.setPropertyValue("true");
-            configRepository.save(timeoutConfig);
-        }
+        configRepository.save(timeoutConfig);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_XML);
         HttpEntity<String> soapRequest = new HttpEntity<>(request.getRequest(), headers);

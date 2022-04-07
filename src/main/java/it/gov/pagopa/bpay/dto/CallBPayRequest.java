@@ -9,6 +9,6 @@ public class CallBPayRequest {
 
     private String request;
     private String outcome;
-    private boolean timeout;
+    private Integer timeout;
 
 }
