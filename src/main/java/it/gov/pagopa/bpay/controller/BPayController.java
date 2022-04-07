@@ -11,7 +11,6 @@ import org.apache.commons.lang3.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.ws.server.endpoint.annotation.*;
 
-import javax.servlet.http.*;
 import javax.xml.bind.*;
 import java.util.*;
 
@@ -35,12 +34,6 @@ public class BPayController {
     private static final String NAMESPACE_URI = "http://p2b.gft.it/srv/pp";
 
     private static final ObjectFactory factory = new ObjectFactory();
-
-    private final HttpServletRequest servletRequest;
-
-    public BPayController(HttpServletRequest servletRequest) {
-        this.servletRequest = servletRequest;
-    }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "inquiryTransactionStatus")
     @ResponsePayload
@@ -97,8 +90,10 @@ public class BPayController {
     private void refreshConfigs() {
         currentClient = configRepository.findByPropertyKey("BPAY_CURRENT_CLIENT").getPropertyValue();
         outcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME").getPropertyValue();
-        if (BooleanUtils.toBoolean(configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT").getPropertyValue())) {
-            throw new RuntimeException("Timeout");
+        try {
+            Thread.sleep(Integer.parseInt(configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT_MS").getPropertyValue()));
+        } catch (InterruptedException e) {
+            log.warn(e);
         }
     }
 
