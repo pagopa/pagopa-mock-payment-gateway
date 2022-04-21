@@ -12,11 +12,19 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.ws.server.endpoint.annotation.*;
 
 import javax.xml.bind.*;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Endpoint
 @Log4j2
 public class BPayController {
+
+    @Value("${bpay.payment.x-correlation-id}")
+    private String xCorrelationId;
+
+    @Value("${bpay.payment.x-correlation-id.amount}")
+    private String xCorrelationIdAmount;
+
 
     @Autowired
     private TableConfigRepository configRepository;
@@ -52,13 +60,16 @@ public class BPayController {
     @ResponsePayload
     public JAXBElement<InserimentoRichiestaPagamentoPagoPaResponse> inserimentoRichiestaPagamentoPagoPa(@RequestPayload InserimentoRichiestaPagamentoPagoPa request) {
         refreshConfigs();
+        loadXCorrelationIdAmount();
         RichiestaPagamentoPagoPaVO requestData = request.getArg0().getRichiestaPagamentoPagoPa();
         BPayPayment payment = new BPayPayment();
         payment.setIdPagoPa(requestData.getIdPagoPa());
         payment.setAmount(requestData.getImporto());
         payment.setOutcome(outcomeConfig);
         payment.setIdPsp(requestData.getIdPSP());
-        String correlationId = UUID.randomUUID().toString();
+
+        String correlationId = Objects.nonNull(xCorrelationIdAmount)&&requestData.getImporto().equals(xCorrelationIdAmount)?
+                xCorrelationId : UUID.randomUUID().toString();
         payment.setCorrelationId(correlationId);
         payment.setClientHostname(currentClient);
         paymentRepository.save(payment);
@@ -97,6 +108,11 @@ public class BPayController {
         }
     }
 
+    private BigDecimal loadXCorrelationIdAmount(){
+       return  Optional.ofNullable(xCorrelationIdAmount).map(Double::valueOf).map(BigDecimal::valueOf).orElse(null);
+    }
+
+
     private BPayPayment findPayment(String idPagoPa, String correlationId) {
         return StringUtils.isNotBlank(idPagoPa) ? paymentRepository.findByIdPagoPa(idPagoPa) : paymentRepository.findByCorrelationId(correlationId);
     }
@@ -109,5 +125,8 @@ public class BPayController {
         esito.setMessaggio(esitoEnum.getMessaggio());
         return esito;
     }
+
+
+
 
 }
