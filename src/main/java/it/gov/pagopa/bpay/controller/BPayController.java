@@ -42,7 +42,9 @@ public class BPayController {
         RequestInquiryTransactionStatusVO requestData = request.getArg0();
         BPayPayment payment = findPayment(requestData.getIdPagoPa(), requestData.getCorrelationId());
         ResponseInquiryTransactionStatusVO responseData = new ResponseInquiryTransactionStatusVO();
-        responseData.setEsito(generateEsito(EsitoEnum.fromCode(payment == null ? EsitoEnum.PAYMENT_NOT_FOUND.getCodice() : payment.getOutcome())));
+        EsitoEnum esito = EsitoEnum.fromCode(payment == null ? EsitoEnum.PAYMENT_NOT_FOUND.getCodice() : payment.getOutcome());
+        responseData.setEsito(generateEsito(esito));
+        responseData.setEsitoPagamento(esito.isEsito() ? "EFF" : "ERR");
         InquiryTransactionStatusResponse response = new InquiryTransactionStatusResponse();
         response.setReturn(responseData);
         return factory.createInquiryTransactionStatusResponse(response);
