@@ -12,11 +12,19 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.ws.server.endpoint.annotation.*;
 
 import javax.xml.bind.*;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Endpoint
 @Log4j2
 public class BPayController {
+
+    @Value("${bpay.payment.x-correlation-id}")
+    private String xCorrelationId;
+
+    @Value("${bpay.payment.x-correlation-id.amount}")
+    private String xCorrelationIdAmount;
+
 
     @Autowired
     private TableConfigRepository configRepository;
@@ -27,7 +35,11 @@ public class BPayController {
     @Autowired
     private PmClientImpl pmClient;
 
-    private String outcomeConfig;
+    private String paymentOutcomeConfig;
+
+    private String refundOutcomeConfig;
+
+    private String inquiryOutcomeConfig;
 
     private String currentClient;
 
@@ -42,7 +54,9 @@ public class BPayController {
         RequestInquiryTransactionStatusVO requestData = request.getArg0();
         BPayPayment payment = findPayment(requestData.getIdPagoPa(), requestData.getCorrelationId());
         ResponseInquiryTransactionStatusVO responseData = new ResponseInquiryTransactionStatusVO();
-        responseData.setEsito(generateEsito(EsitoEnum.fromCode(payment == null ? EsitoEnum.PAYMENT_NOT_FOUND.getCodice() : payment.getOutcome())));
+        EsitoEnum esito = EsitoEnum.fromCode(payment == null ? EsitoEnum.PAYMENT_NOT_FOUND.getCodice() : inquiryOutcomeConfig);
+        responseData.setEsito(generateEsito(esito));
+        responseData.setEsitoPagamento(esito.isEsito() ? "EFF" : "ERR");
         InquiryTransactionStatusResponse response = new InquiryTransactionStatusResponse();
         response.setReturn(responseData);
         return factory.createInquiryTransactionStatusResponse(response);
@@ -52,18 +66,21 @@ public class BPayController {
     @ResponsePayload
     public JAXBElement<InserimentoRichiestaPagamentoPagoPaResponse> inserimentoRichiestaPagamentoPagoPa(@RequestPayload InserimentoRichiestaPagamentoPagoPa request) {
         refreshConfigs();
+        loadXCorrelationIdAmount();
         RichiestaPagamentoPagoPaVO requestData = request.getArg0().getRichiestaPagamentoPagoPa();
         BPayPayment payment = new BPayPayment();
         payment.setIdPagoPa(requestData.getIdPagoPa());
         payment.setAmount(requestData.getImporto());
-        payment.setOutcome(outcomeConfig);
+        payment.setOutcome(paymentOutcomeConfig);
         payment.setIdPsp(requestData.getIdPSP());
-        String correlationId = UUID.randomUUID().toString();
+
+        String correlationId = Objects.nonNull(xCorrelationIdAmount)&&requestData.getImporto().equals(xCorrelationIdAmount)?
+                xCorrelationId : UUID.randomUUID().toString();
         payment.setCorrelationId(correlationId);
         payment.setClientHostname(currentClient);
         paymentRepository.save(payment);
         ResponseInserimentoRichiestaPagamentoPagoPaVO responseData = new ResponseInserimentoRichiestaPagamentoPagoPaVO();
-        responseData.setEsito(generateEsito(EsitoEnum.fromCode(outcomeConfig)));
+        responseData.setEsito(generateEsito(EsitoEnum.fromCode(paymentOutcomeConfig)));
         responseData.setCorrelationId(correlationId);
         InserimentoRichiestaPagamentoPagoPaResponse response = new InserimentoRichiestaPagamentoPagoPaResponse();
         response.setReturn(responseData);
@@ -77,10 +94,10 @@ public class BPayController {
         refreshConfigs();
         RequestStornoPagamentoVO requestData = request.getArg0();
         BPayPayment payment = findPayment(requestData.getIdPagoPa(), requestData.getEndToEndId());
-        payment.setRefundOutcome(outcomeConfig);
+        payment.setRefundOutcome(refundOutcomeConfig);
         paymentRepository.save(payment);
         ResponseStornoPagamentoVO responseData = new ResponseStornoPagamentoVO();
-        responseData.setEsito(generateEsito(EsitoEnum.fromCode(outcomeConfig)));
+        responseData.setEsito(generateEsito(EsitoEnum.fromCode(refundOutcomeConfig)));
         StornoPagamentoResponse response = new StornoPagamentoResponse();
         response.setReturn(responseData);
         pmClient.callbackPm(payment);
@@ -89,13 +106,20 @@ public class BPayController {
 
     private void refreshConfigs() {
         currentClient = configRepository.findByPropertyKey("BPAY_CURRENT_CLIENT").getPropertyValue();
-        outcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME").getPropertyValue();
+        paymentOutcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME").getPropertyValue();
+        refundOutcomeConfig = configRepository.findByPropertyKey("BPAY_REFUND_OUTCOME").getPropertyValue();
+        inquiryOutcomeConfig = configRepository.findByPropertyKey("BPAY_INQUIRY_OUTCOME").getPropertyValue();
         try {
             Thread.sleep(Integer.parseInt(configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT_MS").getPropertyValue()));
         } catch (InterruptedException e) {
             log.warn(e);
         }
     }
+
+    private BigDecimal loadXCorrelationIdAmount(){
+       return  Optional.ofNullable(xCorrelationIdAmount).map(Double::valueOf).map(BigDecimal::valueOf).orElse(null);
+    }
+
 
     private BPayPayment findPayment(String idPagoPa, String correlationId) {
         return StringUtils.isNotBlank(idPagoPa) ? paymentRepository.findByIdPagoPa(idPagoPa) : paymentRepository.findByCorrelationId(correlationId);
@@ -109,5 +133,8 @@ public class BPayController {
         esito.setMessaggio(esitoEnum.getMessaggio());
         return esito;
     }
+
+
+
 
 }
