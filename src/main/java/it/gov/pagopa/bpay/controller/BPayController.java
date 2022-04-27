@@ -27,7 +27,11 @@ public class BPayController {
     @Autowired
     private PmClientImpl pmClient;
 
-    private String outcomeConfig;
+    private String paymentOutcomeConfig;
+
+    private String refundOutcomeConfig;
+
+    private String inquiryOutcomeConfig;
 
     private String currentClient;
 
@@ -42,7 +46,7 @@ public class BPayController {
         RequestInquiryTransactionStatusVO requestData = request.getArg0();
         BPayPayment payment = findPayment(requestData.getIdPagoPa(), requestData.getCorrelationId());
         ResponseInquiryTransactionStatusVO responseData = new ResponseInquiryTransactionStatusVO();
-        EsitoEnum esito = EsitoEnum.fromCode(payment == null ? EsitoEnum.PAYMENT_NOT_FOUND.getCodice() : payment.getOutcome());
+        EsitoEnum esito = EsitoEnum.fromCode(payment == null ? EsitoEnum.PAYMENT_NOT_FOUND.getCodice() : inquiryOutcomeConfig);
         responseData.setEsito(generateEsito(esito));
         responseData.setEsitoPagamento(esito.isEsito() ? "EFF" : "ERR");
         InquiryTransactionStatusResponse response = new InquiryTransactionStatusResponse();
@@ -58,14 +62,14 @@ public class BPayController {
         BPayPayment payment = new BPayPayment();
         payment.setIdPagoPa(requestData.getIdPagoPa());
         payment.setAmount(requestData.getImporto());
-        payment.setOutcome(outcomeConfig);
+        payment.setOutcome(paymentOutcomeConfig);
         payment.setIdPsp(requestData.getIdPSP());
         String correlationId = UUID.randomUUID().toString();
         payment.setCorrelationId(correlationId);
         payment.setClientHostname(currentClient);
         paymentRepository.save(payment);
         ResponseInserimentoRichiestaPagamentoPagoPaVO responseData = new ResponseInserimentoRichiestaPagamentoPagoPaVO();
-        responseData.setEsito(generateEsito(EsitoEnum.fromCode(outcomeConfig)));
+        responseData.setEsito(generateEsito(EsitoEnum.fromCode(paymentOutcomeConfig)));
         responseData.setCorrelationId(correlationId);
         InserimentoRichiestaPagamentoPagoPaResponse response = new InserimentoRichiestaPagamentoPagoPaResponse();
         response.setReturn(responseData);
@@ -79,10 +83,10 @@ public class BPayController {
         refreshConfigs();
         RequestStornoPagamentoVO requestData = request.getArg0();
         BPayPayment payment = findPayment(requestData.getIdPagoPa(), requestData.getEndToEndId());
-        payment.setRefundOutcome(outcomeConfig);
+        payment.setRefundOutcome(refundOutcomeConfig);
         paymentRepository.save(payment);
         ResponseStornoPagamentoVO responseData = new ResponseStornoPagamentoVO();
-        responseData.setEsito(generateEsito(EsitoEnum.fromCode(outcomeConfig)));
+        responseData.setEsito(generateEsito(EsitoEnum.fromCode(refundOutcomeConfig)));
         StornoPagamentoResponse response = new StornoPagamentoResponse();
         response.setReturn(responseData);
         pmClient.callbackPm(payment);
@@ -91,7 +95,9 @@ public class BPayController {
 
     private void refreshConfigs() {
         currentClient = configRepository.findByPropertyKey("BPAY_CURRENT_CLIENT").getPropertyValue();
-        outcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME").getPropertyValue();
+        paymentOutcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME").getPropertyValue();
+        refundOutcomeConfig = configRepository.findByPropertyKey("BPAY_REFUND_OUTCOME").getPropertyValue();
+        inquiryOutcomeConfig = configRepository.findByPropertyKey("BPAY_INQUIRY_OUTCOME").getPropertyValue();
         try {
             Thread.sleep(Integer.parseInt(configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT_MS").getPropertyValue()));
         } catch (InterruptedException e) {
