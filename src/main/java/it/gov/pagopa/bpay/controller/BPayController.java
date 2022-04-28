@@ -22,7 +22,7 @@ public class BPayController {
     @Value("${bpay.payment.x-correlation-id}")
     private String xCorrelationId;
 
-    @Value("${bpay.payment.x-correlation-id.amount}")
+    @Value("${bpay.payment.amount}")
     private String xCorrelationIdAmount;
 
 
