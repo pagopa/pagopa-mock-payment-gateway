@@ -47,4 +47,4 @@ info:
 bpay:
   payment:
     x-correlation-id: ${BPAY_PAYMENT_CORRELATION_ID:179c1732-c176-11ec-9d64-0242ac120002}
-    amount: ${BPAY_PAYMENT_CORRELATION_ID_AMOUNT:'105'}
+    amount: ${BPAY_PAYMENT_CORRELATION_ID_AMOUNT:105}
