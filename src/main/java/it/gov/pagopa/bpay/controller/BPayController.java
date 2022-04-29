@@ -23,7 +23,7 @@ public class BPayController {
     private String xCorrelationId;
 
     @Value("${bpay.payment.amount}")
-    private String xCorrelationIdAmount;
+    private String amount;
 
 
     @Autowired
@@ -67,9 +67,7 @@ public class BPayController {
         payment.setAmount(requestData.getImporto());
         payment.setOutcome(outcomeConfig);
         payment.setIdPsp(requestData.getIdPSP());
-
-        String correlationId = Objects.nonNull(xCorrelationIdAmount)&&requestData.getImporto().equals(xCorrelationIdAmount)?
-                xCorrelationId : UUID.randomUUID().toString();
+        String correlationId = Objects.nonNull(amount) && requestData.getImporto().equals(amount) ? xCorrelationId : UUID.randomUUID().toString();
         payment.setCorrelationId(correlationId);
         payment.setClientHostname(currentClient);
         paymentRepository.save(payment);
@@ -108,8 +106,8 @@ public class BPayController {
         }
     }
 
-    private BigDecimal loadXCorrelationIdAmount(){
-       return  Optional.ofNullable(xCorrelationIdAmount).map(Double::valueOf).map(BigDecimal::valueOf).orElse(null);
+    private BigDecimal loadXCorrelationIdAmount() {
+        return Optional.ofNullable(amount).map(Double::valueOf).map(BigDecimal::valueOf).orElse(null);
     }
 
 
@@ -125,8 +123,6 @@ public class BPayController {
         esito.setMessaggio(esitoEnum.getMessaggio());
         return esito;
     }
-
-
 
 
 }
