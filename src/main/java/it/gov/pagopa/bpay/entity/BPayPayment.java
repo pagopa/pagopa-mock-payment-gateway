@@ -1,6 +1,5 @@
 package it.gov.pagopa.bpay.entity;
 
-import it.gov.pagopa.db.entity.*;
 import lombok.*;
 
 import javax.persistence.*;
