@@ -14,8 +14,9 @@ CREATE TABLE payment_postepay(
 	payment_id varchar(128) not null
 );
 
-GRANT all privileges
-ON payment_postepay
-TO azureuser, mock_psp_user;
-
-GRANT all privileges ON SEQUENCE payment_postepay_id_seq TO azureuser, mock_psp_user;
+-- only for sit/uat environment
+--GRANT all privileges
+--ON payment_postepay
+--TO azureuser, mock_psp_user;
+--
+--GRANT all privileges ON SEQUENCE payment_postepay_id_seq TO azureuser, mock_psp_user;
