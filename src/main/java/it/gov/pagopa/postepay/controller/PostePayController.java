@@ -65,4 +65,20 @@ public class PostePayController {
         }
     }
 
+
+    @PostMapping("/api/v1/payment/refund")
+    public ResponseEntity<Object> refundPayment(@RequestBody @Valid DetailsPaymentRequest request) {
+        String shopId = request.getShopId();
+        String paymentId = request.getPaymentID();
+        String shopTransactionId = request.getShopTransactionId();
+        log.info("START refundPayment - DetailsPaymentRequest: "
+                + "ShopId: " + shopId
+                + " - PaymentOd: " + paymentId
+                + " - shopTransactionId " + shopTransactionId);
+
+        return ResponseEntity.status(HttpStatus.OK).
+                body(new DetailsPaymentResponse(paymentId, shopTransactionId, EsitoStorno.OK));
+    }
+
+
 }
