@@ -5,38 +5,24 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreatePaymentRequest {
-
+public class RefundPaymentRequest {
     @NotEmpty
     private String merchantId;
-
     @NotEmpty
     private String shopId;
-
     @NotEmpty
     private String shopTransactionId;
-
-    @NotEmpty
-    private String amount;
-
     @NotEmpty
     private String currency;
+    @NotEmpty
+    private String paymentID;
+    @NotEmpty
+    private String authNumber;
 
-    @NotNull
-    private PaymentChannelEnum paymentChannel;
-
-    @NotNull
-    private AuthTypeEnum authType;
-
-    @NotNull
-    private ResponseURLs responseURLs;
-
-    private String buyerName;
-    private String buyerEmail;
-    private String description;
+    private String amount;
+    private String reason;
 }
