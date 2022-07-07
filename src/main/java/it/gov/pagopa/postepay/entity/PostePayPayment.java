@@ -20,6 +20,9 @@ public class PostePayPayment {
     @Column(name = "merchant_id")
     private String merchantId;
 
+    @Column(name = "shop_id")
+    private String shopId;
+
     @Column(name = "shop_transaction_id")
     private String shopTransactionId;
 
