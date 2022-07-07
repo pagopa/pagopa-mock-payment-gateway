@@ -13,3 +13,10 @@ CREATE TABLE payment_postepay(
 	shop_transaction_id varchar(128) not null,
 	payment_id varchar(128) not null
 );
+
+-- only for sit/uat environment
+--GRANT all privileges
+--ON payment_postepay
+--TO azureuser, mock_psp_user;
+--
+--GRANT all privileges ON SEQUENCE payment_postepay_id_seq TO azureuser, mock_psp_user;

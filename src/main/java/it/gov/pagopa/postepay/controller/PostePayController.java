@@ -38,7 +38,7 @@ public class PostePayController {
 
     @PostMapping("/api/v1/payment/create")
     @Transactional
-    public ResponseEntity<Object> createPayment(@RequestBody @Valid CreatePaymentRequest request) {
+    public ResponseEntity<Object> createPayment(@RequestBody @Valid CreatePaymentRequest request) throws Exception {
         refreshConfigs();
         String paymentId = UUID.randomUUID().toString();
         String redirectUrl = configRepository.findByPropertyKey("POSTEPAY_REDIRECT_URL").getPropertyValue();
@@ -48,6 +48,9 @@ public class PostePayController {
         postePayPayment.setShopTransactionId(request.getShopTransactionId());
         postePayPayment.setOutcome(paymentOutcomeConfig);
         paymentRepository.save(postePayPayment);
+        if ("KO".equals(paymentOutcomeConfig)) {
+            throw new Exception("KO");
+        }
         return ResponseEntity.status(HttpStatus.OK).body(new CreatePaymentResponse(paymentId, redirectUrl));
     }
 
