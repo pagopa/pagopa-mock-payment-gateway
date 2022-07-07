@@ -1,6 +1,8 @@
 package it.gov.pagopa.postepay.entity;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -23,5 +25,8 @@ public class PostePayPayment {
 
     @Column(name = "outcome")
     private String outcome;
+
+    @Column(name = "is_refunded")
+    private Boolean isRefunded;
 
 }
