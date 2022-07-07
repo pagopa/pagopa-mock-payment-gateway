@@ -1,8 +1,11 @@
 package it.gov.pagopa.postepay.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
@@ -10,21 +13,30 @@ import javax.validation.constraints.*;
 public class CreatePaymentRequest {
 
     @NotEmpty
+    private String merchantId;
+
+    @NotEmpty
     private String shopId;
+
     @NotEmpty
     private String shopTransactionId;
+
     @NotEmpty
     private String amount;
-    private String description;
+
     @NotEmpty
     private String currency;
-    private String buyerName;
-    private String buyerEmail;
+
     @NotNull
     private PaymentChannelEnum paymentChannel;
+
     @NotNull
     private AuthTypeEnum authType;
+
     @NotNull
     private ResponseURLs responseURLs;
 
+    private String buyerName;
+    private String buyerEmail;
+    private String description;
 }

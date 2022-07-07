@@ -5,7 +5,6 @@ import it.gov.pagopa.postepay.dto.*;
 import it.gov.pagopa.postepay.entity.PostePayPayment;
 import it.gov.pagopa.postepay.repository.PostePayPaymentRepository;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,64 +25,65 @@ import java.util.UUID;
 @Log4j2
 public class PostePayController {
 
-    private static final String VALIDATION_ERROR_MSG = "Il parametro %s non può essere blank";
+    private static final String KO = "KO";
+    private static final String POSTEPAY_ONBOARDING_OUTCOME_PROPERTY = "POSTEPAY_ONBOARDING_OUTCOME";
+    private static final String POSTEPAY_PAYMENT_OUTCOME_PROPERTY = "POSTEPAY_PAYMENT_OUTCOME";
+    private static final String POSTEPAY_REFUND_OUTCOME_PROPERTY = "POSTEPAY_REFUND_OUTCOME";
+    private static final String POSTEPAY_PAYMENT_TIMEOUT_MS_PROPERTY = "POSTEPAY_PAYMENT_TIMEOUT_MS";
+    private static final String POSTEPAY_REDIRECT_URL_PROPERTY = "POSTEPAY_REDIRECT_URL";
+    private String paymentOutcomeConfig;
+    private String refundOutcomeConfig;
+    private String onboardingOutcomeConfig;
+
     @Autowired
     private TableConfigRepository configRepository;
 
     @Autowired
     private PostePayPaymentRepository paymentRepository;
 
-    private String paymentOutcomeConfig;
-    private String refundOutcomeConfig;
-
-    @PostMapping("/api/v1/payment/create")
-    @Transactional
-    public ResponseEntity<Object> createPayment(@RequestBody @Valid CreatePaymentRequest request) throws Exception {
-        refreshConfigs();
-        String paymentId = UUID.randomUUID().toString();
-        String redirectUrl = configRepository.findByPropertyKey("POSTEPAY_REDIRECT_URL").getPropertyValue();
-        log.info("CreatePaymentResponse: Payment id: " + paymentId + " - Redirect URL: " + redirectUrl);
-        PostePayPayment postePayPayment = new PostePayPayment();
-        postePayPayment.setPaymentId(paymentId);
-        postePayPayment.setShopTransactionId(request.getShopTransactionId());
-        postePayPayment.setOutcome(paymentOutcomeConfig);
-        paymentRepository.save(postePayPayment);
-        if ("KO".equals(paymentOutcomeConfig)) {
-            throw new Exception("KO");
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(new CreatePaymentResponse(paymentId, redirectUrl));
-    }
-
-    @ExceptionHandler({MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class, ValidationException.class, HttpMessageNotReadableException.class})
-    public ResponseEntity<ErrorResponse> handleBadRequestExceptions(Exception e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("1", "Errore", e.getMessage()));
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("0", "Errore", e.getMessage()));
-    }
-
     private void refreshConfigs() {
-        paymentOutcomeConfig = configRepository.findByPropertyKey("POSTEPAY_PAYMENT_OUTCOME").getPropertyValue();
-        refundOutcomeConfig = configRepository.findByPropertyKey("POSTEPAY_REFUND_OUTCOME").getPropertyValue();
+        onboardingOutcomeConfig = configRepository.findByPropertyKey(POSTEPAY_ONBOARDING_OUTCOME_PROPERTY).getPropertyValue();
+        paymentOutcomeConfig = configRepository.findByPropertyKey(POSTEPAY_PAYMENT_OUTCOME_PROPERTY).getPropertyValue();
+        refundOutcomeConfig = configRepository.findByPropertyKey(POSTEPAY_REFUND_OUTCOME_PROPERTY).getPropertyValue();
+        String timeoutString = configRepository.findByPropertyKey(POSTEPAY_PAYMENT_TIMEOUT_MS_PROPERTY).getPropertyValue();
         try {
-            int clientTimeout = Integer.parseInt(configRepository.findByPropertyKey("POSTEPAY_PAYMENT_TIMEOUT_MS").getPropertyValue());
+            int clientTimeout = Integer.parseInt(timeoutString);
             Thread.sleep(clientTimeout);
         } catch (InterruptedException e) {
             log.warn(e);
         }
     }
 
+    @Transactional
+    @PostMapping("/api/v1/payment/create")
+    public ResponseEntity<Object> createPayment(@RequestBody @Valid CreatePaymentRequest request) throws Exception {
+        refreshConfigs();
+        String redirectUrl = configRepository.findByPropertyKey(POSTEPAY_REDIRECT_URL_PROPERTY).getPropertyValue();
+        String paymentId = savePaymentRequest(request, false);
+        log.info("CreatePaymentResponse: Payment id: " + paymentId + " - Redirect URL: " + redirectUrl);
+        if (KO.equals(paymentOutcomeConfig)) {
+            throw new Exception(KO);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(new CreatePaymentResponse(paymentId, redirectUrl));
+    }
+
+    @Transactional
+    @PostMapping("/api/v1/user/onboarding")
+    public ResponseEntity<Object> onboarding(@RequestBody @Valid CreatePaymentRequest request) throws Exception {
+        refreshConfigs();
+        String redirectUrl = configRepository.findByPropertyKey(POSTEPAY_REDIRECT_URL_PROPERTY).getPropertyValue();
+        String paymentId = savePaymentRequest(request, true);
+        log.info("Onboarding response --> Payment id: " + paymentId + " - Redirect URL: " + redirectUrl);
+        if (KO.equals(onboardingOutcomeConfig)) {
+            throw new Exception(KO);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(new CreatePaymentResponse(paymentId, redirectUrl));
+    }
 
     @PostMapping("/api/v1/payment/refund")
-    public ResponseEntity<Object> refundPayment(@RequestBody RefundPaymentRequest request) {
+    public ResponseEntity<Object> refundPayment(@RequestBody @Valid RefundPaymentRequest request) {
         log.info("Starting PostePay refund");
-        ResponseEntity<Object> badRequestEntity = validateRequestParameters(request);
-        if (badRequestEntity != null) {
-            log.error("Request parameter validation not passed");
-            return badRequestEntity;
-        }
+        refreshConfigs();
         try {
             PostePayPayment postePayPayment = paymentRepository.findByPaymentId(request.getPaymentID());
             String paymentId = postePayPayment.getPaymentId();
@@ -96,33 +96,32 @@ public class PostePayController {
             return ResponseEntity.status(HttpStatus.OK).body(refundPaymentResponse);
         } catch (Exception e) {
             log.error("Exception while performing refund operation", e);
-            return createErrorResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Errore durante il recupero del pagamento");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+                            HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                            "Errore durante il recupero del pagamento"));
         }
     }
 
-    private ResponseEntity<Object> validateRequestParameters(RefundPaymentRequest request) {
-        if (StringUtils.isEmpty(request.getMerchantId())) {
-            return createErrorResponseEntity(HttpStatus.BAD_REQUEST, String.format(VALIDATION_ERROR_MSG, "merchantId"));
-        }
-        if (StringUtils.isEmpty(request.getShopId())) {
-            return createErrorResponseEntity(HttpStatus.BAD_REQUEST, String.format(VALIDATION_ERROR_MSG, "shopId"));
-        }
-        if (StringUtils.isEmpty(request.getShopTransactionId())) {
-            return createErrorResponseEntity(HttpStatus.BAD_REQUEST, String.format(VALIDATION_ERROR_MSG, "shopTransactionId"));
-        }
-        if (StringUtils.isEmpty(request.getCurrency())) {
-            return createErrorResponseEntity(HttpStatus.BAD_REQUEST, String.format(VALIDATION_ERROR_MSG, "currency"));
-        }
-        if (StringUtils.isEmpty(request.getPaymentID())) {
-            return createErrorResponseEntity(HttpStatus.BAD_REQUEST, String.format(VALIDATION_ERROR_MSG, "paymentID"));
-        }
-        return null;
+    private String savePaymentRequest(CreatePaymentRequest request, boolean isOnboarding) {
+        PostePayPayment postePayPayment = new PostePayPayment();
+        postePayPayment.setMerchantId(request.getMerchantId());
+        String paymentId = UUID.randomUUID().toString();
+        postePayPayment.setPaymentId(paymentId);
+        postePayPayment.setShopTransactionId(request.getShopTransactionId());
+        postePayPayment.setIsOnboarding(isOnboarding);
+        postePayPayment.setOutcome(paymentOutcomeConfig);
+        paymentRepository.save(postePayPayment);
+        return paymentId;
     }
 
-    private ResponseEntity<Object> createErrorResponseEntity(HttpStatus httpStatus, String errorMessage) {
-        return ResponseEntity.status(httpStatus)
-                .body(new ErrorResponse(String.valueOf(httpStatus.value()), httpStatus.getReasonPhrase(), errorMessage));
+    @ExceptionHandler({MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class, ValidationException.class, HttpMessageNotReadableException.class})
+    public ResponseEntity<ErrorResponse> handleBadRequestExceptions(Exception e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("1", "Errore", e.getMessage()));
     }
 
-
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("0", "Errore", e.getMessage()));
+    }
 }

@@ -17,6 +17,9 @@ public class PostePayPayment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "merchant_id")
+    private String merchantId;
+
     @Column(name = "shop_transaction_id")
     private String shopTransactionId;
 
@@ -25,6 +28,9 @@ public class PostePayPayment {
 
     @Column(name = "outcome")
     private String outcome;
+
+    @Column(name = "is_onboarding")
+    private Boolean isOnboarding;
 
     @Column(name = "is_refunded")
     private Boolean isRefunded;
