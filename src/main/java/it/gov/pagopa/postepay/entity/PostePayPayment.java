@@ -3,6 +3,7 @@ package it.gov.pagopa.postepay.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 
@@ -33,9 +34,9 @@ public class PostePayPayment {
     private String outcome;
 
     @Column(name = "is_onboarding")
-    private Boolean isOnboarding;
+    private boolean isOnboarding;
 
     @Column(name = "is_refunded")
-    private Boolean isRefunded;
+    private boolean isRefunded;
 
 }

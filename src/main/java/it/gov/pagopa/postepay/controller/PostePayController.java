@@ -5,6 +5,7 @@ import it.gov.pagopa.postepay.dto.*;
 import it.gov.pagopa.postepay.entity.PostePayPayment;
 import it.gov.pagopa.postepay.repository.PostePayPaymentRepository;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,7 @@ public class PostePayController {
     private String refundOutcomeConfig;
     private String onboardingOutcomeConfig;
     private String detailsOutcomeConfig;
+    private String redirectUrlConfig;
 
     @Autowired
     private TableConfigRepository configRepository;
@@ -45,6 +47,7 @@ public class PostePayController {
     private PostePayPaymentRepository paymentRepository;
 
     private void refreshConfigs() {
+        redirectUrlConfig = configRepository.findByPropertyKey(POSTEPAY_REDIRECT_URL_PROPERTY).getPropertyValue();
         onboardingOutcomeConfig = configRepository.findByPropertyKey(POSTEPAY_ONBOARDING_OUTCOME_PROPERTY).getPropertyValue();
         paymentOutcomeConfig = configRepository.findByPropertyKey(POSTEPAY_PAYMENT_OUTCOME_PROPERTY).getPropertyValue();
         refundOutcomeConfig = configRepository.findByPropertyKey(POSTEPAY_REFUND_OUTCOME_PROPERTY).getPropertyValue();
@@ -62,32 +65,30 @@ public class PostePayController {
     @PostMapping("/api/v1/payment/create")
     public ResponseEntity<Object> createPayment(@RequestBody @Valid CreatePaymentRequest request) {
         refreshConfigs();
-        String redirectUrl = configRepository.findByPropertyKey(POSTEPAY_REDIRECT_URL_PROPERTY).getPropertyValue();
         String paymentId = savePaymentRequest(request, false);
-        log.info("CreatePaymentResponse: Payment id: " + paymentId + " - Redirect URL: " + redirectUrl);
+        log.info("CreatePaymentResponse: Payment id: " + paymentId + " - Redirect URL: " + redirectUrlConfig);
         if (KO.equals(paymentOutcomeConfig)) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
                             HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                             "La risposta del mock-psp al pagamento è stata configurata per rispondere KO"));
         }
-        return ResponseEntity.status(HttpStatus.OK).body(new CreatePaymentResponse(paymentId, redirectUrl));
+        return ResponseEntity.status(HttpStatus.OK).body(new CreatePaymentResponse(paymentId, redirectUrlConfig));
     }
 
     @Transactional
     @PostMapping("/api/v1/user/onboarding")
     public ResponseEntity<Object> onboarding(@RequestBody @Valid CreatePaymentRequest request) {
         refreshConfigs();
-        String redirectUrl = configRepository.findByPropertyKey(POSTEPAY_REDIRECT_URL_PROPERTY).getPropertyValue();
         String paymentId = savePaymentRequest(request, true);
-        log.info("Onboarding response --> Payment id: " + paymentId + " - Redirect URL: " + redirectUrl);
+        log.info("Onboarding response --> Payment id: " + paymentId + " - Redirect URL: " + redirectUrlConfig);
         if (KO.equals(onboardingOutcomeConfig)) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
                             HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                             "La risposta del mock-psp all'onboarding è stata configurata per rispondere KO"));
         }
-        return ResponseEntity.status(HttpStatus.OK).body(new CreatePaymentResponse(paymentId, redirectUrl));
+        return ResponseEntity.status(HttpStatus.OK).body(new CreatePaymentResponse(paymentId, redirectUrlConfig));
     }
 
     @PostMapping("/api/v1/payment/details")
@@ -130,7 +131,7 @@ public class PostePayController {
         detailsPaymentResponse.setPaymentChannel("APP");
         detailsPaymentResponse.setAuthType("IMMEDIATA");
         detailsPaymentResponse.setStatus(postePayPayment.getOutcome());
-        detailsPaymentResponse.setRefundedAmount(postePayPayment.getIsRefunded() ? "1234" : "0");
+        detailsPaymentResponse.setRefundedAmount(postePayPayment.isRefunded() ? "1234" : "0");
         return detailsPaymentResponse;
     }
 
@@ -142,8 +143,16 @@ public class PostePayController {
             String paymentID = request.getPaymentID();
             PostePayPayment postePayPayment = paymentRepository.findByPaymentId(paymentID);
 
-            if (postePayPayment.getIsRefunded()) {
-                EsitoStorno outcome = postePayPayment.getIsRefunded() ? EsitoStorno.OK : EsitoStorno.KO;
+            if (ObjectUtils.isEmpty(postePayPayment)) {
+                log.error("Payment " + paymentID + " not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ErrorResponse(String.valueOf(HttpStatus.NOT_FOUND.value()),
+                                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                                String.format("Il pagamento %s non è stato trovato", paymentID)));
+            }
+
+            if (postePayPayment.isRefunded()) {
+                EsitoStorno outcome = postePayPayment.isRefunded() ? EsitoStorno.OK : EsitoStorno.KO;
                 log.info("Refund request for paymentID " + paymentID + " already processed - outcome: " + outcome);
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(new RefundPaymentResponse(paymentID, postePayPayment.getShopTransactionId(), outcome));
@@ -151,7 +160,7 @@ public class PostePayController {
 
             EsitoStorno transactionResult = EsitoStorno.fromValue(refundOutcomeConfig);
             log.info("setting paymentId " + paymentID + " as refunded");
-            postePayPayment.setIsRefunded(transactionResult.equals(EsitoStorno.OK));
+            postePayPayment.setRefunded(transactionResult.equals(EsitoStorno.OK));
             paymentRepository.save(postePayPayment);
             log.info("End PostePay refund");
             return ResponseEntity.status(HttpStatus.OK)
@@ -172,7 +181,7 @@ public class PostePayController {
         String paymentId = UUID.randomUUID().toString();
         postePayPayment.setPaymentId(paymentId);
         postePayPayment.setShopTransactionId(request.getShopTransactionId());
-        postePayPayment.setIsOnboarding(isOnboarding);
+        postePayPayment.setOnboarding(isOnboarding);
         postePayPayment.setOutcome(paymentOutcomeConfig);
         paymentRepository.save(postePayPayment);
         return paymentId;
