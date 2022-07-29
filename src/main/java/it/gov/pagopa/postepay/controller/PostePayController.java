@@ -194,7 +194,7 @@ public class PostePayController {
         String paymentId = UUID.randomUUID().toString();
         postePayPayment.setPaymentId(paymentId);
         postePayPayment.setOnboardingTransactionId(request.getOnboardingTransactionId());
-        postePayPayment.setOnboarding(false);
+        postePayPayment.setOnboarding(true);
         postePayPayment.setOutcome(paymentOutcomeConfig);
         paymentRepository.save(postePayPayment);
         return paymentId;
