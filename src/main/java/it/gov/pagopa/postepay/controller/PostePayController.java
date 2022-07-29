@@ -65,7 +65,7 @@ public class PostePayController {
     @PostMapping("/api/v1/payment/create")
     public ResponseEntity<Object> createPayment(@RequestBody @Valid CreatePaymentRequest request) {
         refreshConfigs();
-        String paymentId = savePaymentRequest(request, false);
+        String paymentId = savePaymentRequest(request);
         log.info("CreatePaymentResponse: Payment id: " + paymentId + " - Redirect URL: " + redirectUrlConfig);
         if (KO.equals(paymentOutcomeConfig)) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -78,9 +78,9 @@ public class PostePayController {
 
     @Transactional
     @PostMapping("/api/v1/user/onboarding")
-    public ResponseEntity<Object> onboarding(@RequestBody @Valid CreatePaymentRequest request) {
+    public ResponseEntity<Object> onboarding(@RequestBody @Valid OnboardingRequest request) {
         refreshConfigs();
-        String paymentId = savePaymentRequest(request, true);
+        String paymentId = saveOnboardingRequest(request);
         log.info("Onboarding response --> Payment id: " + paymentId + " - Redirect URL: " + redirectUrlConfig);
         if (KO.equals(onboardingOutcomeConfig)) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -88,7 +88,7 @@ public class PostePayController {
                             HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                             "La risposta del mock-psp all'onboarding è stata configurata per rispondere KO"));
         }
-        return ResponseEntity.status(HttpStatus.OK).body(new CreatePaymentResponse(paymentId, redirectUrlConfig));
+        return ResponseEntity.status(HttpStatus.OK).body(new OnboardingResponse(paymentId, redirectUrlConfig));
     }
 
     @PostMapping("/api/v1/payment/details")
@@ -174,14 +174,27 @@ public class PostePayController {
         }
     }
 
-    private String savePaymentRequest(CreatePaymentRequest request, boolean isOnboarding) {
+    private String savePaymentRequest(CreatePaymentRequest request) {
         PostePayPayment postePayPayment = new PostePayPayment();
         postePayPayment.setMerchantId(request.getMerchantId());
         postePayPayment.setShopId(request.getShopId());
         String paymentId = UUID.randomUUID().toString();
         postePayPayment.setPaymentId(paymentId);
         postePayPayment.setShopTransactionId(request.getShopTransactionId());
-        postePayPayment.setOnboarding(isOnboarding);
+        postePayPayment.setOnboarding(false);
+        postePayPayment.setOutcome(paymentOutcomeConfig);
+        paymentRepository.save(postePayPayment);
+        return paymentId;
+    }
+
+    private String saveOnboardingRequest(OnboardingRequest request) {
+        PostePayPayment postePayPayment = new PostePayPayment();
+        postePayPayment.setMerchantId(request.getMerchantId());
+        postePayPayment.setShopId(request.getShopId());
+        String paymentId = UUID.randomUUID().toString();
+        postePayPayment.setPaymentId(paymentId);
+        postePayPayment.setOnboardingTransactionId(request.getOnboardingTransactionId());
+        postePayPayment.setOnboarding(false);
         postePayPayment.setOutcome(paymentOutcomeConfig);
         paymentRepository.save(postePayPayment);
         return paymentId;

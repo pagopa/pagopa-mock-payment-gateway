@@ -27,6 +27,9 @@ public class PostePayPayment {
     @Column(name = "shop_transaction_id")
     private String shopTransactionId;
 
+    @Column(name = "onboarding_transaction_id")
+    private String onboardingTransactionId;
+
     @Column(name = "payment_id")
     private String paymentId;
 
