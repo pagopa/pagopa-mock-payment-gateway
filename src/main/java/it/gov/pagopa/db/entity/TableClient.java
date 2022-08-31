@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.Instant;
 
 @Table(name = "client")
 @Entity
@@ -16,7 +15,7 @@ import java.time.Instant;
 @NoArgsConstructor
 public class TableClient {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
     @Column(name = "client_name")
@@ -25,12 +24,7 @@ public class TableClient {
     @Column(name = "auth_key")
     private String authKey;
 
-    @Builder.Default
-    @Column(name = "creation_date")
-    private Instant creationDate=Instant.now();
-
     @Column(name = "base_url")
     private String baseUrl;
 
-    private boolean deleted;
 }

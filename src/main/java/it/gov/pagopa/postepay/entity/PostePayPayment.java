@@ -15,7 +15,7 @@ import javax.persistence.*;
 public class PostePayPayment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "merchant_id")
@@ -37,9 +37,11 @@ public class PostePayPayment {
     private String outcome;
 
     @Column(name = "is_onboarding")
+    @Type(type= "org.hibernate.type.NumericBooleanType")
     private boolean isOnboarding;
 
     @Column(name = "is_refunded")
+    @Type(type= "org.hibernate.type.NumericBooleanType")
     private boolean isRefunded;
 
 }

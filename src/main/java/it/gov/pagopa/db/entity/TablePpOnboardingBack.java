@@ -4,8 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.time.Instant;
 
 @Table(name = "pp_onboarding_back")
@@ -16,7 +19,7 @@ import java.time.Instant;
 @NoArgsConstructor
 public class TablePpOnboardingBack {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
     @Column(name = "url_return")
@@ -35,6 +38,7 @@ public class TablePpOnboardingBack {
     @JoinColumn(name = "client_id")
     private TableClient client;
 
+    @Type(type= "org.hibernate.type.NumericBooleanType")
     private boolean used;
 
 }
