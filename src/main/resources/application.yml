@@ -4,7 +4,7 @@ spring:
   h2:
     console.enabled: true
   datasource:
-    url: jdbc:h2:mem:mockpsp;MODE=PostgreSQL
+    url: jdbc:h2:mem:mockpsp
     username: ${PAGOPA_MOCK_PSP_DB_USERNAME:pm_mock_local}
     password: ${PAGOPA_MOCK_PSP_DB_PWD:pm_mock_local}
     driverClassName: org.h2.Driver

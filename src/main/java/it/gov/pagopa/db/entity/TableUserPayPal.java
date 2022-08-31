@@ -4,8 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.time.Instant;
 import java.util.List;
 
@@ -17,7 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 public class TableUserPayPal {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
     @Column(name = "id_appio")
@@ -36,6 +40,7 @@ public class TableUserPayPal {
     @Column(name = "creation_date")
     private Instant creationDate=Instant.now();
 
+    @Type(type= "org.hibernate.type.NumericBooleanType")
     private boolean deleted;
 
     @OneToMany(mappedBy = "tableUserPayPal", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

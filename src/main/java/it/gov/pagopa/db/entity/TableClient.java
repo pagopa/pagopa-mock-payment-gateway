@@ -15,7 +15,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 public class TableClient {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
     @Column(name = "client_name")
