@@ -1,15 +1,13 @@
 spring:
   application:
     name: Payment Manager Mock PSP
+  h2:
+    console.enabled: true
   datasource:
-    platform: postgres
-    url: jdbc:postgresql://${PAGOPA_MOCK_PSP_DB_URL:localhost:5432/pm_mock_local}
-    driverClassName: org.postgresql.Driver
+    url: jdbc:h2:mem:mockpsp;MODE=PostgreSQL
     username: ${PAGOPA_MOCK_PSP_DB_USERNAME:pm_mock_local}
     password: ${PAGOPA_MOCK_PSP_DB_PWD:pm_mock_local}
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-
+    driverClassName: org.h2.Driver
   mvc:
     static-path-pattern: /static/**
 
