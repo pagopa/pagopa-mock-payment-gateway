@@ -43,7 +43,7 @@ public class PayPalPspManagementRestController {
     @PatchMapping("/response")
     public PpOnboardingBackManagementResponse changeIdUserIoResponse(@RequestHeader(value = "Authorization") String authorization,
                                                                      @Valid @RequestBody PpOnboardingBackManagementRequest ppOnboardingBackManagementRequest) throws BadRequestException, UnauthorizedException {
-        TableClient tableClient = tableClientRepository.findByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "));
+        TableClient tableClient = tableClientRepository.findByAuthKey(StringUtils.remove(authorization, "Bearer "));
         if (tableClient == null) {
             throw new UnauthorizedException();
         }
@@ -73,7 +73,7 @@ public class PayPalPspManagementRestController {
                                                                         @PathVariable String idAppIo,
                                                                         @PathVariable(required = false) ApiPaypalIdEnum apiId) throws NotFoundException, BadRequestException, UnauthorizedException {
 
-        TableClient tableClient = tableClientRepository.findByAuthKeyAndDeletedFalse(StringUtils.remove(authorization, "Bearer "));
+        TableClient tableClient = tableClientRepository.findByAuthKey(StringUtils.remove(authorization, "Bearer "));
         if (tableClient == null) {
             throw new UnauthorizedException();
         }

@@ -41,7 +41,7 @@ public class PaypalUtils {
         TableClient tableClient = null;
         if (StringUtils.isNotBlank(bearerToken) && bearerToken.matches(BEARER_REGEX)) {
             String authKey = StringUtils.remove(bearerToken, "Bearer ");
-            tableClient = tableClientRepository.findByAuthKeyAndDeletedFalse(authKey);
+            tableClient = tableClientRepository.findByAuthKey(authKey);
         }
         return tableClient;
     }

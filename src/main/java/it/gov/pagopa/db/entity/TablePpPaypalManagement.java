@@ -17,7 +17,7 @@ import java.time.Instant;
 @NoArgsConstructor
 public class TablePpPaypalManagement {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "id_appio")
