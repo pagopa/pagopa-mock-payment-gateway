@@ -31,13 +31,6 @@ public class BPaySettingsController {
         timeoutConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_TIMEOUT_MS");
     }
 
-    @PostMapping("/client")
-    public void changeClient(@RequestBody String client) {
-        TableConfig currentClient = configRepository.findByPropertyKey("BPAY_CURRENT_CLIENT");
-        currentClient.setPropertyValue(client);
-        configRepository.save(currentClient);
-    }
-
     @PostMapping("/outcome")
     public void changeOutcome(@RequestParam(required = false) String paymentOutcome, @RequestParam(required = false) String refundOutcome, @RequestParam(required = false) String inquiryOutcome, @RequestParam(required = false) Integer timeoutMs) {
         if (paymentOutcome != null) {

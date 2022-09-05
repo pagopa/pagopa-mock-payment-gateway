@@ -11,6 +11,7 @@ import org.apache.commons.lang3.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.ws.server.endpoint.annotation.*;
 
+import javax.annotation.*;
 import javax.xml.bind.*;
 import java.math.BigDecimal;
 import java.util.*;
@@ -25,6 +26,11 @@ public class BPayController {
     @Value("${bpay.payment.amount}")
     private String amount;
 
+    @Value("${AZURE_KEYVAULT_PROFILE}")
+    private String profile;
+
+    @Autowired
+    private TableClientRepository clientRepository;
 
     @Autowired
     private TableConfigRepository configRepository;
@@ -32,16 +38,21 @@ public class BPayController {
     @Autowired
     private BPayPaymentRepository paymentRepository;
 
+    private String clientBaseUrl;
+
     @Autowired
     private PmClientImpl pmClient;
+
+    @PostConstruct
+    protected void init() {
+        clientBaseUrl = clientRepository.findByClientName(profile).getBaseUrl();
+    }
 
     private String paymentOutcomeConfig;
 
     private String refundOutcomeConfig;
 
     private String inquiryOutcomeConfig;
-
-    private String currentClient;
 
     private static final String NAMESPACE_URI = "http://p2b.gft.it/srv/pp";
 
@@ -75,14 +86,13 @@ public class BPayController {
         payment.setIdPsp(requestData.getIdPSP());
         String correlationId = Objects.nonNull(amount) && requestData.getImporto().equals(amount) ? xCorrelationId : UUID.randomUUID().toString();
         payment.setCorrelationId(correlationId);
-        payment.setClientHostname(currentClient);
         paymentRepository.save(payment);
         ResponseInserimentoRichiestaPagamentoPagoPaVO responseData = new ResponseInserimentoRichiestaPagamentoPagoPaVO();
         responseData.setEsito(generateEsito(EsitoEnum.fromCode(paymentOutcomeConfig)));
         responseData.setCorrelationId(correlationId);
         InserimentoRichiestaPagamentoPagoPaResponse response = new InserimentoRichiestaPagamentoPagoPaResponse();
         response.setReturn(responseData);
-        pmClient.callbackPm(payment);
+        pmClient.callbackPm(payment, clientBaseUrl);
         return factory.createInserimentoRichiestaPagamentoPagoPaResponse(response);
     }
 
@@ -98,12 +108,11 @@ public class BPayController {
         responseData.setEsito(generateEsito(EsitoEnum.fromCode(refundOutcomeConfig)));
         StornoPagamentoResponse response = new StornoPagamentoResponse();
         response.setReturn(responseData);
-        pmClient.callbackPm(payment);
+        pmClient.callbackPm(payment, clientBaseUrl);
         return factory.createStornoPagamentoResponse(response);
     }
 
     private void refreshConfigs() {
-        currentClient = configRepository.findByPropertyKey("BPAY_CURRENT_CLIENT").getPropertyValue();
         paymentOutcomeConfig = configRepository.findByPropertyKey("BPAY_PAYMENT_OUTCOME").getPropertyValue();
         refundOutcomeConfig = configRepository.findByPropertyKey("BPAY_REFUND_OUTCOME").getPropertyValue();
         inquiryOutcomeConfig = configRepository.findByPropertyKey("BPAY_INQUIRY_OUTCOME").getPropertyValue();

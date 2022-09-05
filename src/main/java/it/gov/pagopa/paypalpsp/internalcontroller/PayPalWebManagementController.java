@@ -1,10 +1,8 @@
 package it.gov.pagopa.paypalpsp.internalcontroller;
 
 
-import it.gov.pagopa.db.entity.TablePpOnboardingBack;
-import it.gov.pagopa.db.entity.TableUserPayPal;
-import it.gov.pagopa.db.repository.TableConfigRepository;
-import it.gov.pagopa.db.repository.TableUserPayPalRepository;
+import it.gov.pagopa.db.entity.*;
+import it.gov.pagopa.db.repository.*;
 import it.gov.pagopa.paypalpsp.util.PaypalUtils;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpOnboardingCallResponseEsito;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
@@ -29,6 +27,11 @@ public class PayPalWebManagementController {
     @Value("${server.public-url}")
     private String publicUrl;
 
+    @Value("${AZURE_KEYVAULT_PROFILE}")
+    private String profile;
+
+    private String clientBaseUrl;
+
     private String redirectPaypalwebPpOnboardingCallIdBackUnknown;
 
     @Autowired
@@ -40,9 +43,13 @@ public class PayPalWebManagementController {
     @Autowired
     private TableConfigRepository configRepository;
 
+    @Autowired
+    private TableClientRepository clientRepository;
+
     @PostConstruct
     protected void init() {
         redirectPaypalwebPpOnboardingCallIdBackUnknown = "redirect:" + publicUrl + "/paypalweb/pp_onboarding_call?id_back=unknown";
+        clientBaseUrl = clientRepository.findByClientName(profile).getBaseUrl();
     }
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
@@ -59,14 +66,13 @@ public class PayPalWebManagementController {
                     .idAppIo(idAppIo)
                     .paypalEmail(paypalEmail)
                     .paypalId(paypalId)
-                    .contractNumber(UUID.randomUUID().toString())
-                    .client(tablePpOnboardingBack.getClient()).build();
+                    .contractNumber(UUID.randomUUID().toString()).build();
             log.info("Trying to create contract: " + tableUserPayPal);
             tableUserPayPal = tableUserPayPalRepository.save(tableUserPayPal);
             log.info("New Contract established: " + tableUserPayPal);
 
             String esito = PpOnboardingCallResponseEsito.OK.getCode();
-            String emailPpObfuscated = paypalUtils.obfuscateEmail(paypalEmail);
+            String emailPpObfuscated = PaypalUtils.obfuscateEmail(paypalEmail);
             if (selectRedirect) {
                 String hmac = paypalUtils.calculateHmac(esito, paypalId, emailPpObfuscated, null, tablePpOnboardingBack.getIdBack());
                 String redirectUrl = createRedirectUrlSuccess(urlReturn, esito, emailPpObfuscated, paypalId, hmac);
@@ -126,9 +132,8 @@ public class PayPalWebManagementController {
     private String getPaypalBaseRedirectUrl(TablePpOnboardingBack tablePpOnboardingBack, PpResponseErrCode callResponseErrCode) {
         String redirectUrl = null;
         if (tablePpOnboardingBack != null) {
-            redirectUrl = tablePpOnboardingBack.getClient().getBaseUrl() + configRepository.findByPropertyKey("PAYPAL_PSP_FALLBACK_PATH").getPropertyValue();
+            redirectUrl = clientBaseUrl + configRepository.findByPropertyKey("PAYPAL_PSP_FALLBACK_PATH").getPropertyValue();
         }
-
         if (StringUtils.isBlank(redirectUrl)) {
             redirectUrl = configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL").getPropertyValue();
         }
@@ -181,5 +186,6 @@ public class PayPalWebManagementController {
 
         return "redirect:" + UrlUtils.addQueryParams(newUrl, "sha_val", shaVal);
     }
+
 }
 
