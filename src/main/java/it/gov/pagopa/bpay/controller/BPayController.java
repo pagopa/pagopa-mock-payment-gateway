@@ -26,7 +26,7 @@ public class BPayController {
     @Value("${bpay.payment.amount}")
     private String amount;
 
-    @Value("${AZURE_KEYVAULT_PROFILE}")
+    @Value("${MOCK_PROFILE}")
     private String profile;
 
     @Autowired

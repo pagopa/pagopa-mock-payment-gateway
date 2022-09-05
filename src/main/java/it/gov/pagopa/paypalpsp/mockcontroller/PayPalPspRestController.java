@@ -55,14 +55,11 @@ public class PayPalPspRestController {
     @Value("${server.public-url}")
     private String publicUrl;
 
-    @Value("${keyvault.mockPspAuthKey}")
-    private String authKey;
-
     @PostMapping("/api/pp_onboarding_back")
     @Transactional
     public ResponseEntity<PpOnboardingBackResponse> onboardingBack(@RequestHeader(value = "Authorization", required = false) String authorization,
                                                                    @Valid @RequestBody PpOnboardingBackRequestRequest ppOnboardingBackRequest) throws URISyntaxException, InterruptedException, TimeoutException {
-        if (!authKey.equals(StringUtils.remove(authorization, "Bearer "))) {
+        if (StringUtils.isBlank(authorization)) {
             log.error("Invalid authorization: " + authorization);
             return PayPalCreateResponse.createResponseErrorOnboarding(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
         }
@@ -100,7 +97,7 @@ public class PayPalPspRestController {
                                                              @Valid @RequestBody PpPayDirectRequest ppPayDirectRequest) throws InterruptedException, TimeoutException {
         String idAppIo = ppPayDirectRequest.getIdAppIo();
 
-        if (!authKey.equals(StringUtils.remove(authorization, "Bearer "))) {
+        if (StringUtils.isBlank(authorization)) {
             log.error("Invalid authorization: " + authorization);
             return PayPalCreateResponse.createResponseErrorPayment(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
         }
@@ -136,7 +133,7 @@ public class PayPalPspRestController {
         String idTrsAppIo = ppPayDirectRequest.getIdTrsAppIo();
         TablePaymentPayPal tablePaymentPayPal = null;
         try {
-            if (!authKey.equals(StringUtils.remove(authorization, "Bearer "))) {
+            if (StringUtils.isBlank(authorization)) {
                 log.error("Invalid authorization: " + authorization);
                 return PayPalCreateResponse.createRefundResponseError(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
             }
@@ -174,7 +171,7 @@ public class PayPalPspRestController {
 
     @PostMapping("/api/pp_bilagr_del")
     public ResponseEntity<PpDefaultResponse> deleteContract(@RequestHeader(value = "Authorization", required = false) String authorization, @Valid @RequestBody PPPayPalIdAppIoRequest ppPayPalIdAppIoRequest) throws InterruptedException, TimeoutException {
-        if (!authKey.equals(StringUtils.remove(authorization, "Bearer "))) {
+        if (StringUtils.isBlank(authorization)) {
             log.error("Invalid authorization: " + authorization);
             return PayPalCreateResponse.createResponseErrorDeleteContract(PpResponseErrCode.AUTORIZZAZIONE_NEGATA);
         }

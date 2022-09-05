@@ -27,7 +27,7 @@ public class PayPalWebManagementController {
     @Value("${server.public-url}")
     private String publicUrl;
 
-    @Value("${AZURE_KEYVAULT_PROFILE}")
+    @Value("${MOCK_PROFILE}")
     private String profile;
 
     private String clientBaseUrl;

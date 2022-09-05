@@ -21,18 +21,6 @@ server:
   port: ${SERVER_PORT:7954}
   public-url: ${SERVER_PUBLIC_URL:http://localhost:${server.port}}
 
-azure:
-  keyvault:
-    enabled: true
-    client-id: ${AZURE_KEYVAULT_CLIENT_ID}
-    client-key: ${AZURE_KEYVAULT_CLIENT_KEY}
-    tenant-id: ${AZURE_KEYVAULT_TENANT_ID}
-    uri: ${AZURE_KEYVAULT_URI}
-    refresh-interval: 86400000 #24H
-
-keyvault:
-  mockPspAuthKey: ${${AZURE_KEYVAULT_PROFILE:local}-mockPspAuthKey:local123}
-
 logging:
   level:
     root: ${LOGGING_ROOT_LEVEL:INFO}
@@ -57,3 +45,5 @@ bpay:
   payment:
     x-correlation-id: ${BPAY_PAYMENT_CORRELATION_ID:179c1732-c176-11ec-9d64-0242ac120002}
     amount: ${BPAY_PAYMENT_CORRELATION_ID_AMOUNT:105}
+
+mock-profile: ${MOCK_PROFILE:local}

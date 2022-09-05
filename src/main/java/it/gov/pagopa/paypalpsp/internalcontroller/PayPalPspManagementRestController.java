@@ -34,14 +34,11 @@ public class PayPalPspManagementRestController {
     @Autowired
     private TablePpPaypalManagementRepository tablePpPaypalManagementRepository;
 
-    @Value("${keyvault.mockPspAuthKey}")
-    private String authKey;
-
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
     @PatchMapping("/response")
     public PpOnboardingBackManagementResponse changeIdUserIoResponse(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody PpOnboardingBackManagementRequest ppOnboardingBackManagementRequest) throws BadRequestException, UnauthorizedException {
 
-        if (!authKey.equals(StringUtils.remove(authorization, "Bearer "))) {
+        if (StringUtils.isBlank(authorization)) {
             throw new UnauthorizedException();
         }
         String idAppIo = ppOnboardingBackManagementRequest.getIdAppIo();
@@ -67,7 +64,7 @@ public class PayPalPspManagementRestController {
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
     @GetMapping(value = {"/response/{idAppIo}/{apiId}", "/response/{idAppIo}"})
     public List<PpOnboardingBackManagementResponse> getIdUserIoResponse(@RequestHeader(value = "Authorization") String authorization, @PathVariable String idAppIo, @PathVariable(required = false) ApiPaypalIdEnum apiId) throws NotFoundException, UnauthorizedException {
-        if (!authKey.equals(StringUtils.remove(authorization, "Bearer "))) {
+        if (StringUtils.isBlank(authorization)) {
             throw new UnauthorizedException();
         }
         List<TablePpPaypalManagement> paypalManagements;
