@@ -1,8 +1,7 @@
 CREATE TABLE client(
   id SERIAL PRIMARY KEY,
   client_name varchar(128) not null unique,
-  auth_key varchar(128) not null unique,
-  base_url varchar(256)
+  base_url varchar(256) not null
 );
 
 CREATE TABLE pp_onboarding_back(
@@ -12,9 +11,7 @@ CREATE TABLE pp_onboarding_back(
   id_appio varchar(128) not null,
   id_back varchar(128) not null unique,
   used BOOLEAN NOT NULL DEFAULT FALSE,
-  client_id integer NOT NULL,
-  CONSTRAINT fk_pob_client FOREIGN KEY(client_id) REFERENCES client(id),
-  CONSTRAINT unique_idappio_client UNIQUE (id_appio, client_id, used)
+  CONSTRAINT unique_idappio UNIQUE (id_appio, used)
 );
 
 CREATE TABLE pp_paypal_management(
@@ -23,8 +20,6 @@ CREATE TABLE pp_paypal_management(
   api_id varchar(128) not null,
   err_code varchar(10),
   last_update_date timestamp not null,
-  client_id integer NOT NULL,
-  CONSTRAINT fk_ppm_client FOREIGN KEY(client_id) REFERENCES client(id),
   CONSTRAINT api_un UNIQUE (id_appio, api_id)
 );
 
@@ -36,10 +31,7 @@ CREATE TABLE user_paypal(
   contract_number varchar(128) not null unique,
   creation_date timestamp not null,
   deleted BOOLEAN NOT NULL DEFAULT FALSE,
-  client_id integer NOT NULL,
-  CONSTRAINT fk_up_client FOREIGN KEY(client_id) REFERENCES client(id),
-  CONSTRAINT uq_idappio_client UNIQUE (id_appio, client_id, deleted),
-  CONSTRAINT uq_idappio_client_contract UNIQUE (id_appio, client_id, contract_number, deleted)
+  CONSTRAINT uq_idappio_contract UNIQUE (id_appio, contract_number, deleted)
 );
 
 CREATE TABLE config(
@@ -69,8 +61,7 @@ CREATE TABLE payment_bpay(
 	id_psp varchar(10),
 	outcome varchar(5) not null,
 	correlation_id varchar(128) not null unique,
-	refund_outcome varchar(5),
-	client_hostname varchar(128)
+	refund_outcome varchar(5)
 );
 
 CREATE TABLE payment_postepay(

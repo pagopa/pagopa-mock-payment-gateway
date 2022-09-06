@@ -34,7 +34,4 @@ public class BPayPayment {
     @Column(name = "refund_outcome")
     private String refundOutcome;
 
-    @Column(name = "client_hostname")
-    private String clientHostname;
-
 }
