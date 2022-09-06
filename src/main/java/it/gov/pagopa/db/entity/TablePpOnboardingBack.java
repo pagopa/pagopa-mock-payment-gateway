@@ -34,10 +34,6 @@ public class TablePpOnboardingBack {
     @Column(name = "id_back")
     private String idBack;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id")
-    private TableClient client;
-
     @Type(type= "org.hibernate.type.NumericBooleanType")
     private boolean used;
 

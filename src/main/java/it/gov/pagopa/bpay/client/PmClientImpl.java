@@ -13,7 +13,7 @@ import org.springframework.stereotype.*;
 public class PmClientImpl {
 
     @Async
-    public void callbackPm(BPayPayment payment) {
+    public void callbackPm(BPayPayment payment, String clientBaseUrl) {
         try {
             Thread.sleep(2000);
         } catch (Exception e) {
@@ -24,7 +24,7 @@ public class PmClientImpl {
                 .encoder(new JacksonEncoder())
                 .decoder(new JacksonDecoder())
                 .requestInterceptor(t -> t.header("X-Correlation-ID", payment.getCorrelationId()))
-                .target(PmClient.class, payment.getClientHostname());
+                .target(PmClient.class, clientBaseUrl);
         TransactionUpdateRequest request = new TransactionUpdateRequest(payment.getOutcome().equals("0") ? "OK" : "KO", payment.getOutcome().equals("0") ? "authcode" : null);
         pmClient.updateTransaction(request);
     }

@@ -1,10 +1,8 @@
 package it.gov.pagopa.paypalpsp.internalcontroller;
 
 
-import it.gov.pagopa.db.entity.TableClient;
 import it.gov.pagopa.db.entity.TablePpPaypalManagement;
 import it.gov.pagopa.db.entityenum.ApiPaypalIdEnum;
-import it.gov.pagopa.db.repository.TableClientRepository;
 import it.gov.pagopa.db.repository.TablePpPaypalManagementRepository;
 import it.gov.pagopa.exception.BadRequestException;
 import it.gov.pagopa.exception.NotFoundException;
@@ -14,8 +12,8 @@ import it.gov.pagopa.paypalpsp.dto.PpOnboardingBackManagementResponse;
 import it.gov.pagopa.paypalpsp.dto.PpResponseErrorInfo;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.*;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -36,15 +34,11 @@ public class PayPalPspManagementRestController {
     @Autowired
     private TablePpPaypalManagementRepository tablePpPaypalManagementRepository;
 
-    @Autowired
-    private TableClientRepository tableClientRepository;
-
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
     @PatchMapping("/response")
-    public PpOnboardingBackManagementResponse changeIdUserIoResponse(@RequestHeader(value = "Authorization") String authorization,
-                                                                     @Valid @RequestBody PpOnboardingBackManagementRequest ppOnboardingBackManagementRequest) throws BadRequestException, UnauthorizedException {
-        TableClient tableClient = tableClientRepository.findByAuthKey(StringUtils.remove(authorization, "Bearer "));
-        if (tableClient == null) {
+    public PpOnboardingBackManagementResponse changeIdUserIoResponse(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody PpOnboardingBackManagementRequest ppOnboardingBackManagementRequest) throws BadRequestException, UnauthorizedException {
+
+        if (StringUtils.isBlank(authorization)) {
             throw new UnauthorizedException();
         }
         String idAppIo = ppOnboardingBackManagementRequest.getIdAppIo();
@@ -57,9 +51,9 @@ public class PayPalPspManagementRestController {
             throw new BadRequestException(String.format("Invalid code '%s' for apiId '%s'", errCode, apiId));
         }
 
-        TablePpPaypalManagement onboardingBackManagementSaved = tablePpPaypalManagementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, apiId, tableClient);
+        TablePpPaypalManagement onboardingBackManagementSaved = tablePpPaypalManagementRepository.findByIdAppIoAndApiId(idAppIo, apiId);
         if (onboardingBackManagementSaved == null) {
-            onboardingBackManagementSaved = TablePpPaypalManagement.builder().idAppIo(idAppIo).apiId(apiId).client(tableClient).build();
+            onboardingBackManagementSaved = TablePpPaypalManagement.builder().idAppIo(idAppIo).apiId(apiId).build();
         }
         onboardingBackManagementSaved.setErrCodeValue(errCode != null ? errCode.getCode() : null);
         onboardingBackManagementSaved.setLastUpdateDate(Instant.now());
@@ -69,20 +63,16 @@ public class PayPalPspManagementRestController {
 
     //ONLY INTERNAL API - NOT INCLUDED IN PRODUCTION ENV
     @GetMapping(value = {"/response/{idAppIo}/{apiId}", "/response/{idAppIo}"})
-    public List<PpOnboardingBackManagementResponse> getIdUserIoResponse(@RequestHeader(value = "Authorization") String authorization,
-                                                                        @PathVariable String idAppIo,
-                                                                        @PathVariable(required = false) ApiPaypalIdEnum apiId) throws NotFoundException, BadRequestException, UnauthorizedException {
-
-        TableClient tableClient = tableClientRepository.findByAuthKey(StringUtils.remove(authorization, "Bearer "));
-        if (tableClient == null) {
+    public List<PpOnboardingBackManagementResponse> getIdUserIoResponse(@RequestHeader(value = "Authorization") String authorization, @PathVariable String idAppIo, @PathVariable(required = false) ApiPaypalIdEnum apiId) throws NotFoundException, UnauthorizedException {
+        if (StringUtils.isBlank(authorization)) {
             throw new UnauthorizedException();
         }
         List<TablePpPaypalManagement> paypalManagements;
         if (apiId != null) {
-            TablePpPaypalManagement byIdAppIoAndApiId = tablePpPaypalManagementRepository.findByIdAppIoAndApiIdAndClient(idAppIo, apiId, tableClient);
+            TablePpPaypalManagement byIdAppIoAndApiId = tablePpPaypalManagementRepository.findByIdAppIoAndApiId(idAppIo, apiId);
             paypalManagements = byIdAppIoAndApiId != null ? Collections.singletonList(byIdAppIoAndApiId) : null;
         } else {
-            paypalManagements = tablePpPaypalManagementRepository.findByIdAppIoAndClient(idAppIo, tableClient);
+            paypalManagements = tablePpPaypalManagementRepository.findByIdAppIo(idAppIo);
         }
 
         if (CollectionUtils.isEmpty(paypalManagements)) {
@@ -110,4 +100,5 @@ public class PayPalPspManagementRestController {
         ppOnboardingBackManagementResponse.setIdAppIo(newOnboardingBackManagement.getIdAppIo());
         return ppOnboardingBackManagementResponse;
     }
+
 }

@@ -1,8 +1,6 @@
 package it.gov.pagopa.paypalpsp.util;
 
 import com.google.common.hash.Hashing;
-import it.gov.pagopa.db.entity.TableClient;
-import it.gov.pagopa.db.repository.TableClientRepository;
 import it.gov.pagopa.db.repository.TableConfigRepository;
 import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
 import org.apache.commons.lang3.StringUtils;
@@ -16,11 +14,6 @@ public class PaypalUtils {
     @Autowired
     private TableConfigRepository tableConfigRepository;
 
-    @Autowired
-    private TableClientRepository tableClientRepository;
-
-    private static final String BEARER_REGEX = "Bearer\\s.{3,}";
-
     @SuppressWarnings("UnstableApiUsage")
     public String calculateHmac(String esito, String idPp, String emailPp, PpResponseErrCode errCodeEnum, String idBack) {
         String errCode = errCodeEnum != null ? errCodeEnum.getCode() : "";
@@ -33,16 +26,7 @@ public class PaypalUtils {
     public static String obfuscateEmail(String email) {
         if (StringUtils.isNotBlank(email))
             email = email.replaceAll("\\b(\\w{3})[^@]+@\\S+(\\.[^\\s.]+)", "$1***@****$2");
-
         return email;
     }
 
-    public TableClient getClientAuthenticated(String bearerToken) {
-        TableClient tableClient = null;
-        if (StringUtils.isNotBlank(bearerToken) && bearerToken.matches(BEARER_REGEX)) {
-            String authKey = StringUtils.remove(bearerToken, "Bearer ");
-            tableClient = tableClientRepository.findByAuthKey(authKey);
-        }
-        return tableClient;
-    }
 }

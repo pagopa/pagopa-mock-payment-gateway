@@ -14,15 +14,13 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TableClient {
+
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
     @Column(name = "client_name")
     private String clientName;
-
-    @Column(name = "auth_key")
-    private String authKey;
 
     @Column(name = "base_url")
     private String baseUrl;
