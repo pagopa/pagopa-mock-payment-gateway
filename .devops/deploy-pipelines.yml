@@ -177,4 +177,4 @@ stages:
               azureSubscription: $(AZURE_SUBSCRIPTION)
               scriptLocation: inlineScript
               inlineScript: |
-                az webapp deploy --resource-group $(RESOURCE_GROUP) --name $(APP_NAME) --src-path ./target/pm-mock-$(pomversion.next).jar  --type jar
+                az webapp deploy --resource-group $(RESOURCE_GROUP) --name $(APP_NAME) --src-path ./target/pagopa-mock-payment-gateway-$(pomversion.next).jar  --type jar
