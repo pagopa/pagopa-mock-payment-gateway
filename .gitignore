@@ -8,5 +8,5 @@ target/
 .settings/**
 .vscode/settings.json
 pom.xml.versionsBackup
-pm-mock.iml
+pagopa-mock-payment-gateway.iml
 /src/generated/java/

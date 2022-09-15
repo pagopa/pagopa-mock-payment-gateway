@@ -71,7 +71,7 @@ public class PostePayController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
                             HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                            "La risposta del mock-psp al pagamento è stata configurata per rispondere KO"));
+                            "La risposta del mock-payment-gateway al pagamento è stata configurata per rispondere KO"));
         }
         return ResponseEntity.status(HttpStatus.OK).body(new CreatePaymentResponse(paymentId, redirectUrlConfig));
     }
@@ -86,7 +86,7 @@ public class PostePayController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
                             HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                            "La risposta del mock-psp all'onboarding è stata configurata per rispondere KO"));
+                            "La risposta del mock-payment-gateway all'onboarding è stata configurata per rispondere KO"));
         }
         return ResponseEntity.status(HttpStatus.OK).body(new OnboardingResponse(paymentId, redirectUrlConfig));
     }
@@ -124,10 +124,10 @@ public class PostePayController {
         detailsPaymentResponse.setResult(detailsOutcomeConfig);
         detailsPaymentResponse.setAuthNumber("authNumber");
         detailsPaymentResponse.setAmount("amount");
-        detailsPaymentResponse.setDescription("mock-psp payment");
+        detailsPaymentResponse.setDescription("mock-payment-gateway payment");
         detailsPaymentResponse.setCurrency("978");
         detailsPaymentResponse.setBuyerName("Mock PSP");
-        detailsPaymentResponse.setBuyerEmail("mock-psp@mock.com");
+        detailsPaymentResponse.setBuyerEmail("mock-payment-gateway@mock.com");
         detailsPaymentResponse.setPaymentChannel("APP");
         detailsPaymentResponse.setAuthType("IMMEDIATA");
         detailsPaymentResponse.setStatus(postePayPayment.getOutcome());
