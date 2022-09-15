@@ -27,7 +27,7 @@ public class PayPalWebManagementController {
     @Value("${server.public-url}")
     private String publicUrl;
 
-    @Value("${MOCK_PROFILE}")
+    @Value("${mock-profile}")
     private String profile;
 
     private String clientBaseUrl;
