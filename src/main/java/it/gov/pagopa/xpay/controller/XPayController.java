@@ -1,14 +1,12 @@
 package it.gov.pagopa.xpay.controller;
 
-import com.github.javafaker.Bool;
 import it.gov.pagopa.db.repository.TableConfigRepository;
 import it.gov.pagopa.xpay.dto.EsitoXpay;
 import it.gov.pagopa.xpay.dto.XPayAuthRequest;
 import it.gov.pagopa.xpay.dto.XPayAuthResponse;
-import it.gov.pagopa.xpay.dto.XpayError;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +21,12 @@ import java.math.BigInteger;
 @RequestMapping("/xpay")
 @Log4j2
 public class XPayController {
+
+    @Value("${XPAY_APIKEY_ALIAS}")
+    private String apiKey;
+
+    @Value("${XPAY_SECRET_KEY}")
+    private String chiaveSegreta;
 
     @Autowired
     private TableConfigRepository configRepository;
@@ -55,18 +59,12 @@ public class XPayController {
             return ResponseEntity.internalServerError().body(xPayAuthResponse);
         }
 
-        return   ResponseEntity.ok().body(xPayAuthResponse);
+        return ResponseEntity.ok().body(xPayAuthResponse);
     }
 
     private Boolean checkMac(String macToCheck, String codiceTransazione, Long divisa, BigInteger importo, String timeStamp) {
         log.info("Start checking mac");
-        String apiKey = configRepository.findByPropertyKey("XPAY_APIKEY_ALIAS").getPropertyValue();
-        String chiaveSegreta = configRepository.findByPropertyKey("XPAY_SECRET_KEY").getPropertyValue();
         String realMac = String.format("apiKey=%scodiceTransazione=%sdivisa=%simporto=%stimeStamp=%s%s", apiKey, codiceTransazione, divisa, importo, timeStamp, chiaveSegreta);
-
         return macToCheck.equals(realMac);
     }
-
-
-
 }
