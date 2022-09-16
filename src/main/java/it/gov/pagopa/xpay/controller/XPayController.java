@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Date;
 import java.util.UUID;
 
 @Validated
@@ -29,10 +28,10 @@ import java.util.UUID;
 @Log4j2
 public class XPayController {
 
-    @Value("${XPAY_APIKEY_ALIAS}")
+    @Value("${xpay-apikey-alias}")
     private String apiKey;
 
-    @Value("${XPAY_SECRET_KEY}")
+    @Value("${xpay-secret-key}")
     private String chiaveSegreta;
 
     @Autowired
@@ -57,7 +56,7 @@ public class XPayController {
 
         log.info("Create AuthResponse for transactioId: " + request.getCodiceTransazione());
 
-        Long timeStamp =System.currentTimeMillis();
+        Long timeStamp = System.currentTimeMillis();
         String idOperazione = createIdOperazione();
 
         try {
@@ -66,7 +65,7 @@ public class XPayController {
             saveXpayOnDb(idOperazione, request, timeStamp);
 
             if (request.getMac().equals(macToReturn)) {
-               return createOkResponse(timeStamp, macToReturn,idOperazione);
+                return createOkResponse(timeStamp, macToReturn, idOperazione);
 
             } else {
                 XpayError xpayError = new XpayError(3L, "MAC errato");
@@ -129,13 +128,8 @@ public class XPayController {
 
 
     private String getMacToReturn(String codiceTransazione, Long divisa, BigInteger importo, String timeStamp) throws Exception {
-
-        String apiKey = configRepository.findByPropertyKey("XPAY_APIKEY_ALIAS").getPropertyValue();
-        String chiaveSegreta = configRepository.findByPropertyKey("XPAY_SECRET_KEY").getPropertyValue();
         String realMac = String.format("apiKey=%scodiceTransazione=%sdivisa=%simporto=%stimeStamp=%s%s", apiKey, codiceTransazione, divisa, importo, timeStamp, chiaveSegreta);
-
         return hashMac(realMac);
-
     }
 
     private String hashMac(String realMac) throws Exception {
