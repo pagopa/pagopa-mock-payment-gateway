@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: Pagopa PM Mock
+  title: Pagopa payment gateway Mock
   version: '1.0.0'
 tags:
   - name: paypalmock

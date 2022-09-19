@@ -75,3 +75,20 @@ CREATE TABLE payment_postepay(
 	merchant_id varchar(20),
 	onboarding_transaction_id varchar(128)
 );
+
+CREATE TABLE payment_xpay(
+    id SERIAL PRIMARY KEY,
+    id_operazione varchar(16) not null,
+    api_key varchar(50) not null,
+    url_risposta varchar(50) not null,
+    codice_transazione varchar(50) not null,
+    importo numeric not null,
+    divisa numeric not null,
+    pan varchar(50),
+    scadenza varchar(50),
+    cvv varchar(3),
+    timestamp_request timestamp not null,
+    timestamp_response timestamp not null,
+    mac varchar(100)
+
+)

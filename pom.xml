@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>it.gov.pagopa</groupId>
-    <artifactId>pm-mock</artifactId>
+    <artifactId>pagopa-mock-payment-gateway</artifactId>
     <version>2.1.20</version>
 
     <parent>

@@ -26,7 +26,7 @@ public class BPayController {
     @Value("${bpay.payment.amount}")
     private String amount;
 
-    @Value("${MOCK_PROFILE}")
+    @Value("${mock-profile}")
     private String profile;
 
     @Autowired
