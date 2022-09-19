@@ -1,0 +1,180 @@
+parameters:
+  - name: SEMVER
+    displayName: "When packing a release, define the version bump to apply"
+    type: string
+    values:
+      - major
+      - minor
+      - patch
+    default: patch
+  - name: ENV
+    displayName: Target Environment
+    type: string
+    default: dev
+    values:
+      - dev
+      - uat
+
+variables:
+  ${{ if eq(parameters['ENV'], 'dev') }}:
+    AZURE_SUBSCRIPTION: $(DEV_AZURE_SUBSCRIPTION)
+    RESOURCE_GROUP: $(DEV_WEB_APP_RESOURCE_GROUP_NAME)
+    APP_NAME: $(DEV_WEB_APP_NAME)
+  ${{ if eq(parameters['ENV'], 'uat') }}:
+    AZURE_SUBSCRIPTION: $(UAT_AZURE_SUBSCRIPTION)
+    RESOURCE_GROUP: $(UAT_WEB_APP_RESOURCE_GROUP_NAME)
+    APP_NAME: $(UAT_WEB_APP_NAME)
+
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_OPTS: "-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)"
+  title: ""
+  sha: ""
+  tag: ""
+
+# Only manual triggers
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  # Create a release
+  - stage: release_service
+    #  condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'),
+    #    ne('${{ parameters.REPOSITORY }}', 'auth'))
+    pool:
+      vmImage: "ubuntu-latest"
+    jobs:
+      - job: releaseService
+        steps:
+          - checkout: self
+            clean: true
+            persistCredentials: true
+
+          - powershell: |
+              $branch = "$(Build.SourceBranch)" -replace "refs/tags/", ""
+              $branch = "$(Build.SourceBranch)" -replace "refs/heads/", ""
+
+              echo "##vso[task.setvariable variable=currentBranch]$branch"
+            displayName: Get Current Branch/Tag name
+
+          - script: |
+              git config --global user.name "$(GIT_USERNAME)"
+              git config --global user.email "$(GIT_EMAIL)"
+            displayName: Set git name and email
+
+          - script: |
+              git checkout $(currentBranch)
+            displayName: Checkout current branch
+
+          - template: azure-templates/maven-versioning.yml
+            parameters:
+              semver: "${{ parameters.SEMVER }}"
+
+          - task: Bash@3
+            name: pomversion
+            inputs:
+              targetType: "inline"
+              script: |
+                version=$(mvn -f pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
+                echo "##vso[task.setvariable variable=next;isOutput=true]$version"
+              failOnStderr: true
+
+          - script: |
+              git add pom.xml
+              git commit -m "Bump version [skip ci]"
+              git push origin $(currentBranch)
+              git push --tags
+            displayName: Git push new version
+
+          - script: |
+              HEAD_SHA=$(git rev-parse HEAD)
+              TAG="$(pomversion.next)"
+              TITLE="Release $(pomversion.next)"
+              echo "##vso[task.setvariable variable=title]$TITLE"
+              echo "##vso[task.setvariable variable=sha]$HEAD_SHA"
+              echo "##vso[task.setvariable variable=tag]$TAG"
+            displayName: Set Variable title, sha, tag
+
+          - script: |
+              echo $(title)
+              echo $(sha)
+              echo $(tag)
+            displayName: Print Variable title, sha, tag
+
+          # create new releae
+          - task: GitHubRelease@0
+            inputs:
+              gitHubConnection: $(GITHUB_CONNECTION)
+              repositoryName: $(Build.Repository.Name)
+              action: create
+              target: $(sha)
+              tagSource: manual
+              tag: $(tag)
+              title: $(title)
+              addChangelog: true
+
+  # Create a release
+  - stage: deploy
+    condition: not(failed('releaseService'))
+    variables:
+      pomversionFromRelease: $[ stageDependencies.release_service.releaseService.outputs['pomversion.next'] ]
+    pool:
+      vmImage: "ubuntu-latest"
+    jobs:
+      - job: deployJava
+        steps:
+          - checkout: self
+            clean: true
+            persistCredentials: true
+            submodules: true
+
+          - script: |
+              git checkout $(pomversionFromRelease)
+            displayName: Checkout new tag
+
+          - task: Cache@2
+            inputs:
+              key: 'maven | "$(Agent.OS)" | pom.xml'
+              restoreKeys: |
+                maven | "$(Agent.OS)"
+                maven
+              path: $(MAVEN_CACHE_FOLDER)
+            displayName: Set Maven Cache
+
+          - task: Bash@3
+            name: pomversion
+            inputs:
+              targetType: "inline"
+              script: |
+                version=$(mvn -f pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
+                echo "##vso[task.setvariable variable=next;isOutput=true]$version"
+              failOnStderr: true
+
+          - task: Bash@3
+            name: Check_Version_Matching
+            inputs:
+              targetType: "inline"
+              script: |
+                [[ "$(pomversionFromRelease)" != "$(pomversion.next)" ]] && >&2 echo "Unmatched versions"  || echo "Maching! PomVersion $(pomversion.next)"
+              failOnStderr: true
+       
+          - task: Maven@3
+            inputs:
+              mavenPomFile: 'pom.xml'
+              mavenOptions: '-Xmx3072m $(MAVEN_OPTS)'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '8'
+              jdkArchitectureOption: 'x64'
+              publishJUnitResults: false
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+              goals: 'clean verify'
+
+          - task: AzureCLI@1
+            displayName: 'Deploy'
+            inputs:
+              azureSubscription: $(AZURE_SUBSCRIPTION)
+              scriptLocation: inlineScript
+              inlineScript: |
+                az webapp deploy --resource-group $(RESOURCE_GROUP) --name $(APP_NAME) --src-path ./target/pagopa-mock-payment-gateway-$(pomversion.next).jar  --type jar

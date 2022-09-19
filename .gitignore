@@ -3,3 +3,10 @@ pmmock.iml
 terraform/**
 !terraform/*.tf
 target/
+.classpath
+.project
+.settings/**
+.vscode/settings.json
+pom.xml.versionsBackup
+pagopa-mock-payment-gateway.iml
+/src/generated/java/

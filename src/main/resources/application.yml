@@ -1,8 +1,53 @@
 spring:
   application:
-    name: Payment Manager Cloud Mock
+    name: Payment Manager Mock PSP
+  h2:
+    console.enabled: true
+  datasource:
+    url: jdbc:h2:mem:mockpsp
+    username: ${PAGOPA_MOCK_PSP_DB_USERNAME:pm_mock_local}
+    password: ${PAGOPA_MOCK_PSP_DB_PWD:pm_mock_local}
+    driverClassName: org.h2.Driver
+  mvc:
+    static-path-pattern: /static/**
+
 management:
   endpoints:
     web:
       exposure:
         include: "info,health,prometheus"
+
+server:
+  port: ${SERVER_PORT:7954}
+  public-url: ${SERVER_PUBLIC_URL:http://localhost:${server.port}}
+
+logging:
+  level:
+    root: ${LOGGING_ROOT_LEVEL:INFO}
+    org:
+      zalando:
+        logbook: TRACE
+
+logbook:
+  include:
+    - /paypalpsp/**
+  obfuscate:
+    headers:
+      - None
+
+info:
+  app:
+    name: ${spring.application.name}
+    java-version: ${java.version}
+    logging-level: ${logging.level.root}
+
+bpay:
+  payment:
+    x-correlation-id: ${BPAY_PAYMENT_CORRELATION_ID:179c1732-c176-11ec-9d64-0242ac120002}
+    amount: ${BPAY_PAYMENT_CORRELATION_ID_AMOUNT:105}
+
+mock-profile: ${MOCK_PROFILE:local}
+
+xpay:
+  apikey-alias: ${XPAY_APIKEY_ALIAS:local}
+  secret-key: ${XPAY_SECRET_KEY:local}

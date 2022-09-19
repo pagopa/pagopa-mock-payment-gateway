@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
+<head>
+    <div th:replace="fragment/head :: head"></div>
+</head>
+<body class="bg-light">
+    <div class="container">
+        <h2>BancomatPay Mock</h2>
+        <br>
+        <button onclick="changeRequestTextarea('payment')">Payment</button>
+        <button onclick="changeRequestTextarea('inquiry')">Inquiry</button>
+        <button onclick="changeRequestTextarea('refund')">Refund</button>
+        <br><br>
+        <form th:action="@{/bpayweb/management/home}" th:method="post" th:object="${callBPayRequest}">
+            Request body:
+            <br>
+            <textarea id="requestTextarea" th:field="*{request}" style="width:100%; height:200px; resize:both;"></textarea>
+            <br><br>
+            Outcome (only for Payment and Refund requests):
+            <select th:field="*{outcome}">
+                <option th:each="i : ${T(it.gov.pagopa.bpay.dto.EsitoEnum).values()}" th:value="${i.codice}" th:text="${i.codice + ' - ' + i.messaggio}">
+                </option>
+            </select>
+            <br><br>
+            Timeout (ms):&nbsp;
+            <input type="number" th:field="*{timeout}"/>
+            <br><br>
+            <input type="submit" value="Submit">
+        </form>
+        <br>
+        <h3>Result:</h3>
+        <pre lang="xml" th:text="${result}"></pre>
+    </div>
+    <script th:src="@{${AZURE_API_PUBLIC_URL}+'/static/js/bpay.js'}"></script>
+</body>
+</html>
