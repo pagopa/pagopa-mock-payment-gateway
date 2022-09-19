@@ -59,24 +59,28 @@ public class XPayController {
         Long timeStamp = System.currentTimeMillis();
         String idOperazione = UUID.randomUUID().toString();
         try {
-            saveXpayRequest(idOperazione, request, timeStamp);
+            saveXpayAuthRequest(idOperazione, request, timeStamp);
             String macToReturn = getMacToReturn(codiceTransazione, request.getDivisa(), request.getImporto(), request.getTimeStamp());
             if (StringUtils.equals(request.getMac(), macToReturn)) {
                 log.info("MAC verified. Generating response");
-                return createOkResponse(timeStamp, macToReturn, idOperazione);
+                XPayAuthResponse xpayResponse = createXpayAuthResponse(EsitoXpay.OK, idOperazione, timeStamp, macToReturn);
+                xpayResponse.setHtml(HTML_TO_RETURN);
+                return ResponseEntity.ok().body(xpayResponse);
             } else {
                 log.info("MAC not verified. Generating KO response");
-                XpayError xpayError = new XpayError(3L, "MAC errato");
-                return createKoResponse(timeStamp, xpayError, macToReturn, idOperazione);
+                XPayAuthResponse xPayAuthResponse = createXpayAuthResponse(EsitoXpay.KO, idOperazione, timeStamp, macToReturn);
+                xPayAuthResponse.setErrore(new XpayError(3L, "MAC errato"));
+                return ResponseEntity.internalServerError().body(xPayAuthResponse);
             }
         } catch (Exception e) {
             log.error("An exception occurred while processing the request", e);
-            XpayError xpayError = new XpayError(50L, "Impossibile calcolare il mac");
-            return createKoResponse(timeStamp, xpayError, "error", idOperazione);
+            XPayAuthResponse xPayAuthResponse = createXpayAuthResponse(EsitoXpay.KO, idOperazione, timeStamp, "error");
+            xPayAuthResponse.setErrore(new XpayError(50L, "Impossibile calcolare il mac"));
+            return ResponseEntity.internalServerError().body(xPayAuthResponse);
         }
     }
 
-    private void saveXpayRequest(String idOperazione, XPayAuthRequest request, Long timeStamp) {
+    private void saveXpayAuthRequest(String idOperazione, XPayAuthRequest request, Long timeStamp) {
         XPayPayment xPayPayment = new XPayPayment();
         xPayPayment.setIdOperazione(idOperazione);
         xPayPayment.setApiKey(request.getApiKey());
@@ -93,24 +97,13 @@ public class XPayController {
         xPayRepository.save(xPayPayment);
     }
 
-    private ResponseEntity<Object> createOkResponse(Long timeStamp, String mac, String idOperazione) {
+    private XPayAuthResponse createXpayAuthResponse(EsitoXpay esitoXpay, String idOperazione, Long timeStamp, String mac) {
         XPayAuthResponse xPayAuthResponse = new XPayAuthResponse();
-        xPayAuthResponse.setEsito(EsitoXpay.OK);
-        xPayAuthResponse.setIdOperazione(idOperazione);
-        xPayAuthResponse.setHtml(HTML_TO_RETURN);
-        xPayAuthResponse.setTimeStamp(timeStamp);
-        xPayAuthResponse.setMac(mac);
-        return ResponseEntity.ok().body(xPayAuthResponse);
-    }
-
-    private ResponseEntity<Object> createKoResponse(Long timeStamp, XpayError xpayError, String mac, String idOperazione) {
-        XPayAuthResponse xPayAuthResponse = new XPayAuthResponse();
-        xPayAuthResponse.setEsito(EsitoXpay.KO);
+        xPayAuthResponse.setEsito(esitoXpay);
         xPayAuthResponse.setIdOperazione(idOperazione);
         xPayAuthResponse.setTimeStamp(timeStamp);
         xPayAuthResponse.setMac(mac);
-        xPayAuthResponse.setErrore(xpayError);
-        return ResponseEntity.internalServerError().body(xPayAuthResponse);
+        return xPayAuthResponse;
     }
 
     private String getMacToReturn(String codiceTransazione, Long divisa, BigInteger importo, String timeStamp) throws Exception {
