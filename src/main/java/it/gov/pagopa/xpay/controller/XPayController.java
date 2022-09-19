@@ -9,6 +9,7 @@ import it.gov.pagopa.xpay.entity.XPayPayment;
 import it.gov.pagopa.xpay.repository.XPayRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Date;
 import java.util.UUID;
 
 @Validated
@@ -26,6 +28,12 @@ import java.util.UUID;
 @RequestMapping("/xpay")
 @Log4j2
 public class XPayController {
+
+    @Value("${xpay-apikey-alias}")
+    private String apiKey;
+
+    @Value("${xpay-secret-key}")
+    private String chiaveSegreta;
 
     @Autowired
     private TableConfigRepository configRepository;
@@ -58,7 +66,7 @@ public class XPayController {
             saveXpayOnDb(idOperazione, request, timeStamp);
 
             if (request.getMac().equals(macToReturn)) {
-               return createOkResponse(timeStamp, macToReturn,idOperazione);
+                return createOkResponse(timeStamp, macToReturn, idOperazione);
 
             } else {
                 XpayError xpayError = new XpayError(3L, "MAC errato");
