@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Date;
 import java.util.UUID;
 
 @Validated
@@ -34,7 +33,7 @@ public class XPayController {
     @Autowired
     private XPayRepository xPayRepository;
 
-    private final String htmlToReturn = "<html>" +
+    private final String HTMLTORETURN = "<html>" +
             "   <head>" +
             "      <title>Gestione Pagamento - Autenticazione</title>" +
             "      <script type=\"text/javascript\" language=\"javascript\">function moveWindow() { document.tdsFraudForm.submit();}</script>" +
@@ -51,7 +50,7 @@ public class XPayController {
         log.info("Create AuthResponse for transactioId: " + request.getCodiceTransazione());
 
         Long timeStamp =System.currentTimeMillis();
-        String idOperazione = createIdOperazione();
+        String idOperazione =  UUID.randomUUID().toString();
 
         try {
             String macToReturn = getMacToReturn(request.getCodiceTransazione(), request.getDivisa(), request.getImporto(), request.getTimeStamp());
@@ -63,12 +62,12 @@ public class XPayController {
 
             } else {
                 XpayError xpayError = new XpayError(3L, "MAC errato");
-                return createKoResponse(timeStamp, xpayError, idOperazione);
+                return createKoResponse(timeStamp, xpayError, macToReturn, idOperazione);
 
             }
         } catch (Exception e) {
             XpayError xpayError = new XpayError(50L, "Impossibile calcolare il mac");
-            return createKoResponse(timeStamp, xpayError, idOperazione);
+            return createKoResponse(timeStamp, xpayError, null, idOperazione);
         }
 
     }
@@ -98,7 +97,7 @@ public class XPayController {
         XPayAuthResponse xPayAuthResponse = new XPayAuthResponse();
         xPayAuthResponse.setEsito(EsitoXpay.OK);
         xPayAuthResponse.setIdOperazione(idOperazione);
-        xPayAuthResponse.setHtml(htmlToReturn);
+        xPayAuthResponse.setHtml(HTMLTORETURN);
         xPayAuthResponse.setTimeStamp(timeStamp);
         xPayAuthResponse.setMac(mac);
 
@@ -106,20 +105,16 @@ public class XPayController {
 
     }
 
-    private ResponseEntity<Object> createKoResponse(Long timeStamp, XpayError xpayError, String idOperazione) {
+    private ResponseEntity<Object> createKoResponse(Long timeStamp, XpayError xpayError, String mac, String idOperazione) {
         XPayAuthResponse xPayAuthResponse = new XPayAuthResponse();
         xPayAuthResponse.setEsito(EsitoXpay.KO);
         xPayAuthResponse.setIdOperazione(idOperazione);
         xPayAuthResponse.setTimeStamp(timeStamp);
+        xPayAuthResponse.setMac(mac);
         xPayAuthResponse.setErrore(xpayError);
 
         return ResponseEntity.internalServerError().body(xPayAuthResponse);
     }
-
-    private String createIdOperazione() {
-        return UUID.randomUUID().toString();
-    }
-
 
     private String getMacToReturn(String codiceTransazione, Long divisa, BigInteger importo, String timeStamp) throws Exception {
 
