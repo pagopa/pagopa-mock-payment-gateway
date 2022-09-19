@@ -28,10 +28,10 @@ import java.util.UUID;
 @Log4j2
 public class XPayController {
 
-    @Value("${xpay-apikey-alias}")
+    @Value("${xpay_apikey_alias}")
     private String apiKey;
 
-    @Value("${xpay-secret-key}")
+    @Value("${xpay_secret_key}")
     private String chiaveSegreta;
 
     @Autowired
