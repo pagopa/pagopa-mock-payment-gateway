@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Date;
 import java.util.UUID;
 
 @Validated
@@ -34,9 +33,6 @@ public class XPayController {
 
     @Value("${xpay-secret-key}")
     private String chiaveSegreta;
-
-    @Autowired
-    private TableConfigRepository configRepository;
 
     @Autowired
     private XPayRepository xPayRepository;
@@ -125,9 +121,6 @@ public class XPayController {
     }
 
     private String getMacToReturn(String codiceTransazione, Long divisa, BigInteger importo, String timeStamp) throws Exception {
-
-        String apiKey = configRepository.findByPropertyKey("XPAY_APIKEY_ALIAS").getPropertyValue();
-        String chiaveSegreta = configRepository.findByPropertyKey("XPAY_SECRET_KEY").getPropertyValue();
         String realMac = String.format("apiKey=%scodiceTransazione=%sdivisa=%simporto=%stimeStamp=%s%s", apiKey, codiceTransazione, divisa, importo, timeStamp, chiaveSegreta);
         
         return hashMac(realMac);

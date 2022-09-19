@@ -47,3 +47,6 @@ bpay:
     amount: ${BPAY_PAYMENT_CORRELATION_ID_AMOUNT:105}
 
 mock-profile: ${MOCK_PROFILE:local}
+
+xpay-apikey-alias: ${XPAY_APIKEY_ALIAS:local}
+xpay-secret-key: ${XPAY_SECRET_KEY:local}
