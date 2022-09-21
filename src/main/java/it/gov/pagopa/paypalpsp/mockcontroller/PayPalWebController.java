@@ -4,6 +4,7 @@ package it.gov.pagopa.paypalpsp.mockcontroller;
 import com.github.javafaker.Faker;
 import it.gov.pagopa.db.entity.TableConfig;
 import it.gov.pagopa.db.entity.TablePpOnboardingBack;
+import it.gov.pagopa.db.repository.TableClientRepository;
 import it.gov.pagopa.db.repository.TableConfigRepository;
 import it.gov.pagopa.db.repository.TablePpOnboardingBackRepository;
 import it.gov.pagopa.paypalpsp.util.PaypalUtils;
@@ -12,6 +13,7 @@ import it.gov.pagopa.paypalpsp.dto.dtoenum.PpResponseErrCode;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -32,6 +35,9 @@ import java.util.Locale;
 public class PayPalWebController {
     protected static final String TABLE_PP_ONBOARDING_BACK_ATTRIBUTE = "tablePpOnboardingBack";
 
+    @Value("${mock-profile}")
+    private String profile;
+
     @Autowired
     private TablePpOnboardingBackRepository tablePpOnboardingBackRepository;
 
@@ -41,23 +47,33 @@ public class PayPalWebController {
     @Autowired
     private PaypalUtils paypalUtils;
 
+    @Autowired
+    private TableClientRepository clientRepository;
+
     private static final Faker FAKER = new Faker(Locale.ITALIAN);
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
             .withZone(ZoneId.systemDefault());
+
+    private String clientBaseUrl;
+
+    @PostConstruct
+    protected void init() {
+        clientBaseUrl = clientRepository.findByClientName(profile).getBaseUrl();
+    }
 
     @GetMapping("/pp_onboarding_call")
     public String homePage(Model model, @RequestParam("id_back") String idBack, ModelMap modelMap, HttpServletRequest request) {
         request.getSession().invalidate();
         modelMap.remove(TABLE_PP_ONBOARDING_BACK_ATTRIBUTE);
 
-        TableConfig tableConfig = configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL");
+        String url = clientBaseUrl + configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL").getPropertyValue();
         String esito = PpOnboardingCallResponseEsito.KO.getCode();
         PpResponseErrCode idBackUsatoNonValido = PpResponseErrCode.ID_BACK_NON_VALIDO;
 
         String hmac = paypalUtils.calculateHmac(esito, null, null, idBackUsatoNonValido, idBack);
         String urlReturnFallBackPaypalPsp = String.format("%s?esito=%s&err_cod=%s&err_desc=%s&sha_val=%s",
-                StringUtils.defaultString(tableConfig.getPropertyValue()), esito, idBackUsatoNonValido.getCode(),
+                url, esito, idBackUsatoNonValido.getCode(),
                 idBackUsatoNonValido.getDescription(), hmac);
         model.addAttribute("urlReturnFallBackPaypalPsp", urlReturnFallBackPaypalPsp);
 

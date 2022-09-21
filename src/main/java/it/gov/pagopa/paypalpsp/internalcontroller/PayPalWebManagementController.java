@@ -135,7 +135,7 @@ public class PayPalWebManagementController {
             redirectUrl = clientBaseUrl + configRepository.findByPropertyKey("PAYPAL_PSP_FALLBACK_PATH").getPropertyValue();
         }
         if (StringUtils.isBlank(redirectUrl)) {
-            redirectUrl = configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL").getPropertyValue();
+            redirectUrl = clientBaseUrl + configRepository.findByPropertyKey("PAYPAL_PSP_DEFAULT_BACK_URL").getPropertyValue();
         }
         return callResponseErrCode == PpResponseErrCode.ID_BACK_NON_VALIDO ? redirectUrl : tablePpOnboardingBack.getUrlReturn();
     }
