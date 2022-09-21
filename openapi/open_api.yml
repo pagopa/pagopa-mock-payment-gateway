@@ -27,16 +27,178 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/StartOnboardingResponseSuccess'
-                  - $ref: '#/components/schemas/StartOnboardingResponseError'
+                $ref: '#/components/schemas/StartOnboardingResponseSuccess'
+        default:
+          description: Errore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartOnboardingResponseError'
       security:
         - bearerAuth: []
+  /paypalpsp/api/pp_pay_direct:
+    post:
+      tags:
+        - paypalmock
+      summary: server to server api used to pay
+      requestBody:
+        description: PpPayDirectRequest
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PpPayDirectRequest'
+      responses:
+        '200':
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PpDirectResponseSuccess'
+        default:
+          description: Errore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PpDirectResponseError'
+      security:
+        - bearerAuth: []
+  /paypalpsp/api/pp_refund_direct:
+    post:
+      tags:
+        - paypalmock
+      summary: server to server api used to refund
+      requestBody:
+        description: PpRefundDirectRequest
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PpRefundDirectRequest'
+      responses:
+        '200':
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PpRefundDirectResponseSuccess'
+        default:
+          description: Errore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PpRefundDirectResponseError'
+      security:
+        - bearerAuth: []
+  /paypalpsp/api/pp_bilagr_del:
+    post:
+      tags:
+        - paypalmock
+      requestBody:
+        description: PPPayPalIdAppIoRequest
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PPPayPalIdAppIoRequest'
+      responses:
+        '200':
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PpDefaultResponseSuccess'
+        default:
+          description: Errore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PpDefaultResponseError'
+      security:
+        - bearerAuth: []
+  /paypalweb/pp_onboarding_call:
+    get:
+      tags:
+        - paypalmock
+      parameters:
+        - in: query
+          name: id_back
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Response
+          content:
+            string:
+              schema:
+                type: string
+  /paypalpsp/management/response:
+    patch:
+      tags:
+        - paypalmanagement
+      requestBody:
+        description: PpOnboardingBackManagementRequest
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PpOnboardingBackManagementRequest'
+      responses:
+        default:
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PpOnboardingBackManagementResponse'
+      security:
+        - bearerAuth: []
+    get:
+      tags:
+        - paypalmanagement
+      parameters:
+        - in: query
+          name: apiId
+          required: false
+          schema:
+            type: string
+            enum:
+              - "ONBOARDING"
+              - "PAYMENT"
+              - "REFUND"
+              - "DELETE"
+              - "ONBOARDING_REDIRECT"
+      responses:
+        default:
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PpResponseErrorInfo'
+      security:
+        - bearerAuth: []
+  /paypalpsp/management/response/{idAppIo}:
+    get:
+      tags:
+        - paypalmanagement
+      parameters:
+        - in: path
+          name: idAppIo
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PpOnboardingBackManagementResponse'
   /postepay/api/v1/payment/create:
     post:
       operationId: createPayment
       tags:
-      - Payment Manager Controller
+        - Payment Manager Controller
       summary: Inzializzazione della transazione di pagamento
       description: ""
       requestBody:
@@ -52,11 +214,49 @@ paths:
               schema:
                 description: ""
                 required:
-                - paymentID
-                - userRedirectURL
+                  - paymentID
+                  - userRedirectURL
                 type: object
                 properties:
                   paymentID:
+                    description: identificativo della transazione di pagamento assegnato
+                      da PosteItaliane
+                    type: string
+                  userRedirectURL:
+                    description: URL verso cui redirigere l'utente per portare a compimento
+                      la transazione
+                    type: string
+        default:
+          description: Errore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostePayError'
+  /postepay/api/v1/user/onboarding:
+    post:
+      tags:
+        - Payment Manager Controller
+      operationId: userPostepayOnboarding
+      summary: Postepay user onboarding
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingPostepayRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ""
+                required:
+                  - onboardingID
+                  - userRedirectURL
+                type: object
+                properties:
+                  onboardingID:
                     description: identificativo della transazione di pagamento assegnato
                       da PosteItaliane
                     type: string
@@ -74,7 +274,7 @@ paths:
     post:
       operationId: changeOutcomePostePay
       tags:
-      - Payment Manager Controller
+        - Payment Manager Controller
       parameters:
         - in: query
           name: paymentOutcome
@@ -87,6 +287,146 @@ paths:
       responses:
         "200":
           description: OK
+  /postepay/api/v1/payment/details:
+    post:
+      tags:
+        - Payment Manager Controller
+      operationId: paymentDetail
+      summary: Dettagli di una transazione di pagamento
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeatilsPaymentRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ""
+                required:
+                  - paymentID
+                  - userRedirectURL
+                  - shopId;
+                  - shopTransactionId
+                  - result
+                  - authNumber
+                  - amount
+                  - description
+                  - currency
+                  - buyerName
+                  - buyerEmail
+                  - paymentChannel
+                  - authType
+                  - status
+                  - refundedAmount
+                type: object
+                properties:
+                  paymentID:
+                    type: string
+                  userRedirectURL:
+                    type: string
+                  shopId:
+                    type: string
+                  shopTransactionId:
+                    type: string
+                  result:
+                    type: string
+                  authNumber:
+                    type: string
+                  amount:
+                    type: string
+                  description:
+                    type: string
+                  currency:
+                    type: string
+                  buyerName:
+                    type: string
+                  buyerEmail:
+                    type: string
+                  paymentChannel:
+                    type: string
+                  authType:
+                    type: string
+                  status:
+                    type: string
+                  refundedAmount:
+                    type: string
+        default:
+          description: Errore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostePayError'
+  /postepay/api/v1/payment/refund:
+    post:
+      operationId: refundPostepayPayment
+      tags:
+        - Payment Manager Controller
+      summary: refund transazione di pagamento
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundPaymentRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ""
+                required:
+                  - paymentID
+                  - shopTransactionId
+                  - transactionResult
+                type: object
+                properties:
+                  paymentID:
+                    description: identificativo della transazione di pagamento assegnato
+                      da PosteItaliane
+                    type: string
+                  shopTransactionId:
+                    type: string
+                  transactionResult:
+                    type: string
+                    enum:
+                      - OK
+                      - KO
+        default:
+          description: Errore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostePayError'
+  /xpay/ecomm/api/paga/autenticazione3DS:
+    post:
+      tags:
+        - XPay Controller
+      operationId: paymentAuthorization
+      summary: esegue l'autenticazione3DS
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/XPayAuthRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XPayAuthResponseSuccess'
+        default:
+          description: Errore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XPayAuthResponseError'
+
 components:
   schemas:
     PostePayError:
@@ -137,8 +477,60 @@ components:
         esito:
           type: string
           enum:
-            - "3" #cancel by user
-            - "9" #error
+            - "9" #KO
+          description: Api result
+        err_code:
+          type: string
+          enum:
+            - "3" #autorizzazione negata
+            - "16" #id_appio non esiste
+            - "-1" #timeout
+        err_desc:
+          type: string
+    AuthorizationType:
+      enum:
+        - IMMEDIATA
+        - DIFFERITA
+      type: string
+    PpPayDirectRequest:
+      required:
+        - id_trs_appio
+        - importo
+        - fee
+      type: object
+      properties:
+        id_trs_appio:
+          type: string
+        importo:
+          type: number
+          format: double
+          example: 1.00
+        fee:
+          type: number
+          format: double
+          example: 2.00
+    PpDirectResponseSuccess:
+      required:
+        - id_trs_paypal
+        - esito
+      properties:
+        id_trs_paypal:
+          type: string
+        esito:
+          type: string
+          enum:
+            - "OK"
+    PpDirectResponseError:
+      required:
+        - esito
+        - err_code
+        - err_desc
+      type: object
+      properties:
+        esito:
+          type: string
+          enum:
+            - "KO" #error
           description: Api result
         err_code:
           type: string
@@ -151,21 +543,231 @@ components:
             - "67" #db internal error
         err_desc:
           type: string
-    AuthorizationType:
-      enum:
-      - IMMEDIATA
-      - DIFFERITA
-      type: string
+    PpRefundDirectRequest:
+      required:
+        - id_trs_appio
+        - importo
+      type: object
+      properties:
+        id_trs_appio:
+          type: string
+        importo:
+          type: number
+          format: double
+          example: 1.00
+    PpRefundDirectResponseSuccess:
+      required:
+        - id_trs_paypal
+        - esito
+      properties:
+        id_trs_paypal:
+          type: string
+        esito:
+          type: string
+          enum:
+            - "OK"
+    PpRefundDirectResponseError:
+      required:
+        - esito
+        - err_code
+        - err_desc
+      type: object
+      properties:
+        esito:
+          type: string
+          enum:
+            - "KO" #error
+          description: Api result
+        err_code:
+          type: string
+          enum:
+            - "9" #input non in formato json
+            - "11" #parametri non validi
+            - "13" #autorizzazione negata
+            - "15" #autorizzazione ip negata
+            - "19" #id_appio con bilagr già associato
+            - "67" #db internal error
+        err_desc:
+          type: string
+    PPPayPalIdAppIoRequest:
+      required:
+        - id_appio
+      properties:
+        id_appio:
+          type: string
+    PpDefaultResponseSuccess:
+      required:
+        - esito
+      properties:
+        esito:
+          type: string
+          enum:
+            - "OK"
+    PpDefaultResponseError:
+      required:
+        - esito
+        - err_code
+        - err_desc
+      type: object
+      properties:
+        esito:
+          type: string
+          enum:
+            - "KO" #error
+          description: Api result
+        err_code:
+          type: string
+          enum:
+            - "9" #input non in formato json
+            - "11" #parametri non validi
+            - "13" #autorizzazione negata
+            - "15" #autorizzazione ip negata
+            - "19" #id_appio con bilagr già associato
+            - "67" #db internal error
+        err_desc:
+          type: string
+    PpOnboardingBackManagementRequest:
+      required:
+        - id_appio
+        - err_code
+        - api_id
+      properties:
+        id_appio:
+          type: string
+        err_code:
+          type: string
+          enum:
+            - "9" #input non in formato json
+            - "11" #parametri non validi
+            - "13" #autorizzazione negata
+            - "15" #autorizzazione ip negata
+            - "19" #id_appio con bilagr già associato
+            - "67" #db internal error
+        api_id:
+          type: string
+          enum:
+            - "ONBOARDING"
+            - "PAYMENT"
+            - "REFUND"
+            - "DELETE"
+            - "ONBOARDING_REDIRECT"
+    PpOnboardingBackManagementResponse:
+      required:
+        - id_appio
+        - api_id
+        - lastUpdateDate
+        - err_info
+      properties:
+        id_appio:
+          type: string
+        api_id:
+          type: string
+          enum:
+            - "ONBOARDING"
+            - "PAYMENT"
+            - "REFUND"
+            - "DELETE"
+            - "ONBOARDING_REDIRECT"
+        lastUpdateDate:
+          type: string
+          example: "dd/MM/yyyy HH:ss:SSSS"
+        err_info:
+          type: object
+          properties:
+            code:
+              type: string
+            description:
+              type: string
+            httpStatus:
+              type: string
+            httpCode:
+              type: number
+              format: integer
+            allowed:
+              type: array
+              items:
+                type: string
+                enum:
+                  - "ONBOARDING"
+                  - "PAYMENT"
+                  - "REFUND"
+                  - "DELETE"
+                  - "ONBOARDING_REDIRECT"
+    PpResponseErrorInfo:
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+        httpStatus:
+          type: string
+        httpCode:
+          type: number
+          format: integer
+        allowed:
+          type: array
+          items:
+            type: string
+            enum:
+              - "ONBOARDING"
+              - "PAYMENT"
+              - "REFUND"
+              - "DELETE"
+              - "ONBOARDING_REDIRECT"
+    DeatilsPaymentRequest:
+      description: ""
+      required:
+        - shopId
+        - shopTransactionId
+        - paymentID
+      type: object
+      properties:
+        shopId:
+          description: identificativo del negozio
+          type: string
+        shopTransactionId:
+          description: identificativo della transazione lato merchant
+          type: string
+        paymentID:
+          description: paymentID
+          type: string
+    OnboardingPostepayRequest:
+      description: ""
+      required:
+        - shopId
+        - merchantId
+        - onboardingTransactionId
+        - paymentChannel
+        - responseURLs
+      type: object
+      properties:
+        shopId:
+          description: identificativo del negozio
+          type: string
+        merchantId:
+          description: identificativo del merchant
+          type: string
+        onboardingTransactionId:
+          description: id onboarding transaction Id
+          type: string
+        paymentChannel:
+          allOf:
+            - $ref: '#/components/schemas/PaymentChannel'
+            - description: "canale di pagamento, puo essere valorizzato con APP/WEB"
+        responseURLs:
+          allOf:
+            - $ref: '#/components/schemas/ResponseURLs'
+            - description: URL di ritorno
     CreatePaymentRequest:
       description: ""
       required:
-      - shopId
-      - shopTransactionId
-      - amount
-      - currency
-      - paymentChannel
-      - authType
-      - responseURLs
+        - shopId
+        - shopTransactionId
+        - amount
+        - currency
+        - paymentChannel
+        - authType
+        - responseURLs
       type: object
       properties:
         shopId:
@@ -191,27 +793,59 @@ components:
           type: string
         paymentChannel:
           allOf:
-          - $ref: '#/components/schemas/PaymentChannel'
-          - description: "canale di pagamento, puo essere valorizzato con APP/WEB"
+            - $ref: '#/components/schemas/PaymentChannel'
+            - description: "canale di pagamento, puo essere valorizzato con APP/WEB"
         authType:
           allOf:
-          - $ref: '#/components/schemas/AuthorizationType'
-          - description: "tipo di autorizzazione, puo essere valorizzato con IMMEDIATA/DIFFERITA"
+            - $ref: '#/components/schemas/AuthorizationType'
+            - description: "tipo di autorizzazione, puo essere valorizzato con IMMEDIATA/DIFFERITA"
         responseURLs:
           allOf:
-          - $ref: '#/components/schemas/ResponseURLs'
-          - description: URL di ritorno
+            - $ref: '#/components/schemas/ResponseURLs'
+            - description: URL di ritorno
+    RefundPaymentRequest:
+      description: ""
+      required:
+        - shopId
+        - shopTransactionId
+        - merchantId
+        - paymentID
+        - authNumber
+        - currency
+      type: object
+      properties:
+        shopId:
+          description: identificativo del negozio
+          type: string
+        shopTransactionId:
+          description: identificativo della transazione lato merchant
+          type: string
+        amount:
+          description: importo
+          type: string
+        reason:
+          description: descrizione della transazione presentata al cliente
+          type: string
+        currency:
+          description: valuta in codice ISO (EUR = 978)
+          type: string
+        merchantId:
+          type: string
+        paymentID:
+          type: string
+        authNumber:
+          type: string
     PaymentChannel:
       enum:
-      - WEB
-      - APP
+        - WEB
+        - APP
       type: string
     ResponseURLs:
       description: ""
       required:
-      - responseUrlOk
-      - responseUrlKo
-      - serverNotificationUrl
+        - responseUrlOk
+        - responseUrlKo
+        - serverNotificationUrl
       type: object
       properties:
         responseUrlOk:
@@ -225,6 +859,100 @@ components:
         serverNotificationUrl:
           description: URL presso la quale sarà eseguita la chiamata di conferma del
             pagamento solo per i casi OK
+          type: string
+    XPayAuthRequest:
+      description: ""
+      required:
+        - apiKey
+        - urlRisposta
+        - codiceTransazione
+        - importo
+        - divisa
+        - pan
+        - scadenza
+        - cvv
+        - timeStamp
+        - mac
+      type: object
+      properties:
+        apiKey:
+          type: string
+        urlRisposta:
+          type: string
+        codiceTransazione:
+          type: string
+        importo:
+          type: number
+          format: BigInteger
+        divisa:
+          description: valuta in codice ISO (EUR = 978)
+          type: number
+          format: long
+        pan:
+          type: string
+        scadenza:
+          type: string
+        cvv:
+          type: string
+        timeStamp:
+          type: string
+        mac:
+          type: string
+    XPayAuthResponseSuccess:
+      description: ""
+      required:
+        - esito
+        - idOperazione
+        - timeStamp
+        - mac
+      type: object
+      properties:
+        esito:
+          type: string
+          enum:
+            - OK
+            - KO
+        idOperazione:
+          type: string
+        timeStamp:
+          type: number
+          format: long
+        html:
+          type: string
+        mac:
+          type: string
+    XPayAuthResponseError:
+      description: ""
+      required:
+        - esito
+        - idOperazione
+        - timeStamp
+        - mac
+      type: object
+      properties:
+        esito:
+          type: string
+          enum:
+            - OK
+            - KO
+        idOperazione:
+          type: string
+        timeStamp:
+          type: number
+          format: long
+        errore:
+          $ref: '#/components/schemas/XPayError'
+        mac:
+          type: string
+    XPayError:
+      required:
+        - codice
+        - messaggio
+      properties:
+        codice:
+          type: number
+          format: long
+        messaggio:
           type: string
   securitySchemes:
     bearerAuth:

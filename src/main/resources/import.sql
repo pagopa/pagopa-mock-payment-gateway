@@ -1,4 +1,4 @@
-INSERT INTO config(id, property_key, property_value) VALUES (1, 'PAYPAL_PSP_DEFAULT_BACK_URL', 'http://pagopa-dev:8080/pp-restapi-CD/v3/webview/paypal/fallback');
+INSERT INTO config(id, property_key, property_value) VALUES (1, 'PAYPAL_PSP_DEFAULT_BACK_URL', '/pp-restapi-CD/v3/webview/paypal/fallback');
 INSERT INTO config(id, property_key, property_value) VALUES (2, 'PAYPAL_PSP_HMAC_KEY', 'hmac_key');
 INSERT INTO config(id, property_key, property_value) VALUES (3, 'PAYPAL_PSP_FALLBACK_PATH', '/pp-restapi-CD/v3/webview/paypal/fallback');
 INSERT INTO config(id, property_key, property_value) VALUES (4, 'BPAY_PAYMENT_OUTCOME', '0');
