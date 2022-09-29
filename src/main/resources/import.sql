@@ -15,3 +15,4 @@ INSERT INTO config(id, property_key, property_value) VALUES (13, 'POSTEPAY_PAYME
 INSERT INTO client(id, client_name, base_url) VALUES (1, 'local', 'http://host.docker.internal:8080');
 INSERT INTO client(id, client_name, base_url) VALUES (2, 'sit', 'https://api.dev.platform.pagopa.it');
 INSERT INTO client(id, client_name, base_url) VALUES (3, 'uat', 'https://api.uat.platform.pagopa.it');
+INSERT INTO client(id, client_name, base_url) VALUES (4, 'perf', 'https://api.prf.platform.pagopa.it');
