@@ -3,35 +3,34 @@ package it.gov.pagopa.xpay.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
-import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Valid
 public class XPayAuthRequest {
 
-    @NonNull
+    @NotBlank
     private String apiKey;
-    @NonNull
+    @NotBlank
     private String urlRisposta;
-    @NonNull
+    @NotBlank
     private String codiceTransazione;
-    @NonNull
+    @NotNull
     private BigInteger importo;
-    @NonNull
+    @NotNull
     private Long divisa;
-    @NonNull
+    @NotBlank
     private String pan;
-    @NonNull
+    @NotBlank
     private String scadenza;
-    @NonNull
+    @NotBlank
     private String cvv;
-    @NonNull
+    @NotBlank
     private String timeStamp;
-    @NonNull
+    @NotBlank
     private String mac;
 }
