@@ -1,7 +1,11 @@
 package it.gov.pagopa.xpay.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@AllArgsConstructor
+@Getter
 public enum XPayErrorEnum {
     ERROR_1(1L, "Uno dei valori dei parametri del json in input non è corretto", HttpStatus.BAD_REQUEST),
     ERROR_2(2L, "Non è possibile trovare l’informazione richiesta", HttpStatus.INTERNAL_SERVER_ERROR),
@@ -30,25 +34,7 @@ public enum XPayErrorEnum {
     ERROR_99(99L, "Operazione non permessa, il merchant non ha i requisiti per effettuare l’operazione richiesta", HttpStatus.UNAUTHORIZED),
     ERROR_100(100L, "Errore interno", HttpStatus.INTERNAL_SERVER_ERROR);
 
-    private final Long codiceErrore;
-    private final String descrizione;
+    private final Long errorCode;
+    private final String description;
     private final HttpStatus httpStatus;
-
-    XPayErrorEnum(Long codiceErrore, String descrizione, HttpStatus httpStatus) {
-        this.codiceErrore = codiceErrore;
-        this.descrizione = descrizione;
-        this.httpStatus = httpStatus;
-    }
-
-    public Long getCodiceErrore() {
-        return codiceErrore;
-    }
-
-    public String getDescrizione() {
-        return descrizione;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
 }

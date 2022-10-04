@@ -5,6 +5,7 @@ import it.gov.pagopa.xpay.dto.*;
 import it.gov.pagopa.xpay.entity.XPayPayment;
 import it.gov.pagopa.xpay.repository.XPayRepository;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +68,7 @@ public class XPayController {
             log.error("An exception occurred while processing the request: ", e);
             XPayErrorEnum macError = XPayErrorEnum.ERROR_50;
             XPayAuthResponse xPayAuthResponse = createXpayAuthResponse(EsitoXpay.KO, idOperazione, timeStamp, "error");
-            xPayAuthResponse.setErrore(new XpayError(macError.getCodiceErrore(), macError.getDescrizione()));
+            xPayAuthResponse.setErrore(new XpayError(macError.getErrorCode(), macError.getDescription()));
 
             return ResponseEntity.status(macError.getHttpStatus()).body(xPayAuthResponse);
         }
@@ -83,13 +84,13 @@ public class XPayController {
                 log.info("MAC not verified. Generating KO response");
                 XPayErrorEnum macNotVerified = XPayErrorEnum.ERROR_3;
                 XPayAuthResponse xPayAuthResponse = createXpayAuthResponse(EsitoXpay.KO, idOperazione, timeStamp, macToReturn);
-                xPayAuthResponse.setErrore(new XpayError(macNotVerified.getCodiceErrore(), macNotVerified.getDescrizione()));
+                xPayAuthResponse.setErrore(new XpayError(macNotVerified.getErrorCode(), macNotVerified.getDescription()));
 
                 return ResponseEntity.status(macNotVerified.getHttpStatus()).body(xPayAuthResponse);
             }
         } else {
             XPayAuthResponse xPayAuthResponse = createXpayAuthResponse(EsitoXpay.KO, idOperazione, timeStamp, macToReturn);
-            xPayAuthResponse.setErrore(new XpayError(errorConfig.getCodiceErrore(), errorConfig.getDescrizione()));
+            xPayAuthResponse.setErrore(new XpayError(errorConfig.getErrorCode(), errorConfig.getDescription()));
 
             return ResponseEntity.status(errorConfig.getHttpStatus()).body(xPayAuthResponse);
         }
@@ -141,11 +142,13 @@ public class XPayController {
     private XPayErrorEnum getErrorConfig() {
         String errorCode = configRepository.findByPropertyKey(XPAY_AUTH_ERROR).getPropertyValue();
 
-        try {
+        //If the errorCode is valid, the correct XPayErrorEnum is returned.
+        //If it's invalid, a Generic Error (ERROR_97) is returned as default.
+        if(EnumUtils.isValidEnum(XPayErrorEnum.class, "ERROR_" + errorCode)) {
             return XPayErrorEnum.valueOf("ERROR_" + errorCode);
-        } catch (IllegalArgumentException e) {
-            return XPayErrorEnum.ERROR_97;
         }
+
+        return XPayErrorEnum.ERROR_97;
     }
 
     private static String createHtml() {

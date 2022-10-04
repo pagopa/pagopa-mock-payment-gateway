@@ -5,6 +5,7 @@ import it.gov.pagopa.db.repository.TableConfigRepository;
 import it.gov.pagopa.xpay.dto.EsitoXpay;
 import it.gov.pagopa.xpay.dto.XPayErrorEnum;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,7 @@ public class XPaySettingsController {
 
     @PostMapping("/autenticazione3DS/outcome")
     public void changeOutcome(@RequestParam(required = false) EsitoXpay outcome,
-                              @RequestParam(required = false) Long codiceErrore) {
+                              @RequestParam(required = false) Long errorCode) {
 
         if (outcome != null) {
             TableConfig outcomeConfig = configRepository.findByPropertyKey(XPAY_AUTH_OUTCOME);
@@ -33,17 +34,16 @@ public class XPaySettingsController {
             configRepository.save(outcomeConfig);
         }
 
-        if (codiceErrore != null) {
+        if (errorCode != null) {
             TableConfig errorConfig = configRepository.findByPropertyKey(XPAY_AUTH_ERROR);
 
-            //Se il valore mandato in input non è un codice valido, salvo "Errore Generico" come dafault
-            try {
-                XPayErrorEnum.valueOf("ERROR_" + codiceErrore);
-            } catch (IllegalArgumentException e) {
-                codiceErrore = 97L;
+            //If the errorCode is invalid, a Generic Error (ERROR_97) is saved on the database.
+            //If it's valid, the correct XPayErrorEnum is saved.
+            if(!EnumUtils.isValidEnum(XPayErrorEnum.class, "ERROR_" + errorCode)) {
+                errorCode = XPayErrorEnum.ERROR_97.getErrorCode();
             }
 
-            errorConfig.setPropertyValue(codiceErrore.toString());
+            errorConfig.setPropertyValue(errorCode.toString());
             configRepository.save(errorConfig);
         }
     }
