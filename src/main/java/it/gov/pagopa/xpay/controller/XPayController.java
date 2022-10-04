@@ -1,28 +1,28 @@
 package it.gov.pagopa.xpay.controller;
 
-import it.gov.pagopa.xpay.dto.EsitoXpay;
-import it.gov.pagopa.xpay.dto.XPayAuthRequest;
-import it.gov.pagopa.xpay.dto.XPayAuthResponse;
-import it.gov.pagopa.xpay.dto.XpayError;
+import it.gov.pagopa.db.repository.TableConfigRepository;
+import it.gov.pagopa.xpay.dto.*;
 import it.gov.pagopa.xpay.entity.XPayPayment;
 import it.gov.pagopa.xpay.repository.XPayRepository;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.UUID;
 
-@Validated
+import static it.gov.pagopa.xpay.utils.XPayConstants.XPAY_AUTH_ERROR;
+import static it.gov.pagopa.xpay.utils.XPayConstants.XPAY_AUTH_OUTCOME;
+
 @RestController
 @RequestMapping("/xpay")
 @Log4j2
@@ -37,46 +37,62 @@ public class XPayController {
     @Autowired
     private XPayRepository xPayRepository;
 
-    private static final String HTML_TO_RETURN = "<html>" +
-            "   <head>" +
-            "      <title>Gestione Pagamento - Autenticazione</title>" +
-            "      <script type=\"text/javascript\" language=\"javascript\">function moveWindow() { " +
-            "           document.tdsFraudForm.submit();}</script>" +
-            "   </head>" +
-            "   <body>" +
-            "      <form name=\"tdsFraudForm\" action=\"mock-psp-xpay-view\" method=\"POST\"><input type=\"hidden\" " +
-            "       name=\"action\" value=\"fraud\"><input type=\"hidden\" name=\"merchantId\" value=\"31320986\">" +
-            "       <input type=\"hidden\" name=\"description\" value=\"7090132540_1663077273191\"><input type=\"hidden\"" +
-            "       name=\"gdiUrl\" value=\"\"><input type=\"hidden\" name=\"gdiNotify\" value=\"\"></form>" +
-            "      <script type=\"text/javascript\"> moveWindow(); </script>" +
-            "   </body>" +
-            "</html>";
+    @Autowired
+    private TableConfigRepository configRepository;
+
+    private String outcomeConfig;
+    private XPayErrorEnum errorConfig;
+
+    private static final String HTML_TO_RETURN = createHtml();
+
+    private void refreshConfigs() {
+        outcomeConfig = configRepository.findByPropertyKey(XPAY_AUTH_OUTCOME).getPropertyValue();
+        errorConfig = getErrorConfig();
+    }
 
     @PostMapping("/ecomm/api/paga/autenticazione3DS")
-    public ResponseEntity<Object> paymentAuthorization(@RequestBody XPayAuthRequest request) {
+    public ResponseEntity<Object> paymentAuthorization(@Valid @RequestBody XPayAuthRequest request) {
+        refreshConfigs();
+
         String codiceTransazione = request.getCodiceTransazione();
         log.info("XPay autenticazione3DS - create AuthResponse for transactionId: " + codiceTransazione);
         Long timeStamp = System.currentTimeMillis();
         String idOperazione = UUID.randomUUID().toString();
+
+        saveXpayAuthRequest(idOperazione, request, timeStamp);
+
+        String macToReturn;
         try {
-            saveXpayAuthRequest(idOperazione, request, timeStamp);
-            String macToReturn = getMacToReturn(codiceTransazione, request.getDivisa(), request.getImporto(), request.getTimeStamp());
-            if (StringUtils.equals(request.getMac(), macToReturn)) {
+            macToReturn = getMacToReturn(codiceTransazione, request.getDivisa(), request.getImporto(), request.getTimeStamp());
+        } catch (Exception e) {
+            log.error("An exception occurred while processing the request: ", e);
+            XPayErrorEnum macError = XPayErrorEnum.ERROR_50;
+            XPayAuthResponse xPayAuthResponse = createXpayAuthResponse(EsitoXpay.KO, idOperazione, timeStamp, "error");
+            xPayAuthResponse.setErrore(new XpayError(macError.getErrorCode(), macError.getDescription()));
+
+            return ResponseEntity.status(macError.getHttpStatus()).body(xPayAuthResponse);
+        }
+
+        if(outcomeConfig.equals("OK")) {
+            if (macToReturn.equals(request.getMac())) {
                 log.info("MAC verified. Generating response");
                 XPayAuthResponse xpayResponse = createXpayAuthResponse(EsitoXpay.OK, idOperazione, timeStamp, macToReturn);
                 xpayResponse.setHtml(HTML_TO_RETURN);
+
                 return ResponseEntity.ok().body(xpayResponse);
             } else {
                 log.info("MAC not verified. Generating KO response");
+                XPayErrorEnum macNotVerified = XPayErrorEnum.ERROR_3;
                 XPayAuthResponse xPayAuthResponse = createXpayAuthResponse(EsitoXpay.KO, idOperazione, timeStamp, macToReturn);
-                xPayAuthResponse.setErrore(new XpayError(3L, "MAC errato"));
-                return ResponseEntity.internalServerError().body(xPayAuthResponse);
+                xPayAuthResponse.setErrore(new XpayError(macNotVerified.getErrorCode(), macNotVerified.getDescription()));
+
+                return ResponseEntity.status(macNotVerified.getHttpStatus()).body(xPayAuthResponse);
             }
-        } catch (Exception e) {
-            log.error("An exception occurred while processing the request", e);
-            XPayAuthResponse xPayAuthResponse = createXpayAuthResponse(EsitoXpay.KO, idOperazione, timeStamp, "error");
-            xPayAuthResponse.setErrore(new XpayError(50L, "Impossibile calcolare il mac"));
-            return ResponseEntity.internalServerError().body(xPayAuthResponse);
+        } else {
+            XPayAuthResponse xPayAuthResponse = createXpayAuthResponse(EsitoXpay.KO, idOperazione, timeStamp, macToReturn);
+            xPayAuthResponse.setErrore(new XpayError(errorConfig.getErrorCode(), errorConfig.getDescription()));
+
+            return ResponseEntity.status(errorConfig.getHttpStatus()).body(xPayAuthResponse);
         }
     }
 
@@ -121,5 +137,34 @@ public class XPayController {
             builder.append(String.format("%02x", b));
         }
         return builder.toString();
+    }
+
+    private XPayErrorEnum getErrorConfig() {
+        String errorCode = configRepository.findByPropertyKey(XPAY_AUTH_ERROR).getPropertyValue();
+
+        //If the errorCode is valid, the correct XPayErrorEnum is returned.
+        //If it's invalid, a Generic Error (ERROR_97) is returned as default.
+        if(EnumUtils.isValidEnum(XPayErrorEnum.class, "ERROR_" + errorCode)) {
+            return XPayErrorEnum.valueOf("ERROR_" + errorCode);
+        }
+
+        return XPayErrorEnum.ERROR_97;
+    }
+
+    private static String createHtml() {
+        return "<html>" +
+                "   <head>" +
+                "      <title>Gestione Pagamento - Autenticazione</title>" +
+                "      <script type=\"text/javascript\" language=\"javascript\">function moveWindow() { " +
+                "           document.tdsFraudForm.submit();}</script>" +
+                "   </head>" +
+                "   <body>" +
+                "      <form name=\"tdsFraudForm\" action=\"mock-psp-xpay-view\" method=\"POST\"><input type=\"hidden\" " +
+                "       name=\"action\" value=\"fraud\"><input type=\"hidden\" name=\"merchantId\" value=\"31320986\">" +
+                "       <input type=\"hidden\" name=\"description\" value=\"7090132540_1663077273191\"><input type=\"hidden\"" +
+                "       name=\"gdiUrl\" value=\"\"><input type=\"hidden\" name=\"gdiNotify\" value=\"\"></form>" +
+                "      <script type=\"text/javascript\"> moveWindow(); </script>" +
+                "   </body>" +
+                "</html>";
     }
 }

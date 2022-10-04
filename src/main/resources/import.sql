@@ -11,6 +11,8 @@ INSERT INTO config(id, property_key, property_value) VALUES (10, 'POSTEPAY_REDIR
 INSERT INTO config(id, property_key, property_value) VALUES (11, 'POSTEPAY_REFUND_OUTCOME', 'OK');
 INSERT INTO config(id, property_key, property_value) VALUES (12, 'POSTEPAY_ONBOARDING_OUTCOME', 'OK');
 INSERT INTO config(id, property_key, property_value) VALUES (13, 'POSTEPAY_PAYMENT_DETAILS_OUTCOME', 'OK');
+INSERT INTO config(id, property_key, property_value) VALUES (14, 'XPAY_AUTH_OUTCOME', 'OK');
+INSERT INTO config(id, property_key, property_value) VALUES (15, 'XPAY_AUTH_ERROR', '97L');
 
 INSERT INTO client(id, client_name, base_url) VALUES (1, 'local', 'http://host.docker.internal:8080');
 INSERT INTO client(id, client_name, base_url) VALUES (2, 'sit', 'https://api.dev.platform.pagopa.it');
