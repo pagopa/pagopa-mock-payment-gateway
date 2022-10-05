@@ -427,6 +427,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/XPayAuthResponseError'
 
+  /xpay/change/autenticazione3DS/outcome:
+    post:
+      tags:
+        - XPay Change Outcome Controller
+      operationId: xpayChangeAuthenticationOutcome
+      summary: permette di cambiare l'outcome dell'autenticazione3DS
+      parameters:
+        - in: query
+          name: outcome
+          schema:
+            type: string
+            enum:
+              - "OK"
+              - "KO"
+
+        - in: query
+          name: errorCode
+          schema:
+            type: long
+      responses:
+        "200":
+          description: OK
+
 components:
   schemas:
     PostePayError:
