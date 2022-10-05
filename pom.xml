@@ -85,6 +85,12 @@
             <version>2.1.214</version>
             <scope>runtime</scope>
         </dependency>
+        <!-- Swagger UI -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.6.9</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
