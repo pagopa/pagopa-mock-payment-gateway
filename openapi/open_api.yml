@@ -426,7 +426,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/XPayAuthResponseError'
-
   /xpay/change/autenticazione3DS/outcome:
     post:
       tags:
@@ -436,20 +435,20 @@ paths:
       parameters:
         - in: query
           name: outcome
+          example: "OK"
           schema:
             type: string
             enum:
               - "OK"
               - "KO"
-
         - in: query
           name: errorCode
+          example: 97L
           schema:
-            type: long
+            type: number
       responses:
         "200":
           description: OK
-
 components:
   schemas:
     PostePayError:
