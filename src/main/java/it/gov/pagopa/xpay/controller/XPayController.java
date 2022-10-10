@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -50,7 +51,7 @@ public class XPayController {
     }
 
     @PostMapping("/ecomm/api/paga/autenticazione3DS")
-    public ResponseEntity<Object> paymentAuthorization(@RequestBody XPayAuthRequest request) {
+    public ResponseEntity<Object> paymentAuthorization(@Valid @RequestBody XPayAuthRequest request) {
         log.info("Request from PGS: " + request);
         refreshConfigs();
 
@@ -77,7 +78,7 @@ public class XPayController {
             if (macToReturn.equals(request.getMac())) {
                 log.info("MAC verified. Generating response");
                 XPayAuthResponse xpayResponse = createXpayAuthResponse(EsitoXpay.OK, idOperazione, timeStamp, macToReturn);
-                xpayResponse.setHtml(HTML_TO_RETURN);
+                xpayResponse.setHtml(HTML_TO_RETURN.replace("mock-psp-xpay-view", request.getUrlRisposta()));
 
                 return ResponseEntity.ok().body(xpayResponse);
             } else {
