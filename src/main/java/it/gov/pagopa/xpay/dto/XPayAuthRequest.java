@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 
 @Data
@@ -13,24 +11,24 @@ import java.math.BigInteger;
 @NoArgsConstructor
 public class XPayAuthRequest {
 
-    @NotBlank
+    //@NotBlank
     private String apiKey;
-    @NotBlank
+//    @NotBlank
     private String urlRisposta;
-    @NotBlank
+//    @NotBlank
     private String codiceTransazione;
-    @NotNull
+//    @NotNull
     private BigInteger importo;
-    @NotNull
+//    @NotNull
     private Long divisa;
-    @NotBlank
+//    @NotBlank
     private String pan;
-    @NotBlank
+//    @NotBlank
     private String scadenza;
-    @NotBlank
+//    @NotBlank
     private String cvv;
-    @NotBlank
+//    @NotBlank
     private String timeStamp;
-    @NotBlank
+//    @NotBlank
     private String mac;
 }
