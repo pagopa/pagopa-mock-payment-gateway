@@ -13,6 +13,8 @@ INSERT INTO config(id, property_key, property_value) VALUES (12, 'POSTEPAY_ONBOA
 INSERT INTO config(id, property_key, property_value) VALUES (13, 'POSTEPAY_PAYMENT_DETAILS_OUTCOME', 'OK');
 INSERT INTO config(id, property_key, property_value) VALUES (14, 'XPAY_AUTH_OUTCOME', 'OK');
 INSERT INTO config(id, property_key, property_value) VALUES (15, 'XPAY_AUTH_ERROR', '97L');
+INSERT INTO config(id, property_key, property_value) VALUES (16, 'XPAY_PAYMENT_OUTCOME', 'OK');
+INSERT INTO config(id, property_key, property_value) VALUES (17, 'XPAY_PAYMENT_ERROR', '97L');
 
 INSERT INTO client(id, client_name, base_url) VALUES (1, 'local', 'http://host.docker.internal:8080');
 INSERT INTO client(id, client_name, base_url) VALUES (2, 'sit', 'https://api.dev.platform.pagopa.it');
