@@ -81,11 +81,11 @@ public class XPayPayment3DSService {
         }
     }
 
-    private XPayPaymentResponse createXPayPaymentResponse(XPayOutcome XPayOutcome, String idOperazione, String mac,
+    private XPayPaymentResponse createXPayPaymentResponse(XPayOutcome xPayOutcome, String idOperazione, String mac,
                                                           XPayErrorEnum error) {
 
         XPayPaymentResponse xPayPaymentResponse = new XPayPaymentResponse();
-        xPayPaymentResponse.setEsito(XPayOutcome);
+        xPayPaymentResponse.setEsito(xPayOutcome);
         xPayPaymentResponse.setIdOperazione(idOperazione);
         xPayPaymentResponse.setTimeStamp(System.currentTimeMillis());
         xPayPaymentResponse.setMac(mac);
