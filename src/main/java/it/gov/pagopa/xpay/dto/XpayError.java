@@ -10,9 +10,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class XpayError implements Serializable {
-
     private Long codice;
     private String messaggio;
-
 }
 

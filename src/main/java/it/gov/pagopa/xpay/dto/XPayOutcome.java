@@ -1,6 +1,6 @@
 package it.gov.pagopa.xpay.dto;
 
-public enum EsitoXpay {
+public enum XPayOutcome {
         OK,
         KO
 }
