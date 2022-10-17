@@ -1,6 +1,8 @@
 package it.gov.pagopa.xpay.entity;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.math.BigInteger;
@@ -44,13 +46,11 @@ public class XPayPayment {
     private String cvv;
 
     @Column(name = "timestamp_request")
-    private String timeStamp_request;
+    private String timestampRequest;
 
     @Column(name = "timestamp_response")
-    private Long  timeStamp_response;
+    private Long timestampResponse;
 
     @Column(name = "mac")
     private String mac;
-
-
 }

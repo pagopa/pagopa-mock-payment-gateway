@@ -37,7 +37,7 @@ public class XPayAuth3DSService {
 
     private void refreshConfigs() {
         outcomeConfig = configRepository.findByPropertyKey(XPAY_AUTH_OUTCOME).getPropertyValue();
-        errorConfig = XPayUtils.getErrorConfig(configRepository.findByPropertyKey(XPAY_AUTH_ERROR).getPropertyValue());;
+        errorConfig = XPayUtils.getErrorConfig(configRepository.findByPropertyKey(XPAY_AUTH_ERROR).getPropertyValue());
     }
 
     public ResponseEntity<XPayAuthResponse> getMock(XPayAuthRequest request) {
@@ -95,8 +95,8 @@ public class XPayAuth3DSService {
         xPayPayment.setMac(request.getMac());
         xPayPayment.setScadenza(request.getScadenza());
         xPayPayment.setCodiceTransazione(request.getCodiceTransazione());
-        xPayPayment.setTimeStamp_request(request.getTimeStamp());
-        xPayPayment.setTimeStamp_response(timeStamp);
+        xPayPayment.setTimestampRequest(request.getTimeStamp());
+        xPayPayment.setTimestampResponse(timeStamp);
         xPayPayment.setUrlRisposta(request.getUrlRisposta());
         xPayRepository.save(xPayPayment);
     }
