@@ -496,6 +496,87 @@ paths:
       responses:
         "200":
           description: OK
+
+  /xpay/ecomm/api/bo/storna:
+    post:
+      tags:
+        - XPay Refund Controller
+      operationId: xPayRefund
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/XPayRefundRequest"
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/XPayRefundResponse"
+  /xpay/ecomm/api/bo/situazioneOrdine:
+    post:
+      tags:
+        - XPay OrderStatus Controller
+      operationId: xPayOrderStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/XPayOrderRequest"
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/XPayOrderResponse"
+  /xpay/change/storna/outcome:
+    post:
+      tags:
+        - XPay Refund Change Outcome Controller
+      operationId: xPayRefundChangeOutcome
+      parameters:
+        - name: outcome
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - OK
+              - KO
+        - name: errorCode
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /xpay/change/situazioneOrdine/outcome:
+    post:
+      tags:
+        - XPay OrderStatus Change Outcome Controller
+      operationId: xPayOrderStatusChangeOutcome
+      parameters:
+        - name: outcome
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - OK
+              - KO
+        - name: errorCode
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
 components:
   schemas:
     PostePayError:
@@ -1140,6 +1221,183 @@ components:
         errore:
           $ref: '#/components/schemas/XPayError'
         mac:
+          type: string
+    XPayRefundRequest:
+      required:
+        - apiKey
+        - codiceTransazione
+        - divisa
+        - importo
+        - mac
+        - timeStamp
+      type: object
+      properties:
+        apiKey:
+          type: string
+        codiceTransazione:
+          type: string
+        importo:
+          type: integer
+        divisa:
+          type: integer
+          format: int64
+        timeStamp:
+          type: string
+        mac:
+          type: string
+        idContabParzialePayPal:
+          type: string
+    XPayInfoApm:
+      type: object
+      properties:
+        apm:
+          type: string
+        info:
+          type: string
+    XPayRefundResponse:
+      type: object
+      properties:
+        esito:
+          type: string
+          enum:
+            - OK
+            - KO
+        idOperazione:
+          type: string
+        timeStamp:
+          type: integer
+          format: int64
+        mac:
+          type: string
+        infoAPM:
+          "$ref": "#/components/schemas/XPayInfoApm"
+        errore:
+          "$ref": "#/components/schemas/XPayError"
+    XPayOrderRequest:
+      required:
+        - apiKey
+        - codiceTransazione
+        - mac
+        - timeStamp
+      type: object
+      properties:
+        apiKey:
+          type: string
+        codiceTransazione:
+          type: string
+        timeStamp:
+          type: string
+        mac:
+          type: string
+    XPayOrderResponse:
+      type: object
+      properties:
+        timeStamp:
+          type: integer
+          format: int64
+        esito:
+          type: string
+          enum:
+            - OK
+            - KO
+        idOperazione:
+          type: string
+        scadenza:
+          type: string
+        mac:
+          type: string
+        errore:
+          "$ref": "#/components/schemas/XPayError"
+        report:
+          "$ref": "#/components/schemas/XPayReport"
+    XPayReport:
+      type: object
+      properties:
+        numeroMerchant:
+          type: string
+        codiceTransazione:
+          type: string
+        importo:
+          type: integer
+        divisa:
+          type: string
+        codiceAutorizzazione:
+          type: string
+        brand:
+          type: string
+        tipoPagamento:
+          type: string
+        tipoTransazione:
+          type: string
+        nazione:
+          type: string
+        tipoProdotto:
+          type: string
+        pan:
+          type: string
+        parametri:
+          type: string
+        stato:
+          type: string
+        dataTransazione:
+          type: string
+        mail:
+          type: string
+        dettaglio:
+          "$ref": "#/components/schemas/XPayReportDetail"
+    XPayReportDetail:
+      type: object
+      properties:
+        nome:
+          type: string
+        cognome:
+          type: string
+        mail:
+          type: string
+        importo:
+          type: integer
+        importoRifiutato:
+          type: integer
+        divisa:
+          type: string
+        stato:
+          type: string
+        codiceTransazione:
+          type: string
+        parametriAggiuntivi:
+          type: string
+        controvaloreValuta:
+          type: integer
+        decimaliValuta:
+          type: integer
+          format: int32
+        tassoCambio:
+          type: integer
+        codiceValuta:
+          type: integer
+          format: int32
+        flagValuta:
+          type: boolean
+        operazioni:
+          type: array
+          items:
+            "$ref": "#/components/schemas/XPayReportOperations"
+    XPayReportOperations:
+      type: object
+      properties:
+        tipoOperazione:
+          type: string
+        importo:
+          type: integer
+        divisa:
+          type: string
+        stato:
+          type: string
+        dataOperazione:
+          type: string
+        utente:
+          type: string
+        idContabParzialePayPal:
           type: string
   securitySchemes:
     bearerAuth:

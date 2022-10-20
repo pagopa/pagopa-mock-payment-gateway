@@ -29,4 +29,18 @@ public class XPaySettingsController {
 
         configService.updateXPayOutcomeAndError(XPAY_PAYMENT_OUTCOME, outcome, XPAY_PAYMENT_ERROR, errorCode);
     }
+
+    @PostMapping("/storna/outcome")
+    public void xPayRefundChangeOutcome(@RequestParam(required = false) XPayOutcome outcome,
+                                        @RequestParam(required = false) String errorCode) {
+
+        configService.updateXPayOutcomeAndError(XPAY_REFUND_OUTCOME, outcome, XPAY_REFUND_ERROR, errorCode);
+    }
+
+    @PostMapping("/situazioneOrdine/outcome")
+    public void xPayOrderStatusChangeOutcome(@RequestParam(required = false) XPayOutcome outcome,
+                                             @RequestParam(required = false) String errorCode) {
+
+        configService.updateXPayOutcomeAndError(XPAY_ORDER_STATUS_OUTCOME, outcome, XPAY_ORDER_STATUS_ERROR, errorCode);
+    }
 }

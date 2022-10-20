@@ -65,7 +65,7 @@ public class XPayPayment3DSService {
                 log.info("XPay Paga3DS - MAC verified");
                 XPayPaymentResponse xPayPaymentResponse = createXPayPaymentResponse(XPayOutcome.OK, idOperazione, macToReturn, null);
                 if(request.getParametriAggiuntivi() != null)
-                    xPayPaymentResponse.setParametriAggiuntivi(request.getParametriAggiuntivi());;
+                    xPayPaymentResponse.setParametriAggiuntivi(request.getParametriAggiuntivi());
 
                 return ResponseEntity.ok().body(xPayPaymentResponse);
             } else {
@@ -103,7 +103,7 @@ public class XPayPayment3DSService {
             xPayPaymentResponse.setTipoTransazione("3DS_FULL");
             xPayPaymentResponse.setPpo("Apple pay");
         } else {
-            xPayPaymentResponse.setErrore(new XpayError(error.getErrorCode(), error.getDescription()));
+            xPayPaymentResponse.setErrore(new XPayError(error.getErrorCode(), error.getDescription()));
         }
 
         return xPayPaymentResponse;

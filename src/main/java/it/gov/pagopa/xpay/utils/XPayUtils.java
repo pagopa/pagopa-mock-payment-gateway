@@ -29,6 +29,14 @@ public class XPayUtils {
         return hashMac(realMac);
     }
 
+    public static String getMacToReturn(String codiceTransazione, String timeStamp, String apiKey, String chiaveSegreta) throws Exception {
+
+        String realMac = String.format("apiKey=%scodiceTransazione=%stimeStamp=%s%s",
+                apiKey, codiceTransazione, timeStamp, chiaveSegreta);
+
+        return hashMac(realMac);
+    }
+
     private static String hashMac(String realMac) throws Exception {
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
         byte[] in = digest.digest(realMac.getBytes(StandardCharsets.UTF_8));

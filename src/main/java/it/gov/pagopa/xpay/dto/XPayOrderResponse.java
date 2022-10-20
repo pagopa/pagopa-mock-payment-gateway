@@ -9,20 +9,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class XPayPaymentResponse {
+public class XPayOrderResponse {
     private Long timeStamp;
     private XPayOutcome esito;
     private String idOperazione;
-    private String codiceAutorizzazione;
-    private String codiceConvenzione;
-    private String data;
-    private String nazione;
-    private String regione;
-    private String brand;
-    private String tipoProdotto;
-    private String tipoTransazione;
+    private String scadenza; //Formato: aaaamm
     private String mac;
-    private String ppo;
     private XPayError errore;
-    private XPayAdditionalParameters parametriAggiuntivi;
+    private XPayReport report;
 }
