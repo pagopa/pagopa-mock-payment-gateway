@@ -12,6 +12,6 @@ public class XPayAuthResponse {
     private String idOperazione;
     private Long timeStamp;
     private String html;
-    private XpayError errore;
+    private XPayError errore;
     private String mac;
 }

@@ -15,6 +15,6 @@ public class XPayOrderResponse {
     private String idOperazione;
     private String scadenza; //Formato: aaaamm
     private String mac;
-    private XpayError errore;
+    private XPayError errore;
     private XPayReport report;
 }

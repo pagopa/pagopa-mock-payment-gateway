@@ -23,6 +23,6 @@ public class XPayPaymentResponse {
     private String tipoTransazione;
     private String mac;
     private String ppo;
-    private XpayError errore;
+    private XPayError errore;
     private XPayAdditionalParameters parametriAggiuntivi;
 }

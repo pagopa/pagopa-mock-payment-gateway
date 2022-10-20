@@ -89,7 +89,7 @@ public class XPayRefundService {
         if(error == null)
             xPayRefundResponse.setInfoAPM(new XPayInfoApm("12345", "Info APM"));
         else
-            xPayRefundResponse.setErrore(new XpayError(error.getErrorCode(), error.getDescription()));
+            xPayRefundResponse.setErrore(new XPayError(error.getErrorCode(), error.getDescription()));
 
         return xPayRefundResponse;
     }

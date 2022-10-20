@@ -109,7 +109,7 @@ public class XPayAuth3DSService {
         xPayAuthResponse.setIdOperazione(idOperazione);
         xPayAuthResponse.setTimeStamp(timeStamp);
         xPayAuthResponse.setMac(mac);
-        if(error != null) xPayAuthResponse.setErrore(new XpayError(error.getErrorCode(), error.getDescription()));
+        if(error != null) xPayAuthResponse.setErrore(new XPayError(error.getErrorCode(), error.getDescription()));
 
         return xPayAuthResponse;
     }

@@ -103,7 +103,7 @@ public class XPayPayment3DSService {
             xPayPaymentResponse.setTipoTransazione("3DS_FULL");
             xPayPaymentResponse.setPpo("Apple pay");
         } else {
-            xPayPaymentResponse.setErrore(new XpayError(error.getErrorCode(), error.getDescription()));
+            xPayPaymentResponse.setErrore(new XPayError(error.getErrorCode(), error.getDescription()));
         }
 
         return xPayPaymentResponse;

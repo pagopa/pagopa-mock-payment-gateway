@@ -15,5 +15,5 @@ public class XPayRefundResponse {
     private Long timeStamp;
     private String mac;
     private XPayInfoApm infoAPM;
-    private XpayError errore;
+    private XPayError errore;
 }

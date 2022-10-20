@@ -95,7 +95,7 @@ public class XPayOrderStatusService {
         if(error == null)
             xPayOrderResponse.setReport(createXPayReport());
         else
-            xPayOrderResponse.setErrore(new XpayError(error.getErrorCode(), error.getDescription()));
+            xPayOrderResponse.setErrore(new XPayError(error.getErrorCode(), error.getDescription()));
 
         return xPayOrderResponse;
     }
