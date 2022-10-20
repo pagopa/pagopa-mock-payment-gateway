@@ -15,6 +15,10 @@ INSERT INTO config(id, property_key, property_value) VALUES (14, 'XPAY_AUTH_OUTC
 INSERT INTO config(id, property_key, property_value) VALUES (15, 'XPAY_AUTH_ERROR', '97L');
 INSERT INTO config(id, property_key, property_value) VALUES (16, 'XPAY_PAYMENT_OUTCOME', 'OK');
 INSERT INTO config(id, property_key, property_value) VALUES (17, 'XPAY_PAYMENT_ERROR', '97L');
+INSERT INTO config(id, property_key, property_value) VALUES (18, 'XPAY_REFUND_OUTCOME', 'OK');
+INSERT INTO config(id, property_key, property_value) VALUES (19, 'XPAY_REFUND_ERROR', '97L');
+INSERT INTO config(id, property_key, property_value) VALUES (20, 'XPAY_ORDER_STATUS_OUTCOME', 'OK');
+INSERT INTO config(id, property_key, property_value) VALUES (21, 'XPAY_ORDER_STATUS_ERROR', '97L');
 
 INSERT INTO client(id, client_name, base_url) VALUES (1, 'local', 'http://host.docker.internal:8080');
 INSERT INTO client(id, client_name, base_url) VALUES (2, 'sit', 'https://api.dev.platform.pagopa.it');

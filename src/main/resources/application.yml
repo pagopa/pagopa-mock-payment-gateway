@@ -51,3 +51,7 @@ mock-profile: ${MOCK_PROFILE:local}
 xpay:
   apikey-alias: ${XPAY_APIKEY_ALIAS:local}
   secret-key: ${XPAY_SECRET_KEY:local}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
