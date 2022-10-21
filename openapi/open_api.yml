@@ -1309,7 +1309,9 @@ components:
         errore:
           "$ref": "#/components/schemas/XPayError"
         report:
-          "$ref": "#/components/schemas/XPayReport"
+          type: array
+          items:
+            "$ref": "#/components/schemas/XPayReport"
     XPayReport:
       type: object
       properties:

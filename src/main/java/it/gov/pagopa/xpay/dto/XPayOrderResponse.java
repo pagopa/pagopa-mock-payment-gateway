@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,5 +18,5 @@ public class XPayOrderResponse {
     private String scadenza; //Formato: aaaamm
     private String mac;
     private XPayError errore;
-    private XPayReport report;
+    private List<XPayReport> report;
 }
