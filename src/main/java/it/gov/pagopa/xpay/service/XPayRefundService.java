@@ -48,8 +48,7 @@ public class XPayRefundService {
 
         try {
             log.info("XPay Refund - Generating MAC for transactionId: " + codiceTransazione);
-            macToReturn = XPayUtils.getMacToReturn(codiceTransazione, request.getDivisa(), request.getImporto(),
-                    request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToReturn = XPayUtils.getMacToReturn(codiceTransazione, request.getTimeStamp(), apiKey, chiaveSegreta);
         } catch (Exception e) {
             log.error("XPay Refund - Exception during the creation of the MAC string: ", e);
             XPayErrorEnum error = XPayErrorEnum.ERROR_50;

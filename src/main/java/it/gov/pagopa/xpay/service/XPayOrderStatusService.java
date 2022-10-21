@@ -100,7 +100,7 @@ public class XPayOrderStatusService {
         return xPayOrderResponse;
     }
 
-    private XPayReport createXPayReport() {
+    private List<XPayReport> createXPayReport() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
 
         XPayReport xPayReport = new XPayReport();
@@ -119,7 +119,7 @@ public class XPayOrderStatusService {
         xPayReport.setMail("prova@mail.it");
         xPayReport.setDettaglio(createXPayReportDetail());
 
-        return xPayReport;
+        return Collections.singletonList(xPayReport);
     }
 
     private XPayReportDetail createXPayReportDetail() {
