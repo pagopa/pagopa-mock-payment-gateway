@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+
+</head>
+<body>
+<div th:fragment="header">
+    <script type="text/javascript" th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/header.js}"></script>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+        <a class="navbar-brand" th:href="@{/home}">Home</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li id="navbar_wiki" class="nav-item">
+                    <a class="nav-link" th:href="@{/wiki/home}">Wiki</a>
+                </li>
+                <li id="navbar_manage-nodo" class="nav-item" th:if="${SPRING_PROFILE != 'azure'}">
+                    <a class="nav-link" th:href="@{/manage-nodo}">Nodo</a>
+                </li>
+                <li class="nav-item" id="navbar_response_custom" th:if="${NODO_CUSTOM_RESPONSE_ENABLED == 'true'}">
+                    <a class="nav-link" th:href="@{/response-custom}">Nodo Resp.</a>
+                </li>
+                <li class="nav-item" id="navbar_cc">
+                    <a class="nav-link" th:href="@{/cc}">Credit Cards</a>
+                </li>
+                <li class="nav-item" id="navbar_pa_new_payment_gen" th:if="${SPRING_PROFILE != 'azure'}">
+                    <a class="nav-link" th:href="@{/pa/payment/gen/nodo}">Payment Gen</a>
+                </li>
+                <li class="nav-item dropdown" id="navbar_cd_user_controller">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        IO
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" th:href="@{/cd/user/controller}">Users</a>
+                        <a class="dropdown-item" th:href="@{/cd/emulate/webview/pay}">Pay</a>
+                        <a class="dropdown-item" th:href="@{/cd/emulate/webview/verification}">Verify</a>
+                        <a class="dropdown-item" th:href="@{/cd/emulate/webview/paypal/onboarding}">Paypal Onboarding</a>
+                        <a class="dropdown-item" th:href="@{/cd/emulate/webview/postepay/onboarding}">Postepay Onboarding</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown" id="navbar_pgs">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPgs" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        PGS
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" th:href="@{/pgs/request-payment}">Start Payment</a>
+                    </div>
+                </li>
+                <li class="nav-item" id="navbar_wisp_manager" th:if="${SPRING_PROFILE != 'azure'}">
+                    <a class="nav-link" th:href="@{/wisp-manager}">Wisp</a>
+                </li>
+                <li class="nav-item" id="navbar_bancomat_manager" th:if="${SPRING_PROFILE != 'azure'}">
+                    <a class="nav-link" th:href="@{/bancomat-manager/home}">Bancomat</a>
+                </li>
+                <li class="nav-item" id="navbar_satispay_manager" th:if="${SPRING_PROFILE != 'azure'}">
+                    <a class="nav-link" th:href="@{/satispay/controller}">Satispay</a>
+                </li>
+                <li class="nav-item" id="navbar_bpd_manager">
+                    <a class="nav-link" th:href="@{/bpd/controller}">BPD</a>
+                </li>
+                <li class="nav-item" id="navbar_cobadge_manager" th:if="${SPRING_PROFILE != 'azure'}">
+                    <a class="nav-link" th:href="@{/cobadge-manager/home}">Cobadge</a>
+                </li>
+                <li class="nav-item" id="navbar_3ds2.0_manager" th:if="${SPRING_PROFILE != 'azure'}">
+                    <a class="nav-link" th:href="@{/3ds2.0-manager/home}">3DS2</a>
+                </li>
+                <li class="nav-item" id="navbar_s4s_manager" th:if="${SPRING_PROFILE != 'azure'}">
+                    <a class="nav-link" th:href="@{/s4s-manager/home}">S4S</a>
+                </li>
+                <li class="nav-item" id="navbar_buyer_bank_manager">
+                    <a class="nav-link" th:href="@{/buyer-bank-manager/home}">BuyerBank</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>
+</body>
+</html>

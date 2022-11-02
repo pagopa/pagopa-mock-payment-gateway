@@ -1,0 +1,169 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.2.1/css/bootstrap.min.css}"/>
+    <link href="../../static/css/vpos.css" th:href="@{/static/css/vpos.css}" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css"
+          rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" th:href="@{/static/favicon.ico}"/>
+</head>
+
+<body>
+<div th:replace=" vpos/header :: header"></div>
+<div class="container">
+    <div class="row mb-3">
+        <form class="form-inline" action="#" th:action="@{/3ds2.0-manager/change-response}"
+              th:object="${vposHttpCodeResponse}"
+              method="post">
+            <div class="form-group">
+                <div class="input-group mr-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">HTTP Code VPOS Response</span>
+                    </div>
+                    <select th:field="*{propertyValue}" class="custom-select" id="vposHttpCodeResponse">
+                        <option th:each="enumValue : ${vposHttpCodeResponseEnum}" th:value="${enumValue.value()}"
+                                th:text="${enumValue}"
+                                th:selected="${vposHttpCodeResponse.propertyValue.equals(enumValue.value())}">
+                        </option>
+                    </select>
+                </div>
+                <input hidden type="text" th:field="*{propertyKey}" th:value="${vposHttpCodeResponse.propertyKey}"/>
+                <input hidden type="text" th:field="*{id}" th:value="${vposHttpCodeResponse.id}"/>
+                <input class="btn btn-outline-primary  mr-1" type="submit" value="Save"/>
+            </div>
+        </form>
+    </div>
+    <div class="row mb-3">
+        <form class="form-inline" action="#" th:action="@{/3ds2.0-manager/change-response}"
+              th:object="${method3Ds2Response}"
+              method="post">
+            <div class="form-group">
+                <div class="input-group mr-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Method Response</span>
+                    </div>
+                    <select th:field="*{propertyValue}" class="custom-select" id="method3Ds2Response">
+                        <option th:each="enumValue : ${method3Ds2bancomatResponseEnum}" th:value="${enumValue}"
+                                th:text="${enumValue}"
+                                th:selected="${method3Ds2Response.propertyValue.equals(enumValue)}">
+                        </option>
+                    </select>
+                </div>
+                <input hidden type="text" th:field="*{propertyKey}" th:value="${method3Ds2Response.propertyKey}"/>
+                <input hidden type="text" th:field="*{id}" th:value="${method3Ds2Response.id}"/>
+                <input class="btn btn-outline-primary  mr-1" type="submit" value="Save"/>
+            </div>
+        </form>
+    </div>
+    <div class="row mb-3">
+        <form class="form-inline" action="#" th:action="@{/3ds2.0-manager/change-response}"
+              th:object="${orderStatusResponse}"
+              method="post">
+            <div class="form-group">
+                <div class="input-group mr-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">OrderStatus ResultCode</span>
+                    </div>
+                    <select th:field="*{propertyValue}" class="custom-select" id="orderStatus">
+                        <option th:each="enumValue : ${orderStatusResponseEnum}" th:value="${enumValue.code}"
+                                th:text="${enumValue.name()}"
+                                th:selected="${orderStatusResponse.propertyValue.equals(enumValue.code)}">
+                        </option>
+                    </select>
+                </div>
+                <input hidden type="text" th:field="*{propertyKey}" th:value="${orderStatusResponse.propertyKey}"/>
+                <input hidden type="text" th:field="*{id}" th:value="${orderStatusResponse.id}"/>
+                <input class="btn btn-outline-primary  mr-1" type="submit" value="Save"/>
+            </div>
+        </form>
+    </div>
+    <div class="row mb-3">
+        <form class="form-inline" action="#" th:action="@{/3ds2.0-manager/change-response}"
+              th:object="${transactionStatus}"
+              method="post">
+            <div class="form-group">
+                <div class="input-group mr-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">OrderStatus TransactionStatus</span>
+                    </div>
+                    <select th:field="*{propertyValue}" class="custom-select" id="transactionStatus">
+                        <option th:each="enumValue : ${transactionStatusEnum}" th:value="${enumValue.code}"
+                                th:text="${enumValue.name()}"
+                                th:selected="${transactionStatus.propertyValue.equals(enumValue.code)}">
+                        </option>
+                    </select>
+                </div>
+                <input hidden type="text" th:field="*{propertyKey}" th:value="${transactionStatus.propertyKey}"/>
+                <input hidden type="text" th:field="*{id}" th:value="${transactionStatus.id}"/>
+                <input class="btn btn-outline-primary  mr-1" type="submit" value="Save"/>
+            </div>
+        </form>
+    </div>
+    <div class="row mb-3">
+        <div class="card w-100">
+            <div class="card-header">
+                3DS Flow
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <form class="form-inline" action="#" th:action="@{/3ds2.0-manager/change-response}"
+                          th:object="${step0Response}"
+                          method="post">
+                        <div class="form-group">
+                            <div class="input-group mr-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Step 0 Response</span>
+                                </div>
+                                <select th:field="*{propertyValue}" class="custom-select" id="step0"
+                                        onchange="onchangeStep0()">
+                                    <option th:each="enumValue : ${step0ResponseEnum}" th:value="${enumValue.code}"
+                                            th:text="${enumValue.name()}"
+                                            th:selected="${step0Response.propertyValue.equals(enumValue.code)}">
+                                    </option>
+                                </select>
+                            </div>
+                            <input hidden type="text" th:field="*{propertyKey}" th:value="${step0Response.propertyKey}"/>
+                            <input hidden type="text" th:field="*{id}" th:value="${step0Response.id}"/>
+                            <input class="btn btn-outline-primary  mr-1" type="submit" value="Save"/>
+                        </div>
+                    </form>
+                </div>
+                <div class="row mb-3">
+                    <form class="form-inline" action="#" th:action="@{/3ds2.0-manager/change-response}"
+                          th:object="${step1Response}"
+                          method="post">
+                        <fieldset disabled="disabled" id="fieldsetStep1">
+                            <div class="form-group">
+                                <div class="input-group mr-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Step 1 Response</span>
+                                    </div>
+                                    <select th:field="*{propertyValue}" class="custom-select" id="step1">
+                                        <option th:each="enumValue : ${step1ResponseEnum}" th:value="${enumValue.code}"
+                                                th:text="${enumValue.name()}"
+                                                th:selected="${step1Response.propertyValue.equals(enumValue.code)}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <input hidden type="text" th:field="*{propertyKey}"
+                                       th:value="${step1Response.propertyKey}"/>
+                                <input hidden type="text" th:field="*{id}" th:value="${step1Response.id}"/>
+                                <input class="btn btn-outline-primary  mr-1" type="submit" value="Save"/>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace=" vpos/footer :: footer"></div>
+<script type="text/javascript" th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script type="text/javascript" th:src="@{/webjars/bootstrap/4.2.1/js/bootstrap.bundle.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/util.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/3ds_manager.js}"></script>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+</body>
+</html>

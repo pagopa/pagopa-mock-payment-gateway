@@ -90,5 +90,16 @@ CREATE TABLE payment_xpay(
     timestamp_request timestamp not null,
     timestamp_response timestamp not null,
     mac varchar(100)
+);
 
-)
+CREATE TABLE TRANSACTION_3DS(
+    ORDER_ID varchar(50) PRIMARY KEY,
+    THREE_DS_SERVER_TRANS_ID varchar(100),
+    NOTIFY_URL varchar(200),
+    THREE_DS_MTD_NOTIFY_URL varchar(100),
+    OUTCOME varchar(50),
+    THREE_DS_MTD_COMPL_IND varchar(100),
+    PAN varchar(50),
+    AMOUNT varchar(50),
+    CURRENCY varchar(10)
+);

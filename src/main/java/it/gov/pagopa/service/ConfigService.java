@@ -1,4 +1,4 @@
-package it.gov.pagopa.xpay.service;
+package it.gov.pagopa.service;
 
 import it.gov.pagopa.db.entity.TableConfig;
 import it.gov.pagopa.db.repository.TableConfigRepository;
@@ -12,6 +12,14 @@ import org.springframework.stereotype.Service;
 public class ConfigService {
     @Autowired
     private TableConfigRepository configRepository;
+
+    public TableConfig getByKey(String key) {
+        return configRepository.findByPropertyKey(key);
+    }
+
+    public void save(TableConfig tableConfig) {
+        configRepository.save(tableConfig);
+    }
 
     public void updateXPayOutcomeAndError(String outcomeParam, XPayOutcome newOutcome, String errorParam, String newError) {
         if (newOutcome != null)

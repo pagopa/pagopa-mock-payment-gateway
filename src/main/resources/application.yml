@@ -55,3 +55,5 @@ xpay:
 springdoc:
   swagger-ui:
     path: /swagger-ui
+
+AZURE_API_PUBLIC_URL: ${AZURE_API_PUBLIC_URL:http://localhost:${server.port}}

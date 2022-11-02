@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>
+<form id="formMethod" class="form-inline" th:action="${threeDSMethodNotificationUrl}" method="POST">
+    <div class="form-group">
+        <div class="input-group mr-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Method 3DS 2.0 Issuer</span>
+            </div>
+        </div>
+        <input hidden type="text" name="threeDSMethodData" th:value="${methodData3Ds}"/>
+        <input class="btn btn-outline-primary  mr-1" type="submit" value="Send"/>
+    </div>
+</form>
+</body>
+<script type="text/javascript" th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script>
+    $('form#formMethod').submit();
+</script>
+</html>
