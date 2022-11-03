@@ -37,7 +37,7 @@ import java.util.function.Function;
 
 @Service
 @Log4j2
-public class VposAuthService {
+public class VposService {
     private static final String RETURN_CODE_OK = "00";
     private static final String RETURN_CODE_ERROR_INVALID_MAC = "04";
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -57,7 +57,7 @@ public class VposAuthService {
     @Value("${AZURE_API_PUBLIC_URL}")
     private String host;
 
-    public BPWXmlResponse authorize(String data) throws Exception {
+    public BPWXmlResponse getMock(String data) throws Exception {
         Function<String, Optional<TableConfig>> findByKeyOrThrow = key -> Optional.ofNullable(configService.getByKey(key));
 
         TableConfig tableConfig = findByKeyOrThrow.apply((VposConstants.VPOS_HTTP_CODE_RESPONSE)).orElseThrow(Exception::new);

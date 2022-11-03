@@ -25,7 +25,7 @@ import java.util.function.Function;
 @Controller
 @RequestMapping("/issuer/3ds2.0/")
 @Log4j2
-public class IssuerIController {
+public class IssuerController {
     @Autowired
     private ConfigService configService;
 
@@ -58,7 +58,7 @@ public class IssuerIController {
     }
 
     @PostMapping("/challenge")
-    public String acsFor3dsV2Challenge(Model model, @RequestParam String creq) {
+    public String challengeUrl(Model model, @RequestParam String creq) {
         String decodedCreq = new String(Base64Utils.decodeFromString(creq));
         String threeDSServerTransID = (String) new Gson().fromJson(decodedCreq, Map.class).get("threeDSServerTransID");
         Transaction3DsEntity byId = transaction3DsService.getByThreeDSServerTransId(threeDSServerTransID);

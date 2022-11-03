@@ -29,7 +29,7 @@ public class ManagerController {
     private ConfigService configService;
 
     @GetMapping("/home")
-    public String viewBancomatStatus(Model model) {
+    public String vposMockHome(Model model) {
         Function<String,TableConfig> findByKey = key -> Optional.ofNullable(configService.getByKey(key)).orElse(new TableConfig());
 
         model.addAttribute("method3Ds2Response", findByKey.apply(VPOS_METHOD_3DS2_RESPONSE));
@@ -54,7 +54,7 @@ public class ManagerController {
     }
 
     @PostMapping("/change-response")
-    private String saveBancomateResponse(@ModelAttribute TableConfig tableConfig) {
+    private String changeVposConfig(@ModelAttribute TableConfig tableConfig) {
         configService.save(tableConfig);
 
         return "redirect:/3ds2.0-manager/home";

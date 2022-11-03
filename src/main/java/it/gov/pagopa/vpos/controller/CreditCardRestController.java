@@ -1,6 +1,5 @@
 package it.gov.pagopa.vpos.controller;
 
-import it.gov.pagopa.vpos.dto.CreditCard;
 import it.gov.pagopa.vpos.dto.CreditCardResponse;
 import it.gov.pagopa.vpos.utils.VposCreditCardGenerator;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-
 
 @RestController
 @RequestMapping(value = "/cc")
@@ -28,7 +26,7 @@ public class CreditCardRestController {
     private static final List<String> POSSIBLE_CC_TYPE = Arrays.asList(VISA, MASTERCARD, MAESTRO, AMEX, DINERS);
 
     @GetMapping("generateCard")
-    public CreditCardResponse generateCard(@RequestParam String type, @RequestParam String returnCode) {
+    public CreditCardResponse generateCard(@RequestParam String type) {
         CreditCardResponse creditCardResponse;
 
         switch (type) {
@@ -53,14 +51,13 @@ public class CreditCardRestController {
                 creditCardResponse = new CreditCardResponse(dinersCardNumber, getUrlImg(DINERS));
                 break;
             case RAND:
-                creditCardResponse = generateCard(POSSIBLE_CC_TYPE.get(new Random().nextInt(POSSIBLE_CC_TYPE.size())), returnCode);
+                creditCardResponse = generateCard(POSSIBLE_CC_TYPE.get(new Random().nextInt(POSSIBLE_CC_TYPE.size())));
                 break;
             default:
                 creditCardResponse = CREDIT_CARD_RESPONSE_DEFAULT;
                 break;
         }
 
-        CreditCard.addCreditCard(creditCardResponse.getCardNumber(), returnCode);
         return creditCardResponse;
     }
 

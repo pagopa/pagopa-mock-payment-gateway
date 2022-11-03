@@ -16,11 +16,10 @@ public class ManagerRestController {
     private Transaction3DsService transaction3DsService;
 
     @PostMapping("/challenge/save/response")
-    public void viewBancomatStatus(@RequestBody SaveResponseChallenge3Ds2 saveResponseChallenge3Ds2) {
-        Transaction3DsEntity transaction3DsEntity = transaction3DsService.getByThreeDSServerTransId(
-                saveResponseChallenge3Ds2.getThreeDSServerTransID());
-
+    public void saveChallengeOutcome(@RequestBody SaveResponseChallenge3Ds2 saveResponseChallenge3Ds2) {
+        Transaction3DsEntity transaction3DsEntity = transaction3DsService.getByThreeDSServerTransId(saveResponseChallenge3Ds2.getThreeDSServerTransID());
         transaction3DsEntity.setOutcome(saveResponseChallenge3Ds2.getOutcome());
+
         transaction3DsService.save(transaction3DsEntity);
     }
 }
