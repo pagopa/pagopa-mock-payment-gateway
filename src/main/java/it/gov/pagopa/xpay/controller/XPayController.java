@@ -1,18 +1,13 @@
 package it.gov.pagopa.xpay.controller;
 
 import it.gov.pagopa.xpay.dto.*;
-import it.gov.pagopa.xpay.service.XPayAuth3DSService;
-import it.gov.pagopa.xpay.service.XPayOrderStatusService;
-import it.gov.pagopa.xpay.service.XPayPayment3DSService;
-import it.gov.pagopa.xpay.service.XPayRefundService;
+import it.gov.pagopa.xpay.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.math.BigInteger;
 
 @RestController
 @RequestMapping("/xpay")
@@ -28,6 +23,9 @@ public class XPayController {
 
     @Autowired
     private XPayOrderStatusService xPayOrderStatusService;
+
+    @Autowired
+    private XPayMacService xPayMacService;
 
     @PostMapping("/ecomm/api/paga/autenticazione3DS")
     public ResponseEntity<XPayAuthResponse> xPayAuthorization(@Valid @RequestBody XPayAuthRequest request) {
@@ -47,5 +45,13 @@ public class XPayController {
     @PostMapping("/ecomm/api/bo/situazioneOrdine")
     public ResponseEntity<XPayOrderResponse> xPayOrderStatus(@Valid @RequestBody XPayOrderRequest request) {
         return xPayOrderStatusService.getMock(request);
+    }
+
+    @GetMapping("/mac")
+    public ResponseEntity<XPayAuthResponse> generateMac(@RequestParam String codiceTransazione, @RequestParam String timeStamp,
+                                              @RequestParam(required = false) Long divisa,
+                                              @RequestParam(required = false) BigInteger importo) {
+
+        return xPayMacService.getMac(codiceTransazione, divisa, importo, timeStamp);
     }
 }

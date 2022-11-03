@@ -405,9 +405,8 @@ paths:
   /xpay/ecomm/api/paga/autenticazione3DS:
     post:
       tags:
-        - XPay Authentication Controller
+        - XPay Controller
       operationId: paymentAuthorization
-      summary: esegue l'autenticazione3DS
       requestBody:
         content:
           application/json:
@@ -429,9 +428,8 @@ paths:
   /xpay/change/autenticazione3DS/outcome:
     post:
       tags:
-        - XPay Authentication Change Outcome Controller
+        - XPay Change Outcome Controller
       operationId: xpayChangeAuthenticationOutcome
-      summary: permette di cambiare l'outcome dell'autenticazione3DS
       parameters:
         - in: query
           name: outcome
@@ -452,9 +450,8 @@ paths:
   /xpay/ecomm/api/paga/paga3DS:
     post:
       tags:
-        - XPay Payment Controller
+        - XPay Controller
       operationId: xPayPayment
-      summary: esegue la paga3DS
       requestBody:
         content:
           application/json:
@@ -476,9 +473,8 @@ paths:
   /xpay/change/paga3DS/outcome:
     post:
       tags:
-        - XPay Payment Change Outcome Controller
+        - XPay Change Outcome Controller
       operationId: xpayChangePaymentOutcome
-      summary: permette di cambiare l'outcome della paga3DS
       parameters:
         - in: query
           name: outcome
@@ -496,11 +492,10 @@ paths:
       responses:
         "200":
           description: OK
-
   /xpay/ecomm/api/bo/storna:
     post:
       tags:
-        - XPay Refund Controller
+        - XPay Controller
       operationId: xPayRefund
       requestBody:
         content:
@@ -518,7 +513,7 @@ paths:
   /xpay/ecomm/api/bo/situazioneOrdine:
     post:
       tags:
-        - XPay OrderStatus Controller
+        - XPay Controller
       operationId: xPayOrderStatus
       requestBody:
         content:
@@ -536,7 +531,7 @@ paths:
   /xpay/change/storna/outcome:
     post:
       tags:
-        - XPay Refund Change Outcome Controller
+        - XPay Change Outcome Controller
       operationId: xPayRefundChangeOutcome
       parameters:
         - name: outcome
@@ -558,7 +553,7 @@ paths:
   /xpay/change/situazioneOrdine/outcome:
     post:
       tags:
-        - XPay OrderStatus Change Outcome Controller
+        - XPay Change Outcome Controller
       operationId: xPayOrderStatusChangeOutcome
       parameters:
         - name: outcome
@@ -577,6 +572,46 @@ paths:
       responses:
         '200':
           description: OK
+  /xpay/mac:
+    get:
+      tags:
+        - XPay Controller
+      operationId: generateMac
+      parameters:
+        - name: codiceTransazione
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: timeStamp
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: divisa
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: importo
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XPayAuthResponseSuccess'
+        default:
+          description: Errore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XPayAuthResponseError'
 components:
   schemas:
     PostePayError:
