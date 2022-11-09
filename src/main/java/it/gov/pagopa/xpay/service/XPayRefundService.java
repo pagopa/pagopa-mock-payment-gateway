@@ -44,11 +44,14 @@ public class XPayRefundService {
 
         String codiceTransazione = request.getCodiceTransazione();
         String idOperazione = UUID.randomUUID().toString();
+        long timeStamp = System.currentTimeMillis();
         String macToReturn;
+        String macForError;
 
         try {
             log.info("XPay Refund - Generating MAC for transactionId: " + codiceTransazione);
-            macToReturn = XPayUtils.getMacToReturn(codiceTransazione, request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToReturn = XPayUtils.getRefundMac(codiceTransazione, request.getTimeStamp(), apiKey, chiaveSegreta);
+            macForError = XPayUtils.getMacWithoutNonce(XPayOutcome.KO.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
         } catch (Exception e) {
             log.error("XPay Refund - Exception during the creation of the MAC string: ", e);
             XPayErrorEnum error = XPayErrorEnum.ERROR_50;
@@ -68,11 +71,11 @@ public class XPayRefundService {
                 XPayErrorEnum error = XPayErrorEnum.ERROR_3;
 
                 return ResponseEntity.status(error.getHttpStatus())
-                        .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, macToReturn, error));
+                        .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, macForError, error));
             }
         } else {
             return ResponseEntity.status(errorConfig.getHttpStatus())
-                    .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, macToReturn, errorConfig));
+                    .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig));
         }
     }
 

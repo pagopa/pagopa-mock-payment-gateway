@@ -46,12 +46,17 @@ public class XPayPayment3DSService {
 
         String codiceTransazione = request.getCodiceTransazione();
         String idOperazione = UUID.randomUUID().toString();
+        long timeStamp = System.currentTimeMillis();
+        String macToCheck;
         String macToReturn;
+        String macForError;
 
         try {
             log.info("XPay Paga3DS - Generating MAC for transactionId: " + codiceTransazione);
-            macToReturn = XPayUtils.getMacToReturn(codiceTransazione, request.getDivisa(), request.getImporto(),
+            macToCheck = XPayUtils.getBaseMac(codiceTransazione, request.getDivisa(), request.getImporto(),
                     request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToReturn = XPayUtils.getMacWithoutNonce(XPayOutcome.OK.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
+            macForError = XPayUtils.getMacWithoutNonce(XPayOutcome.KO.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
         } catch (Exception e) {
             log.error("XPay Paga3DS - Exception during the creation of the MAC string: ", e);
             XPayErrorEnum error = XPayErrorEnum.ERROR_50;
@@ -61,7 +66,7 @@ public class XPayPayment3DSService {
         }
 
         if(outcomeConfig.equals("OK")) {
-            if (macToReturn.equals(request.getMac())) {
+            if (macToCheck.equals(request.getMac())) {
                 log.info("XPay Paga3DS - MAC verified");
                 XPayPaymentResponse xPayPaymentResponse = createXPayPaymentResponse(XPayOutcome.OK, idOperazione, macToReturn, null);
                 if(request.getParametriAggiuntivi() != null)
@@ -73,11 +78,11 @@ public class XPayPayment3DSService {
                 XPayErrorEnum error = XPayErrorEnum.ERROR_3;
 
                 return ResponseEntity.status(error.getHttpStatus())
-                        .body(createXPayPaymentResponse(XPayOutcome.KO, idOperazione, macToReturn, error));
+                        .body(createXPayPaymentResponse(XPayOutcome.KO, idOperazione, macForError, error));
             }
         } else {
             return ResponseEntity.status(errorConfig.getHttpStatus())
-                    .body(createXPayPaymentResponse(XPayOutcome.KO, idOperazione, macToReturn, errorConfig));
+                    .body(createXPayPaymentResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig));
         }
     }
 

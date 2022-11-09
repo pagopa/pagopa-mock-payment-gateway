@@ -27,9 +27,9 @@ public class XPayMacService {
 
             String mac;
             if(areImportoAndDivisaPresent(importo, divisa))
-                mac = XPayUtils.getMacToReturn(codiceTransazione, divisa, importo, timeStamp, apiKey, chiaveSegreta);
+                mac = XPayUtils.getBaseMac(codiceTransazione, divisa, importo, timeStamp, apiKey, chiaveSegreta);
             else
-                mac = XPayUtils.getMacToReturn(codiceTransazione, timeStamp, apiKey, chiaveSegreta);
+                mac = XPayUtils.getRefundMac(codiceTransazione, timeStamp, apiKey, chiaveSegreta);
 
             XPayAuthResponse response = new XPayAuthResponse();
             response.setEsito(XPayOutcome.OK);
