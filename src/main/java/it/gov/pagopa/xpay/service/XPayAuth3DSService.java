@@ -143,6 +143,7 @@ public class XPayAuth3DSService {
                         "         <input type=\"hidden\" name=\"xpayNonce\" value=\"%s\">" +
                         "         <input type=\"hidden\" name=\"codice\" value=\"%s\">" +
                         "         <input type=\"hidden\" name=\"messaggio\" value=\"%s\">" +
+                        "         <input type=\"hidden\" name=\"resumeType \" value=\"xpay\">" +
                         "      </form>" +
                         "      <script type= \"text/javascript\"> moveWindow(); </script>" +
                         "   </body>" +
