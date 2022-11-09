@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Random;
 import java.util.UUID;
 
 import static it.gov.pagopa.xpay.utils.XPayConstants.XPAY_AUTH_ERROR;
@@ -31,7 +32,6 @@ public class XPayAuth3DSService {
     @Autowired
     private TableConfigRepository configRepository;
 
-    private static final String HTML_TO_RETURN = createHtml();
     private String outcomeConfig;
     private XPayErrorEnum errorConfig;
 
@@ -48,14 +48,20 @@ public class XPayAuth3DSService {
         log.info("XPay Autenticazione3DS - create AuthResponse for transactionId: " + codiceTransazione);
         Long timeStamp = System.currentTimeMillis();
         String idOperazione = UUID.randomUUID().toString();
+        String nonce = String.valueOf(new Random().nextInt(99999));;
 
         saveXpayAuthRequest(idOperazione, request, timeStamp);
 
-        String macToReturn;
+        String macToCheck;
+        String macForHtml;
+        String macForResponse;
+        String macForError;
         try {
             log.info("XPay Autenticazione3DS - Generating MAC for transactionId: " + codiceTransazione);
-            macToReturn = XPayUtils.getMacToReturn(codiceTransazione, request.getDivisa(), request.getImporto(),
-                    request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToCheck = XPayUtils.getBaseMac(codiceTransazione, request.getDivisa(), request.getImporto(), request.getTimeStamp(), apiKey, chiaveSegreta);
+            macForResponse = XPayUtils.getMacWithoutNonce(XPayOutcome.OK.toString(), idOperazione, timeStamp.toString(), chiaveSegreta);
+            macForError = XPayUtils.getMacWithoutNonce(XPayOutcome.KO.toString(), idOperazione, timeStamp.toString(), chiaveSegreta);
+            macForHtml = XPayUtils.getMacWithNonce(XPayOutcome.OK.toString(), idOperazione, nonce, timeStamp.toString(), chiaveSegreta);
         } catch (Exception e) {
             log.error("XPay Autenticazione3DS - Exception during the creation of the MAC: ", e);
             XPayErrorEnum error = XPayErrorEnum.ERROR_50;
@@ -65,10 +71,12 @@ public class XPayAuth3DSService {
         }
 
         if(outcomeConfig.equals("OK")) {
-            if (macToReturn.equals(request.getMac())) {
+            if (macToCheck.equals(request.getMac())) {
                 log.info("XPay Autenticazione3DS - MAC verified");
-                XPayAuthResponse xpayResponse = createXpayAuthResponse(XPayOutcome.OK, idOperazione, timeStamp, macToReturn, null);
-                xpayResponse.setHtml(HTML_TO_RETURN.replace("mock-psp-xpay-view", request.getUrlRisposta()));
+                XPayAuthResponse xpayResponse = createXpayAuthResponse(XPayOutcome.OK, idOperazione, timeStamp, macForResponse, null);
+                String html = createHtml(request.getUrlRisposta(), xpayResponse.getEsito().toString(), xpayResponse.getIdOperazione(),
+                        xpayResponse.getTimeStamp().toString(), macForHtml, nonce);
+                xpayResponse.setHtml(html);
 
                 return ResponseEntity.ok().body(xpayResponse);
             } else {
@@ -76,11 +84,11 @@ public class XPayAuth3DSService {
                 XPayErrorEnum error = XPayErrorEnum.ERROR_3;
 
                 return ResponseEntity.status(error.getHttpStatus())
-                        .body(createXpayAuthResponse(XPayOutcome.KO, idOperazione, timeStamp, macToReturn, error));
+                        .body(createXpayAuthResponse(XPayOutcome.KO, idOperazione, timeStamp, macForError, error));
             }
         } else {
             return ResponseEntity.status(errorConfig.getHttpStatus())
-                    .body(createXpayAuthResponse(XPayOutcome.KO, idOperazione, timeStamp, macToReturn, errorConfig));
+                    .body(createXpayAuthResponse(XPayOutcome.KO, idOperazione, timeStamp, macForError, errorConfig));
         }
     }
 
@@ -114,20 +122,31 @@ public class XPayAuth3DSService {
         return xPayAuthResponse;
     }
 
-    private static String createHtml() {
-        return "<html>" +
-                "   <head>" +
-                "      <title>Gestione Pagamento - Autenticazione</title>" +
-                "      <script type=\"text/javascript\" language=\"javascript\">function moveWindow() { " +
-                "           document.tdsFraudForm.submit();}</script>" +
-                "   </head>" +
-                "   <body>" +
-                "      <form name=\"tdsFraudForm\" action=\"mock-psp-xpay-view\" method=\"POST\"><input type=\"hidden\" " +
-                "       name=\"action\" value=\"fraud\"><input type=\"hidden\" name=\"merchantId\" value=\"31320986\">" +
-                "       <input type=\"hidden\" name=\"description\" value=\"7090132540_1663077273191\"><input type=\"hidden\"" +
-                "       name=\"gdiUrl\" value=\"\"><input type=\"hidden\" name=\"gdiNotify\" value=\"\"></form>" +
-                "      <script type=\"text/javascript\"> moveWindow(); </script>" +
-                "   </body>" +
-                "</html>";
+    private static String createHtml(String url, String outcome, String operationId, String timeStamp, String mac, String nonce) {
+        String code = "mock-code";
+        String message = "mock-message";
+
+        return String.format("<html>" +
+                        "   <head>" +
+                        "      <title>Gestione Pagamento - Autenticazione</title>" +
+                        "      <script type= \"text/javascript language= \"javascript\">" +
+                        "         function moveWindow() { " +
+                        "               document.tdsFraudForm.submit();}" +
+                        "      </script>" +
+                        "   </head>" +
+                        "   <body>" +
+                        "      <form name=\"tdsFraudForm\" action=\"%s\" method= \"GET \">" +
+                        "         <input type=\"hidden\" name=\"esito\" value=\"%s\">" +
+                        "         <input type=\"hidden\" name=\"idOperazione\" value=\"%s\">" +
+                        "         <input type=\"hidden\" name=\"timeStamp\" value= \"%s\">" +
+                        "         <input type=\"hidden\" name=\"mac\" value=\"%s\">" +
+                        "         <input type=\"hidden\" name=\"xpayNonce\" value=\"%s\">" +
+                        "         <input type=\"hidden\" name=\"codice\" value=\"%s\">" +
+                        "         <input type=\"hidden\" name=\"messaggio\" value=\"%s\">" +
+                        "      </form>" +
+                        "      <script type= \"text/javascript\"> moveWindow(); </script>" +
+                        "   </body>" +
+                        "</html>",
+                url, outcome, operationId, timeStamp, mac, nonce, code, message);
     }
 }
