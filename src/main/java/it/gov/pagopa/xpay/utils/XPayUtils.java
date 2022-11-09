@@ -25,7 +25,7 @@ public class XPayUtils {
                                     String apiKey, String chiaveSegreta) throws Exception {
 
         String mac = MessageFormat.format("apiKey={0}codiceTransazione={1}divisa={2}importo={3}timeStamp={4}{5}",
-                apiKey, codiceTransazione, divisa, importo, timeStamp, chiaveSegreta);
+                apiKey, codiceTransazione, divisa, String.valueOf(importo), timeStamp, chiaveSegreta);
 
         return hashMac(mac);
     }
