@@ -22,6 +22,6 @@ public enum Response3Ds2Step0Enum {
 
     @JsonValue
     @Getter
-    private String code;
+    private final String code;
 }
 

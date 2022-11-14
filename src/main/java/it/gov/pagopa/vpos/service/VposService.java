@@ -2,12 +2,11 @@ package it.gov.pagopa.vpos.service;
 
 import com.google.gson.Gson;
 import it.gov.pagopa.db.entity.TableConfig;
-import it.gov.pagopa.db.entity.Transaction3DsEntity;
 import it.gov.pagopa.service.ConfigService;
-import it.gov.pagopa.service.Transaction3DsService;
 import it.gov.pagopa.vpos.dto.AuthRequest3dsV2Enum;
 import it.gov.pagopa.vpos.dto.request.*;
 import it.gov.pagopa.vpos.dto.response.*;
+import it.gov.pagopa.vpos.entity.Transaction3DsEntity;
 import it.gov.pagopa.vpos.utils.MacBuilder3dsV2;
 import it.gov.pagopa.vpos.utils.VposConstants;
 import it.gov.pagopa.vpos.utils.VposCreditCardGenerator;
@@ -54,14 +53,14 @@ public class VposService {
     @Autowired
     private ConfigService configService;
 
-    @Value("${AZURE_API_PUBLIC_URL}")
+    @Value("${HOST_URL}")
     private String host;
 
     public BPWXmlResponse getMock(String data) throws Exception {
-        Function<String, Optional<TableConfig>> findByKeyOrThrow = key -> Optional.ofNullable(configService.getByKey(key));
+        Function<String, Optional<TableConfig>> findByKeyOrThrow = key -> configService.getOptionalByKey(key);
 
-        TableConfig tableConfig = findByKeyOrThrow.apply((VposConstants.VPOS_HTTP_CODE_RESPONSE)).orElseThrow(Exception::new);
-        HttpStatus resolve = HttpStatus.valueOf(Integer.parseInt(tableConfig.getPropertyValue()));
+        TableConfig httResponse = findByKeyOrThrow.apply(VposConstants.VPOS_HTTP_CODE_RESPONSE).orElseThrow(Exception::new);
+        HttpStatus resolve = HttpStatus.valueOf(Integer.parseInt(httResponse.getPropertyValue()));
         if (resolve != HttpStatus.OK) throw new ResponseStatusException(resolve);
 
         BPWXmlRequest request = unmarshallEng(data);
@@ -73,8 +72,8 @@ public class VposService {
         switch (operation) {
             case "ORDERSTATUS":
                 OrderStatus orderStatus = requestData.getOrderStatus();
-                returnCode = configService.getByKey(VposConstants.ORDER_STATUS_RESPONSE).getPropertyValue();
-                transactionStatus = configService.getByKey(VposConstants.TRANSACTION_STATUS).getPropertyKey();
+                returnCode = configService.getByKey(VposConstants.VPOS_ORDER_STATUS_RESPONSE).getPropertyValue();
+                transactionStatus = configService.getByKey(VposConstants.VPOS_TRANSACTION_STATUS).getPropertyKey();
                 return createOrderStatusResponse(orderStatus, returnCode, transactionStatus);
             case "ACCOUNTING":
             case "REFUND":
@@ -93,9 +92,9 @@ public class VposService {
         }
 
         if (request0 != null) {
-            returnCode = configService.getByKey(VposConstants.STEP0_3DS2_RESPONSE).getPropertyValue();
+            returnCode = configService.getByKey(VposConstants.VPOS_STEP0_3DS2_RESPONSE).getPropertyValue();
         } else if (request1 != null) {
-            returnCode = configService.getByKey(VposConstants.STEP1_3DS2_RESPONSE).getPropertyValue();
+            returnCode = configService.getByKey(VposConstants.VPOS_STEP1_3DS2_RESPONSE).getPropertyValue();
         } else if (request2 != null) {
             returnCode = transaction3DsService.getByThreeDSServerTransId(request2.getThreeDSTransId()).getOutcome();
         }

@@ -19,7 +19,7 @@ function generate(cardSelected, code, labelCard, labelImg) {
         returnCode: code
     });
 
-    xhr.open('GET', '/pmmockserviceapi/cc/generateCard?'.concat(params.toString()), true);
+    xhr.open('GET', '/cc/generateCard?'.concat(params.toString()), true);
     xhr.responseType = 'json';
     xhr.send();
 }

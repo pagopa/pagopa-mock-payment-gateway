@@ -28,12 +28,12 @@ INSERT INTO config(id, property_key, property_value) VALUES (20, 'XPAY_ORDER_STA
 INSERT INTO config(id, property_key, property_value) VALUES (21, 'XPAY_ORDER_STATUS_ERROR', '97L');
 
 --VPOS CONFIGURATIONS
-INSERT INTO config(id, property_key, property_value) VALUES (22, 'VPOS_METHOD_3DS2_RESPONSE','Ok');
+INSERT INTO config(id, property_key, property_value) VALUES (22, 'VPOS_METHOD_3DS2_RESPONSE','OK');
 INSERT INTO config(id, property_key, property_value) VALUES (23, 'VPOS_STEP0_3DS2_RESPONSE','00');
 INSERT INTO config(id, property_key, property_value) VALUES (24, 'VPOS_STEP1_3DS2_RESPONSE','00');
 INSERT INTO config(id, property_key, property_value) VALUES (25, 'VPOS_ORDER_STATUS_RESPONSE','00');
-INSERT INTO config(id, property_key, property_value) VALUES (26, 'VPOS_HTTP_CODE_RESPONSE','200');
-INSERT INTO config(id, property_key, property_value) VALUES (27, 'VPOS_TRANSACTION_STATUS','00');
+INSERT INTO config(id, property_key, property_value) VALUES (26, 'VPOS_TRANSACTION_STATUS','00');
+INSERT INTO config(id, property_key, property_value) VALUES (27, 'VPOS_HTTP_CODE_RESPONSE','200');
 
 --GENERIC CONFIGURATIONS
 INSERT INTO client(id, client_name, base_url) VALUES (1, 'local', 'http://host.docker.internal:8080');

@@ -2,11 +2,11 @@ package it.gov.pagopa.vpos.controller;
 
 import com.google.gson.Gson;
 import it.gov.pagopa.db.entity.TableConfig;
-import it.gov.pagopa.db.entity.Transaction3DsEntity;
 import it.gov.pagopa.service.ConfigService;
-import it.gov.pagopa.service.Transaction3DsService;
 import it.gov.pagopa.vpos.dto.Method3Ds2ResponseEnum;
 import it.gov.pagopa.vpos.dto.request.MethodData3Ds;
+import it.gov.pagopa.vpos.entity.Transaction3DsEntity;
+import it.gov.pagopa.vpos.service.Transaction3DsService;
 import it.gov.pagopa.vpos.utils.VposConstants;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 @Controller
@@ -34,22 +33,23 @@ public class IssuerController {
 
     @PostMapping("/method")
     public String methodUrl(@RequestParam String threeDSMethodData, Model model) {
-        Function<String, TableConfig> findByKey = key -> Optional.ofNullable(configService.getByKey(key)).orElse(new TableConfig());
+        Function<String, TableConfig> findByKey = key -> configService.getOptionalByKey(key).orElse(new TableConfig());
 
         String decodedMethodData = new String(Base64Utils.decodeFromString(threeDSMethodData));
         MethodData3Ds methodData3Ds = new Gson().fromJson(decodedMethodData, MethodData3Ds.class);
         model.addAttribute("threeDSMethodNotificationUrl", methodData3Ds.getThreeDSMethodNotificationUrl());
 
-        MethodData3Ds methodData3DsReturn = new MethodData3Ds();
         String threeDSServerTransID = methodData3Ds.getThreeDSServerTransID();
+        MethodData3Ds methodData3DsReturn = new MethodData3Ds();
         methodData3DsReturn.setThreeDSServerTransID(threeDSServerTransID);
         model.addAttribute("methodData3Ds", Base64Utils.encodeToString(new Gson().toJson(methodData3DsReturn).getBytes()));
         log.info(String.format("Request %s", threeDSServerTransID));
-        String byKeyConfig = findByKey.apply(VposConstants.METHOD_3DS2_RESPONSE).getPropertyValue();
-        String redirect = "vpos/method3ds.html";
 
-        if (StringUtils.equals(byKeyConfig, Method3Ds2ResponseEnum.NoResponse.name())) {
-            redirect = "/home";
+        String method3dsResponse = findByKey.apply(VposConstants.VPOS_METHOD_3DS2_RESPONSE).getPropertyValue();
+
+        String redirect = "vpos/method3ds.html";
+        if (StringUtils.equals(method3dsResponse, Method3Ds2ResponseEnum.KO.toString())) {
+            redirect = "/";
         }
 
         log.info(String.format("Request %s going to url %s", threeDSServerTransID, redirect));
@@ -61,11 +61,12 @@ public class IssuerController {
     public String challengeUrl(Model model, @RequestParam String creq) {
         String decodedCreq = new String(Base64Utils.decodeFromString(creq));
         String threeDSServerTransID = (String) new Gson().fromJson(decodedCreq, Map.class).get("threeDSServerTransID");
-        Transaction3DsEntity byId = transaction3DsService.getByThreeDSServerTransId(threeDSServerTransID);
-        model.addAttribute("notifyUrl", byId.getNotifyUrl());
-        model.addAttribute("threeDSServerTransID", byId.getThreeDSServerTransId());
+        Transaction3DsEntity transaction = transaction3DsService.getByThreeDSServerTransId(threeDSServerTransID);
+
+        model.addAttribute("notifyUrl", transaction.getNotifyUrl());
+        model.addAttribute("threeDSServerTransID", transaction.getThreeDSServerTransId());
         model.addAttribute("cres", Base64Utils.encodeToString("FAKE_CRES".getBytes()));
-        model.addAttribute("threeDSMtdComplInd", StringUtils.defaultIfBlank(byId.getThreeDSMtdComplInd(), "UNKNOWN"));
+        model.addAttribute("threeDSMtdComplInd", StringUtils.defaultIfBlank(transaction.getThreeDSMtdComplInd(), "UNKNOWN"));
 
         return "vpos/challenge3ds.html";
     }

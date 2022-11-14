@@ -16,5 +16,5 @@ public enum TransactionStatusEnum {
 
     @JsonValue
     @Getter
-    private String code;
+    private final String code;
 }

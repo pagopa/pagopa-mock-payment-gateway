@@ -7,6 +7,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @Log4j2
 public class ConfigService {
@@ -15,6 +17,10 @@ public class ConfigService {
 
     public TableConfig getByKey(String key) {
         return configRepository.findByPropertyKey(key);
+    }
+
+    public Optional<TableConfig> getOptionalByKey(String key) {
+        return Optional.ofNullable(configRepository.findByPropertyKey(key));
     }
 
     public void save(TableConfig tableConfig) {

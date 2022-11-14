@@ -1,6 +1,6 @@
-package it.gov.pagopa.db.repository;
+package it.gov.pagopa.vpos.repository;
 
-import it.gov.pagopa.db.entity.Transaction3DsEntity;
+import it.gov.pagopa.vpos.entity.Transaction3DsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,7 @@
-package it.gov.pagopa.service;
+package it.gov.pagopa.vpos.service;
 
-import it.gov.pagopa.db.entity.Transaction3DsEntity;
-import it.gov.pagopa.db.repository.Transaction3Ds2Repository;
+import it.gov.pagopa.vpos.entity.Transaction3DsEntity;
+import it.gov.pagopa.vpos.repository.Transaction3Ds2Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

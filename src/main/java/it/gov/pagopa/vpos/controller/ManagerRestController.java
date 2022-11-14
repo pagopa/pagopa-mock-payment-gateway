@@ -1,8 +1,8 @@
 package it.gov.pagopa.vpos.controller;
 
-import it.gov.pagopa.db.entity.Transaction3DsEntity;
-import it.gov.pagopa.service.Transaction3DsService;
 import it.gov.pagopa.vpos.dto.request.SaveResponseChallenge3Ds2;
+import it.gov.pagopa.vpos.entity.Transaction3DsEntity;
+import it.gov.pagopa.vpos.service.Transaction3DsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

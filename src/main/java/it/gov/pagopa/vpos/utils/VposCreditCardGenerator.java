@@ -82,19 +82,13 @@ public class VposCreditCardGenerator {
     public static String generateMasterCardNumber() {
         return getCreditCardNumber(MASTERCARD_PREFIX_LIST, 16);
     }
-
-    public static String generateVisaCardNumber() {
-        return getCreditCardNumber(VISA_PREFIX_LIST, 16);
-    }
-
+    public static String generateVisaCardNumber() { return getCreditCardNumber(VISA_PREFIX_LIST, 16); }
     public static String generateMaestroCardNumber() {
         return getCreditCardNumber(MAESTRO_PREFIX_LIST, 16);
     }
-
     public static String generateAmexCardNumber() {
         return getCreditCardNumber(AMEX_PREFIX_LIST, 15);
     }
-
     public static String generateDinersCardNumber() {
         return getCreditCardNumber(DINERS_NEW_PREFIX_LIST, 15);
     }

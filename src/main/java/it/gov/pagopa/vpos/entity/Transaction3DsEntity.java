@@ -1,4 +1,4 @@
-package it.gov.pagopa.db.entity;
+package it.gov.pagopa.vpos.entity;
 
 import lombok.Data;
 
