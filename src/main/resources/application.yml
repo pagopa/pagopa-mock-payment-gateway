@@ -56,4 +56,4 @@ springdoc:
   swagger-ui:
     path: /swagger-ui
 
-HOST_URL: ${AZURE_HOST_URL:http://localhost:${server.port}}
+HOST_URL: ${SERVER_PUBLIC_URL:http://localhost:${server.port}}
