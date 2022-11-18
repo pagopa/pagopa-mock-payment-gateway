@@ -18,7 +18,7 @@ public class VposRestController {
 
     @Tag(name = "VPOS Mock for 3dsV2")
     @PostMapping(value = "/authorize3dsV2", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = "text/xml;charset=ISO-8859-1")
-    public BPWXmlResponse authorize(@RequestParam String data) throws Exception {
+    public BPWXmlResponse vposAuthorize(@RequestParam String data) throws Exception {
         return vposService.getMock(data);
     }
 }

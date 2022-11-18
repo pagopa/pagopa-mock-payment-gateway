@@ -10,7 +10,6 @@ import java.io.Serializable;
 @Data
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ThreeDSAuthorizationRequest1 implements Serializable {
-
     @XmlElement(name = "Header")
     private VposHeader header;
 
@@ -19,5 +18,4 @@ public class ThreeDSAuthorizationRequest1 implements Serializable {
 
     @XmlElement(name = "ThreeDSMtdComplInd")
     private String threeDSMtdComplInd;
-
 }

@@ -12,11 +12,9 @@ import java.io.Serializable;
 @Data
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OrderStatus implements Serializable {
-
     @XmlElement(name = "Header")
     private OrderStatusHeader header;
 
     @XmlElement(name = "OrderID")
     private String orderId;
-
 }

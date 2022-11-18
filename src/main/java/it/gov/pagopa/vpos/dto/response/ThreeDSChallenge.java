@@ -10,7 +10,6 @@ import java.io.Serializable;
 @Data
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ThreeDSChallenge implements Serializable {
-
     @XmlElement(name = "ThreeDSTransId")
     private String threeDSTransId;
 
@@ -22,5 +21,4 @@ public class ThreeDSChallenge implements Serializable {
 
     @XmlElement(name = "MAC")
     private String mac;
-
 }

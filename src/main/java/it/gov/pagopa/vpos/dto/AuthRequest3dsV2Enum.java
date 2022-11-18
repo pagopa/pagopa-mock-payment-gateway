@@ -3,11 +3,7 @@ package it.gov.pagopa.vpos.dto;
 import java.math.BigInteger;
 import java.util.Date;
 
-/**
- * The Enum AuthRequestEnum.
- */
 public enum AuthRequest3dsV2Enum {
-
 	REQUEST_ROOT(true, "BPWXmlRequest", null, null, 0),
 	RELEASE(false, "Release", String.class, null, 2),
 	REQUEST(true, "Request3dsV2", null, null, 0),
@@ -77,7 +73,7 @@ public enum AuthRequest3dsV2Enum {
 	private String format;
 	private int length;
 
-	private AuthRequest3dsV2Enum(boolean mandatory, String tagName, Class<?> type, String format, int length) {
+	AuthRequest3dsV2Enum(boolean mandatory, String tagName, Class<?> type, String format, int length) {
 		this.mandatory = mandatory;
 		this.tagName = tagName;
 		this.type = type;
@@ -85,86 +81,45 @@ public enum AuthRequest3dsV2Enum {
 		this.length = length;
 	}
 
-	/**
-	 * @return the mandatory
-	 */
 	public boolean isMandatory() {
 		return mandatory;
 	}
 
-	/**
-	 * @param mandatory
-	 *            the mandatory to set
-	 */
 	public void setMandatory(boolean mandatory) {
 		this.mandatory = mandatory;
 	}
 
-	/**
-	 * @return the tagName
-	 */
 	public String getTagName() {
 		return tagName;
 	}
 
-	/**
-	 * @param tagName
-	 *            the tagName to set
-	 */
 	public void setTagName(String tagName) {
 		this.tagName = tagName;
 	}
-
-	/**
-	 * @return the type
-	 */
 	public Class<?> getType() {
 		return type;
 	}
 
-	/**
-	 * @param type
-	 *            the type to set
-	 */
 	public void setType(Class<?> type) {
 		this.type = type;
 	}
 
-	/**
-	 * @return the format
-	 */
 	public String getFormat() {
 		return format;
 	}
 
-	/**
-	 * @param format
-	 *            the format to set
-	 */
 	public void setFormat(String format) {
 		this.format = format;
 	}
 
-	/**
-	 * @return the length
-	 */
 	public int getLength() {
 		return length;
 	}
 
-	/**
-	 * @param length
-	 *            the length to set
-	 */
 	public void setLength(int length) {
 		this.length = length;
 	}
 
-	/**
-	 * Gets the root element.
-	 *
-	 * @return the root element
-	 */
 	public static AuthRequest3dsV2Enum getRootElement() {
 		return REQUEST_ROOT;
 	}

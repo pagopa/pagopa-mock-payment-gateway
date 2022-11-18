@@ -16,8 +16,10 @@ import java.io.Serializable;
 public class Request3dsV2 implements Serializable {
     @XmlElement(name = "Operation")
     private String operation;
+
     @XmlElement(name = "Timestamp")
     private String timestamp;
+
     @XmlElement(name = "MAC")
     private String mac;
 }

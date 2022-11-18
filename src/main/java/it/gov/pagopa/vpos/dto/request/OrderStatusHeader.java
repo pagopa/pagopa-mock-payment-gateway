@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlElement;
 @Data
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OrderStatusHeader {
-
     @XmlElement(name = "ShopID")
     private String shopId;
 
@@ -18,5 +17,4 @@ public class OrderStatusHeader {
 
     @XmlElement(name = "ReqRefNum")
     private String reqRefNum;
-
 }

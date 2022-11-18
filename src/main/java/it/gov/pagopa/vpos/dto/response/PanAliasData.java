@@ -12,10 +12,13 @@ import java.io.Serializable;
 public class PanAliasData implements Serializable {
     @XmlElement(name = "PanAlias")
     private String panAlias;
+
     @XmlElement(name = "PanAliasExpDate")
     private String panAliasExpDate;
+
     @XmlElement(name = "PanAliasTail")
     private String panAliasTail;
+
     @XmlElement(name = "MAC")
     private String mac;
 }

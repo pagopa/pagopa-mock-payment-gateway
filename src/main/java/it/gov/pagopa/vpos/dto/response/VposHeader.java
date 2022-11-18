@@ -16,8 +16,10 @@ import java.io.Serializable;
 public class VposHeader implements Serializable {
     @XmlElement(name = "ShopID")
     private String shopID;
+
     @XmlElement(name = "OperatorID")
     private String operatorID;
+
     @XmlElement(name = "ReqRefNum")
     private String reqRefNum;
 }

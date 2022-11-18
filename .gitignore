@@ -9,4 +9,4 @@ target/
 .vscode/settings.json
 pom.xml.versionsBackup
 pagopa-mock-payment-gateway.iml
-/src/generated/java/
+/src/generated/
