@@ -10,6 +10,7 @@ import it.gov.pagopa.vpos.entity.Transaction3DsEntity;
 import it.gov.pagopa.vpos.utils.MacBuilder3dsV2;
 import it.gov.pagopa.vpos.utils.VposConstants;
 import it.gov.pagopa.vpos.utils.VposCreditCardGenerator;
+import it.gov.pagopa.vpos.utils.VposUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -21,10 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -63,9 +60,9 @@ public class VposService {
         HttpStatus resolve = HttpStatus.valueOf(Integer.parseInt(httResponse.getPropertyValue()));
         if (resolve != HttpStatus.OK) throw new ResponseStatusException(resolve);
 
-        BPWXmlRequest request = unmarshallEng(data);
-        XmlData requestData = request.getData();
-        String operation = request.getRequest().getOperation();
+        BPWXmlRequest xmlRequest = VposUtils.unmarshallEng(data);
+        XmlData requestData = xmlRequest.getData();
+        String operation = xmlRequest.getRequest().getOperation();
         String returnCode = null;
         String transactionStatus;
 
@@ -73,7 +70,7 @@ public class VposService {
             case "ORDERSTATUS":
                 OrderStatus orderStatus = requestData.getOrderStatus();
                 returnCode = configService.getByKey(VposConstants.VPOS_ORDER_STATUS_RESPONSE).getPropertyValue();
-                transactionStatus = configService.getByKey(VposConstants.VPOS_TRANSACTION_STATUS).getPropertyKey();
+                transactionStatus = configService.getByKey(VposConstants.VPOS_TRANSACTION_STATUS).getPropertyValue();
                 return createOrderStatusResponse(orderStatus, returnCode, transactionStatus);
             case "ACCOUNTING":
             case "REFUND":
@@ -87,7 +84,7 @@ public class VposService {
         ThreeDSAuthorizationRequest1 request1 = requestData.getThreeDSAuthorizationRequest1();
         ThreeDSAuthorizationRequest2 request2 = requestData.getThreeDSAuthorizationRequest2();
 
-        if (!checkMac3dsV2(request)) {
+        if (!checkMac3dsV2(xmlRequest)) {
             returnCode = RETURN_CODE_ERROR_INVALID_MAC;
         }
 
@@ -272,14 +269,6 @@ public class VposService {
         }
 
         return responseType;
-    }
-
-    private static BPWXmlRequest unmarshallEng(String data) throws JAXBException {
-        StringReader sr = new StringReader(data);
-        JAXBContext jaxbContext = JAXBContext.newInstance(BPWXmlRequest.class);
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
-        return (BPWXmlRequest) unmarshaller.unmarshal(sr);
     }
 
     private static BPWXmlResponse createOrderStatusResponse(OrderStatus requestData, String returnCode, String transactionStatus) {
