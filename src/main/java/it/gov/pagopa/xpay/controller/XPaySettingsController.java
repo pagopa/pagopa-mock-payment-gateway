@@ -1,7 +1,7 @@
 package it.gov.pagopa.xpay.controller;
 
+import it.gov.pagopa.service.ConfigService;
 import it.gov.pagopa.xpay.dto.XPayOutcome;
-import it.gov.pagopa.xpay.service.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

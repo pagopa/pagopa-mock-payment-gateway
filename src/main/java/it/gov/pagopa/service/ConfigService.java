@@ -1,4 +1,4 @@
-package it.gov.pagopa.xpay.service;
+package it.gov.pagopa.service;
 
 import it.gov.pagopa.db.entity.TableConfig;
 import it.gov.pagopa.db.repository.TableConfigRepository;
@@ -7,11 +7,25 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @Log4j2
 public class ConfigService {
     @Autowired
     private TableConfigRepository configRepository;
+
+    public TableConfig getByKey(String key) {
+        return configRepository.findByPropertyKey(key);
+    }
+
+    public Optional<TableConfig> getOptionalByKey(String key) {
+        return Optional.ofNullable(configRepository.findByPropertyKey(key));
+    }
+
+    public void save(TableConfig tableConfig) {
+        configRepository.save(tableConfig);
+    }
 
     public void updateXPayOutcomeAndError(String outcomeParam, XPayOutcome newOutcome, String errorParam, String newError) {
         if (newOutcome != null)
