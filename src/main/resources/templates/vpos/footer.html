@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+</head>
+<body>
+<div th:fragment="footer">
+    <link href="../static/css/common.css" th:href="@{/static/css/common.css}" rel="stylesheet"/>
+    <div class="pb-7"></div>
+    <div class="navbar-light bg-light fixed-bottom">
+        <footer class="page-footer font-small blue">
+
+            <div class="footer-copyright text-right mr-3">Version: [[${APP_VERSION}]]
+            </div>
+
+        </footer>
+    </div>
+</div>
+</body>
+</html>
