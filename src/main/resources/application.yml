@@ -57,3 +57,4 @@ springdoc:
     path: /swagger-ui
 
 HOST_URL: ${SERVER_PUBLIC_URL:http://localhost:${server.port}}
+MOCK_PGS_URL: ${MOCK_PGS_URL_AZURE:http://localhost:${server.port}}
