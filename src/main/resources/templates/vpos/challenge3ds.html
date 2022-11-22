@@ -10,7 +10,7 @@
 <div>
     <div class="row">
         <div class="col">
-            <img th:src="@{/static/img/3ds.png}" class="rounded float-left img-thumbnail" width="15%"/>
+            <img th:src="@{${MOCK_PGS_URL}+'/static/img/3ds.png'}" class="rounded float-left img-thumbnail" width="15%"/>
         </div>
     </div>
     <div class="row mb-3">
@@ -56,6 +56,6 @@
 <div th:replace="vpos/footer:: footer"></div>
 <script type="text/javascript" th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
 <script type="text/javascript" th:src="@{/webjars/bootstrap/4.2.1/js/bootstrap.min.js}"></script>
-<script type="text/javascript" th:src="@{/static/js/challenge3ds.js}"></script>
+<script type="text/javascript" th:src="@{${MOCK_PGS_URL}+'/static/js/challenge3ds.js'}"></script>
 </body>
 </html>

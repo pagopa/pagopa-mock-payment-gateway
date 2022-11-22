@@ -11,6 +11,7 @@ import it.gov.pagopa.vpos.utils.VposConstants;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.Base64Utils;
@@ -31,6 +32,9 @@ public class IssuerController {
     @Autowired
     private Transaction3DsService transaction3DsService;
 
+    @Value("${MOCK_PGS_URL}")
+    private String mockPgsUrl;
+
     @PostMapping("/method")
     public String methodUrl(@RequestParam String threeDSMethodData, Model model) {
         Function<String, TableConfig> findByKey = key -> configService.getOptionalByKey(key).orElse(new TableConfig());
@@ -43,6 +47,7 @@ public class IssuerController {
         MethodData3Ds methodData3DsReturn = new MethodData3Ds();
         methodData3DsReturn.setThreeDSServerTransID(threeDSServerTransID);
         model.addAttribute("methodData3Ds", Base64Utils.encodeToString(new Gson().toJson(methodData3DsReturn).getBytes()));
+        model.addAttribute("MOCK_PGS_URL", mockPgsUrl);
         log.info(String.format("Request %s", threeDSServerTransID));
 
         String method3dsResponse = findByKey.apply(VposConstants.VPOS_METHOD_3DS2_RESPONSE).getPropertyValue();
@@ -67,6 +72,7 @@ public class IssuerController {
         model.addAttribute("threeDSServerTransID", transaction.getThreeDSServerTransId());
         model.addAttribute("cres", Base64Utils.encodeToString("FAKE_CRES".getBytes()));
         model.addAttribute("threeDSMtdComplInd", StringUtils.defaultIfBlank(transaction.getThreeDSMtdComplInd(), "UNKNOWN"));
+        model.addAttribute("MOCK_PGS_URL", mockPgsUrl);
 
         return "vpos/challenge3ds.html";
     }

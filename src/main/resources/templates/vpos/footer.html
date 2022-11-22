@@ -4,7 +4,7 @@
 </head>
 <body>
 <div th:fragment="footer">
-    <link href="../static/css/common.css" th:href="@{/static/css/common.css}" rel="stylesheet"/>
+    <link th:href="@{${MOCK_PGS_URL}+'/static/css/common.css'}" rel="stylesheet"/>
     <div class="pb-7"></div>
     <div class="navbar-light bg-light fixed-bottom">
         <footer class="page-footer font-small blue">
