@@ -47,6 +47,7 @@ bpay:
     amount: ${BPAY_PAYMENT_CORRELATION_ID_AMOUNT:105}
 
 mock-profile: ${MOCK_PROFILE:local}
+mock-pgs-url: ${MOCK_PGS_URL_AZURE:http://localhost:${server.port}}
 
 xpay:
   apikey-alias: ${XPAY_APIKEY_ALIAS:local}
@@ -55,6 +56,3 @@ xpay:
 springdoc:
   swagger-ui:
     path: /swagger-ui
-
-HOST_URL: ${SERVER_PUBLIC_URL:http://localhost:${server.port}}
-MOCK_PGS_URL: ${MOCK_PGS_URL_AZURE:http://localhost:${server.port}}

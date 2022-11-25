@@ -32,7 +32,7 @@ public class IssuerController {
     @Autowired
     private Transaction3DsService transaction3DsService;
 
-    @Value("${MOCK_PGS_URL}")
+    @Value("${mock-pgs-url}")
     private String mockPgsUrl;
 
     @PostMapping("/method")

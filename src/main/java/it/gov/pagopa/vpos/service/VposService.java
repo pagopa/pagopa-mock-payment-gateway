@@ -50,7 +50,7 @@ public class VposService {
     @Autowired
     private ConfigService configService;
 
-    @Value("${HOST_URL}")
+    @Value("${server.public-url}")
     private String host;
 
     public BPWXmlResponse getMock(String data) throws Exception {
