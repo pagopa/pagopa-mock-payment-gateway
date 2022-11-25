@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class CreditCardController {
-    @Value("${MOCK_PGS_URL}")
+    @Value("${mock-pgs-url}")
     private String mockPgsUrl;
 
     @GetMapping("/cc")
