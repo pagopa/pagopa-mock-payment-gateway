@@ -67,7 +67,7 @@ public class XPayOrderStatusService {
                     .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, null, error));
         }
 
-        if(outcomeConfig.equals("OK")) {
+        if (outcomeConfig.equals("OK")) {
             if (macToReturn.equals(request.getMac())) {
                 log.info("XPay OrderStatus - MAC verified");
 
@@ -95,7 +95,7 @@ public class XPayOrderStatusService {
         xPayOrderResponse.setTimeStamp(System.currentTimeMillis());
         xPayOrderResponse.setMac(mac);
 
-        if(error == null)
+        if (error == null)
             xPayOrderResponse.setReport(createXPayReport());
         else
             xPayOrderResponse.setErrore(new XPayError(error.getErrorCode(), error.getDescription()));
@@ -125,7 +125,7 @@ public class XPayOrderStatusService {
         return Collections.singletonList(xPayReport);
     }
 
-    private XPayReportDetail createXPayReportDetail() {
+    private List<XPayReportDetail> createXPayReportDetail() {
         XPayReportDetail detail = new XPayReportDetail();
         detail.setNome("Mario");
         detail.setCognome("Rossi");
@@ -141,7 +141,7 @@ public class XPayOrderStatusService {
         detail.setFlagValuta(true);
         detail.setOperazioni(createXPayReportOperations());
 
-        return detail;
+        return Collections.singletonList(detail);
     }
 
     private List<XPayReportOperations> createXPayReportOperations() {

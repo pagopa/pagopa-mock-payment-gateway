@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -25,5 +26,5 @@ public class XPayReport {
     private String stato;
     private String dataTransazione; //Formato: gg/mm/aaaa hh:mm:ss
     private String mail;
-    private XPayReportDetail dettaglio;
+    private List<XPayReportDetail> dettaglio;
 }

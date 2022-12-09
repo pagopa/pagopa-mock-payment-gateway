@@ -53,8 +53,8 @@ public class XPayPayment3DSService {
 
         try {
             log.info("XPay Paga3DS - Generating MAC for transactionId: " + codiceTransazione);
-            macToCheck = XPayUtils.getBaseMac(codiceTransazione, request.getDivisa(), request.getImporto(),
-                    request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToCheck = XPayUtils.getPaymentMac(codiceTransazione, request.getImporto(), request.getDivisa(),
+                    request.getTimeStamp(), request.getXpayNonce(), apiKey, chiaveSegreta);
             macToReturn = XPayUtils.getMacWithoutNonce(XPayOutcome.OK.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
             macForError = XPayUtils.getMacWithoutNonce(XPayOutcome.KO.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
         } catch (Exception e) {
@@ -65,11 +65,11 @@ public class XPayPayment3DSService {
                     .body(createXPayPaymentResponse(XPayOutcome.KO, idOperazione, null, error));
         }
 
-        if(outcomeConfig.equals("OK")) {
+        if (outcomeConfig.equals("OK")) {
             if (macToCheck.equals(request.getMac())) {
                 log.info("XPay Paga3DS - MAC verified");
                 XPayPaymentResponse xPayPaymentResponse = createXPayPaymentResponse(XPayOutcome.OK, idOperazione, macToReturn, null);
-                if(request.getParametriAggiuntivi() != null)
+                if (request.getParametriAggiuntivi() != null)
                     xPayPaymentResponse.setParametriAggiuntivi(request.getParametriAggiuntivi());
 
                 return ResponseEntity.ok().body(xPayPaymentResponse);
@@ -95,7 +95,7 @@ public class XPayPayment3DSService {
         xPayPaymentResponse.setTimeStamp(System.currentTimeMillis());
         xPayPaymentResponse.setMac(mac);
 
-        if(error == null) {
+        if (error == null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
             xPayPaymentResponse.setCodiceAutorizzazione("A14619");
