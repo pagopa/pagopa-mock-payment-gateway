@@ -714,8 +714,93 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/ChangeVposOutcome"
+              $ref: "#/components/schemas/ChangeVposOutcome"
         required: true
+      responses:
+        '200':
+          description: OK
+  /transactions/{transactionId}/auth-requests:
+    patch:
+      tags:
+        - Transaction Controller
+      operationId: updateTransactionAuth
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAuthRequest"
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionInfo"
+        '400':
+          description: KO
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        '404':
+          description: KO
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        '500':
+          description: KO
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        '502':
+          description: KO
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        '504':
+          description: KO
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /transactions/change/auth-requests/outcome:
+    post:
+      tags:
+        - Transaction Change Outcome Controller
+      operationId: changeTransactionAuthOutcome
+      parameters:
+        - name: transactionStatus
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ACTIVATION_REQUESTED
+              - ACTIVATED
+              - AUTHORIZATION_REQUESTED
+              - AUTHORIZED
+              - AUTHORIZATION_FAILED
+              - CLOSED
+              - CLOSURE_FAILED
+              - NOTIFIED
+              - NOTIFIED_FAILED
+              - EXPIRED
+              - REFUNDED
+        - name: httpStatus
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -2001,6 +2086,75 @@ components:
             - OK
             - NOT_FOUND
             - SERVICE_UNAVAILABLE
+    UpdateAuthRequest:
+      required:
+        - authorizationCode
+        - authorizationResult
+        - timestampOperation
+      type: object
+      properties:
+        authorizationResult:
+          type: string
+          enum:
+            - OK
+            - KO
+        timestampOperation:
+          type: string
+        authorizationCode:
+          type: string
+    TransactionInfo:
+      type: object
+      properties:
+        transactionId:
+          type: string
+        status:
+          type: string
+          enum:
+            - ACTIVATION_REQUESTED
+            - ACTIVATED
+            - AUTHORIZATION_REQUESTED
+            - AUTHORIZED
+            - AUTHORIZATION_FAILED
+            - CLOSED
+            - CLOSURE_FAILED
+            - NOTIFIED
+            - NOTIFIED_FAILED
+            - EXPIRED
+            - REFUNDED
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentInfo'
+      required:
+        - transactionId
+        - status
+        - payments
+    PaymentInfo:
+      type: object
+      properties:
+        paymentToken:
+          type: string
+        rptId:
+          type: string
+        reason:
+          type: string
+        authToken:
+          type: string
+        amount:
+          type: integer
+    ProblemJson:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        detail:
+          type: string
+        instance:
+          type: string
+        status:
+          type: integer
   securitySchemes:
     bearerAuth:
       type: http
