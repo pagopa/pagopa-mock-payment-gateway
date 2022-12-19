@@ -151,7 +151,7 @@ public class VposService {
         String threeDSTransId = UUID.randomUUID().toString();
         method.setThreeDSTransId(threeDSTransId);
         method.setThreeDSMethodData(createBase64MethodData3Ds(threeDSTransId, data.getThreeDSAuthorizationRequest0().getThreeDSMtdNotifUrl()));
-        method.setThreeDSMethodUrl(normalizeUrl(String.format("%s/issuer/3ds2.0/method", host)));
+        method.setThreeDSMethodUrl(normalizeUrl(String.format("%s/issuer/3ds20/method", host)));
         method.setMac(generate3DSMethodMac(method));
 
         return method;
@@ -162,7 +162,7 @@ public class VposService {
         String transId = threeDSAuthorizationRequest1 != null ? threeDSAuthorizationRequest1.getThreeDSTransId() : UUID.randomUUID().toString();
         ThreeDSChallenge challenge = new ThreeDSChallenge();
         challenge.setThreeDSTransId(transId);
-        challenge.setAcsUrl(normalizeUrl(String.format("%s/issuer/3ds2.0/challenge", host)));
+        challenge.setAcsUrl(normalizeUrl(String.format("%s/issuer/3ds20/challenge", host)));
         challenge.setCReq(createBase64MethodData3Ds(transId, null));
         challenge.setMac(generateChallengeMac(challenge));
 

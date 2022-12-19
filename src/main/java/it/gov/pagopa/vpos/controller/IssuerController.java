@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Controller
-@RequestMapping("/issuer/3ds2.0/")
+@RequestMapping("/issuer/3ds20/")
 @Log4j2
 public class IssuerController {
     @Autowired
