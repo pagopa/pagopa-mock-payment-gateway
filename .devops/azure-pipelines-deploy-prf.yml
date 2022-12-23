@@ -19,8 +19,8 @@ variables:
   containerRegistry: 'cstaruatregistry.azurecr.io'
 
 stages:
-  - stage: UAT
-    displayName: UAT
+  - stage: PRF
+    displayName: PRF
     jobs:
       - job: Build
         displayName: Build
@@ -39,7 +39,7 @@ stages:
         dependsOn: Build
         pool:
           name: $(poolNameDeploy)
-        environment: $(environment)
+        environment: 'PT'
         strategy:
           runOnce:
             deploy:
