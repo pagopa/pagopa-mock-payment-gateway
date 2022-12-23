@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pmmockpaymentgatewaysit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pmmockpaymentgatewaysit
+  template:
+    metadata:
+      labels:
+        app: pmmockpaymentgatewayprfsit
+      annotations:
+        prometheus.io/path: /pmmockpaymentgatewayapi/actuator/prometheus
+        prometheus.io/port: '8081'
+        prometheus.io/scrape: 'true'
+    spec:
+      hostAliases:
+        - ip: "10.230.8.5"
+          hostnames:
+            - "api.dev.platform.pagopa.it"
+      containers:
+        - name: pmmockpaymentgatewaysit
+          image: cstaruatregistry.azurecr.io/pmmockservice
+          ports:
+            - containerPort: 8081
+          resources:
+            requests:
+              memory: 1Gi
+              cpu: 250m
+            limits:
+              memory: 4Gi
+              cpu: 500m
+          livenessProbe:
+            httpGet:
+              path: /pmmockpaymentgatewayapi/actuator/health
+              port: 8081
+              scheme: HTTP
+            timeoutSeconds: 5
+            periodSeconds: 20
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /pmmockpaymentgatewayapi/actuator/health
+              port: 8081
+              scheme: HTTP
+            timeoutSeconds: 5
+            periodSeconds: 45
+            successThreshold: 1
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /pmmockpaymentgatewayapi/actuator/health
+              port: 8081
+              scheme: HTTP
+            initialDelaySeconds: 45
+            timeoutSeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 30
+          imagePullPolicy: Always
