@@ -20,7 +20,7 @@ variables:
 
 stages:
   - stage: UAT
-    displayName: $(environment)
+    displayName: UAT
     jobs:
       - job: Build
         displayName: Build

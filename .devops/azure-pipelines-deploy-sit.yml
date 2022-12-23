@@ -26,7 +26,7 @@ stages:
             displayName: 'download settings.xml for Maven'
             name: settingsxml
             inputs:
-              secureFile: 'settings.xml'
+              secureFile: 'settings_v2.xml'
               retryCount: '2'
           - task: Bash@3
             displayName: Get POM version
@@ -41,7 +41,7 @@ stages:
               failOnStderr: true
 
   - stage: SIT
-    displayName: $(environment)
+    displayName: SIT
     dependsOn: POM
     variables:
       pomversion: $[ stageDependencies.POM.POM.outputs['getpomversion.outputpomversion'] ]
@@ -55,7 +55,7 @@ stages:
             displayName: 'download settings.xml for Maven'
             name: settingsxml
             inputs:
-              secureFile: 'settings.xml'
+              secureFile: 'settings_v2.xml'
               retryCount: '2'
           - task: Docker@2
             displayName: Build and push an image to container registry
