@@ -19,7 +19,7 @@ variables:
   containerRegistry: 'cstaruatregistry.azurecr.io'
 
 stages:
-  - stage: $(environment)
+  - stage: UAT
     displayName: $(environment)
     jobs:
       - job: Build

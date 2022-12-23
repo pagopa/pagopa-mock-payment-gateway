@@ -40,7 +40,7 @@ stages:
                 echo "Current Project Version ${version}"
               failOnStderr: true
 
-  - stage: $(environment)
+  - stage: SIT
     displayName: $(environment)
     dependsOn: POM
     variables:
