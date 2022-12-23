@@ -13,7 +13,7 @@ spec:
         app: mockpaymentgatewayprf
       annotations:
         prometheus.io/path: /actuator/prometheus
-        prometheus.io/port: '8081'
+        prometheus.io/port: '7954'
         prometheus.io/scrape: 'true'
     spec:
       nodeSelector:
@@ -22,7 +22,7 @@ spec:
         - name: mockpaymentgatewayprf
           image: cstaruatregistry.azurecr.io/mockpaymentgateway
           ports:
-            - containerPort: 8081
+            - containerPort: 7954
           resources:
             requests:
               memory: 1Gi
@@ -33,7 +33,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /actuator/health
-              port: 8081
+              port: 7954
               scheme: HTTP
             timeoutSeconds: 5
             periodSeconds: 20
@@ -42,7 +42,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health
-              port: 8081
+              port: 7954
               scheme: HTTP
             timeoutSeconds: 5
             periodSeconds: 45
@@ -51,7 +51,7 @@ spec:
           startupProbe:
             httpGet:
               path: /actuator/health
-              port: 8081
+              port: 7954
               scheme: HTTP
             initialDelaySeconds: 45
             timeoutSeconds: 5
