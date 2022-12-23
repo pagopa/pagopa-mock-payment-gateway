@@ -9,17 +9,17 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/use-regex: "true"
   name: pmmockingress
-  namespace: pmmockpaymentgateway-prf
+  namespace: mockpaymentgateway-prf
 spec:
   rules:
     - http:
         paths:
           - backend:
               service:
-                name: pmmockpaymentgatewayprf
+                name: mockpaymentgatewayprf
                 port:
                   number: 8081
-            path: /pmmockpaymentgateway(/|$)(.*)
+            path: /mockpaymentgateway(/|$)(.*)
             pathType: Prefix
 status:
   loadBalancer:
