@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mockpaymentgatewaysit
+spec:
+  type: ClusterIP
+  ports:
+    - port: 7954
+  selector:
+    app: mockpaymentgatewaysit
