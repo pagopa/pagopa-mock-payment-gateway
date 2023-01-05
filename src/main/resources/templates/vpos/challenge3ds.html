@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    <link rel="stylesheet" th:href="@{static/webjars/bootstrap/4.2.1/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{${MOCK_PGS_URL}+'/static/webjars/bootstrap/4.2.1/css/bootstrap.min.css'}"/>
 </head>
 
 <body>
@@ -54,8 +54,8 @@
     </div>
 </div>
 <div th:replace="vpos/footer:: footer"></div>
-<script type="text/javascript" th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
-<script type="text/javascript" th:src="@{/webjars/bootstrap/4.2.1/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{${MOCK_PGS_URL}+'/webjars/jquery/3.4.1/jquery.min.js'}"></script>
+<script type="text/javascript" th:src="@{${MOCK_PGS_URL}+'/webjars/bootstrap/4.2.1/js/bootstrap.min.js'}"></script>
 <script type="text/javascript" th:src="@{${MOCK_PGS_URL}+'/static/js/challenge3ds.js'}"></script>
 </body>
 </html>
