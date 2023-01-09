@@ -38,6 +38,12 @@ public class VposSettingsController {
                     configService.save(c);
                 });
 
+        configService.getOptionalByKey(VPOS_STEP2_3DS2_RESPONSE)
+                .ifPresent(c -> {
+                    c.setPropertyValue(input.getStep2Outcome().getCode());
+                    configService.save(c);
+                });
+
         configService.getOptionalByKey(VPOS_ORDER_STATUS_RESPONSE)
                 .ifPresent(c -> {
                     c.setPropertyValue(input.getOrderStatusOutcome().getCode());
