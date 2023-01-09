@@ -4,6 +4,9 @@ $('#formChallenge').submit(function(){
         outcome: $('#outcome').val()
     };
 
+    var saveResponseUrl =  $('#mockPgsUrl').text() + '/3ds2.0-manager/challenge/save/response';
+
+   console.log(saveResponseUrl);
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (xhttp.readyState == XMLHttpRequest.DONE && xhttp.status !== 200) {
@@ -13,7 +16,7 @@ $('#formChallenge').submit(function(){
         }
     }
 
-    xhttp.open('POST', '/3ds2.0-manager/challenge/save/response', false);
+    xhttp.open('POST', saveResponseUrl, false);
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.send(JSON.stringify(data));
 });
