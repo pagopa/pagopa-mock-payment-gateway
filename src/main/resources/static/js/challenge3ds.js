@@ -5,8 +5,7 @@ $('#formChallenge').submit(function(){
     };
 
     var saveResponseUrl =  $('#mockPgsUrl').text() + '/3ds2.0-manager/challenge/save/response';
-
-   console.log(saveResponseUrl);
+    console.log(saveResponseUrl);
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (xhttp.readyState == XMLHttpRequest.DONE && xhttp.status !== 200) {
