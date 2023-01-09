@@ -66,6 +66,7 @@ public class VposService {
         String returnCode = null;
         String transactionStatus;
 
+        log.info("Operation " + operation);
         switch (operation) {
             case "ORDERSTATUS":
                 OrderStatus orderStatus = requestData.getOrderStatus();
@@ -89,17 +90,17 @@ public class VposService {
         }
 
         if (request0 != null) {
-            log.info("request0 not null");
+            log.info("Request0 not null");
             returnCode = configService.getByKey(VposConstants.VPOS_STEP0_3DS2_RESPONSE).getPropertyValue();
         } else if (request1 != null) {
-            log.info("request1 not null");
+            log.info("Request1 not null");
             returnCode = configService.getByKey(VposConstants.VPOS_STEP1_3DS2_RESPONSE).getPropertyValue();
         } else if (request2 != null) {
-            log.info("request2 not null and transactionId: " + request2.getThreeDSTransId());
+            log.info("Request2 not null for transactionId: " + request2.getThreeDSTransId());
             returnCode = transaction3DsService.getByThreeDSServerTransId(request2.getThreeDSTransId()).getOutcome();
         }
 
-        log.info("returnCode 101: " + returnCode);
+        log.info("ReturnCode: " + returnCode);
 
         return createAuthResponse3ds2(requestData, returnCode);
     }
@@ -137,7 +138,6 @@ public class VposService {
 
         response.setData(data);
         response.setResult(returnCode);
-        log.info("returnCode 140: " + returnCode);
         return response;
     }
 
