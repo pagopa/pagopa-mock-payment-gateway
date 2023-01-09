@@ -87,6 +87,10 @@ public class IssuerController {
         model.addAttribute("threeDSMtdComplInd", StringUtils.defaultIfBlank(transaction.getThreeDSMtdComplInd(), "UNKNOWN"));
         model.addAttribute("MOCK_PGS_URL", mockPgsUrl);
 
+        String step2Outcome = configService.getByKey(VposConstants.VPOS_STEP2_3DS2_RESPONSE).getPropertyValue();
+        transaction.setOutcome(step2Outcome);
+        transaction3DsService.save(transaction);
+
         return "vpos/challenge3ds.html";
     }
 

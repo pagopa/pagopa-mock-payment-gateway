@@ -2,6 +2,7 @@ package it.gov.pagopa.vpos.dto;
 
 import it.gov.pagopa.vpos.dto.response.Response3Ds2Step0Enum;
 import it.gov.pagopa.vpos.dto.response.Response3Ds2Step1Enum;
+import it.gov.pagopa.vpos.dto.response.Response3Ds2Step2Enum;
 import it.gov.pagopa.vpos.dto.response.ResponseOrderStatusEnum;
 import lombok.Data;
 
@@ -17,6 +18,8 @@ public class ChangeVposOutcome {
 
     @NotNull
     private Response3Ds2Step1Enum step1Outcome;
+    @NotNull
+    private Response3Ds2Step2Enum step2Outcome;
 
     @NotNull
     private ResponseOrderStatusEnum orderStatusOutcome;
