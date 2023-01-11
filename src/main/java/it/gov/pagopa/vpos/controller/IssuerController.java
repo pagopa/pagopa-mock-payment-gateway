@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.Base64Utils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,7 +24,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Controller
-@RequestMapping("/issuer/3ds2.0/")
+@RequestMapping("/issuer/3ds20/")
 @Log4j2
 public class IssuerController {
     @Autowired
@@ -34,6 +35,18 @@ public class IssuerController {
 
     @Value("${mock-pgs-url}")
     private String mockPgsUrl;
+
+    //Only for manual testing
+    @GetMapping("/method")
+    public String methodGet(@RequestParam String threeDSMethodData, Model model) {
+        return methodUrl(threeDSMethodData, model);
+    }
+
+    //Only for manual testing
+    @GetMapping("/challenge")
+    public String challengeGet(@RequestParam String creq, Model model) {
+        return challengeUrl(creq, model);
+    }
 
     @PostMapping("/method")
     public String methodUrl(@RequestParam String threeDSMethodData, Model model) {
@@ -63,7 +76,7 @@ public class IssuerController {
     }
 
     @PostMapping("/challenge")
-    public String challengeUrl(Model model, @RequestParam String creq) {
+    public String challengeUrl(@RequestParam String creq, Model model) {
         String decodedCreq = new String(Base64Utils.decodeFromString(creq));
         String threeDSServerTransID = (String) new Gson().fromJson(decodedCreq, Map.class).get("threeDSServerTransID");
         Transaction3DsEntity transaction = transaction3DsService.getByThreeDSServerTransId(threeDSServerTransID);
@@ -73,6 +86,10 @@ public class IssuerController {
         model.addAttribute("cres", Base64Utils.encodeToString("FAKE_CRES".getBytes()));
         model.addAttribute("threeDSMtdComplInd", StringUtils.defaultIfBlank(transaction.getThreeDSMtdComplInd(), "UNKNOWN"));
         model.addAttribute("MOCK_PGS_URL", mockPgsUrl);
+
+        String step2Outcome = configService.getByKey(VposConstants.VPOS_STEP2_3DS2_RESPONSE).getPropertyValue();
+        transaction.setOutcome(step2Outcome);
+        transaction3DsService.save(transaction);
 
         return "vpos/challenge3ds.html";
     }

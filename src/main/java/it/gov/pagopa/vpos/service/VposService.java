@@ -66,6 +66,7 @@ public class VposService {
         String returnCode = null;
         String transactionStatus;
 
+        log.info("Operation " + operation);
         switch (operation) {
             case "ORDERSTATUS":
                 OrderStatus orderStatus = requestData.getOrderStatus();
@@ -89,12 +90,17 @@ public class VposService {
         }
 
         if (request0 != null) {
+            log.info("Request0 not null");
             returnCode = configService.getByKey(VposConstants.VPOS_STEP0_3DS2_RESPONSE).getPropertyValue();
         } else if (request1 != null) {
+            log.info("Request1 not null");
             returnCode = configService.getByKey(VposConstants.VPOS_STEP1_3DS2_RESPONSE).getPropertyValue();
         } else if (request2 != null) {
+            log.info("Request2 not null for transactionId: " + request2.getThreeDSTransId());
             returnCode = transaction3DsService.getByThreeDSServerTransId(request2.getThreeDSTransId()).getOutcome();
         }
+
+        log.info("ReturnCode: " + returnCode);
 
         return createAuthResponse3ds2(requestData, returnCode);
     }
@@ -107,16 +113,19 @@ public class VposService {
 
         switch (getResponseType(returnCode)) {
             case METHOD:
+                log.info("START METHOD");
                 ThreeDSMethod threeDSMethod = renspondMethodUrl(data);
                 data.setThreeDSMethod(threeDSMethod);
                 transId = threeDSMethod.getThreeDSTransId();
                 break;
             case CHALLENGE:
+                log.info("START CHALLENGE");
                 ThreeDSChallenge threeDSChallenge = respondChallengeUrl(data);
                 data.setThreeDSChallenge(threeDSChallenge);
                 transId = threeDSChallenge.getThreeDSTransId();
                 break;
             case AUTHORIZATION:
+                log.info("START AUTHORIZATION");
                 data.setThreeDSAuthorization(respondAuthorization(data));
                 data.setPanAliasData(createPanAlias());
                 break;
@@ -151,7 +160,7 @@ public class VposService {
         String threeDSTransId = UUID.randomUUID().toString();
         method.setThreeDSTransId(threeDSTransId);
         method.setThreeDSMethodData(createBase64MethodData3Ds(threeDSTransId, data.getThreeDSAuthorizationRequest0().getThreeDSMtdNotifUrl()));
-        method.setThreeDSMethodUrl(normalizeUrl(String.format("%s/issuer/3ds2.0/method", host)));
+        method.setThreeDSMethodUrl(normalizeUrl(String.format("%s/issuer/3ds20/method", host)));
         method.setMac(generate3DSMethodMac(method));
 
         return method;
@@ -162,7 +171,7 @@ public class VposService {
         String transId = threeDSAuthorizationRequest1 != null ? threeDSAuthorizationRequest1.getThreeDSTransId() : UUID.randomUUID().toString();
         ThreeDSChallenge challenge = new ThreeDSChallenge();
         challenge.setThreeDSTransId(transId);
-        challenge.setAcsUrl(normalizeUrl(String.format("%s/issuer/3ds2.0/challenge", host)));
+        challenge.setAcsUrl(normalizeUrl(String.format("%s/issuer/3ds20/challenge", host)));
         challenge.setCReq(createBase64MethodData3Ds(transId, null));
         challenge.setMac(generateChallengeMac(challenge));
 

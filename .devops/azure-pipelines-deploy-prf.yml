@@ -1,0 +1,74 @@
+trigger: none
+pr: none
+
+parameters:
+  - name: 'pomversion'
+    displayName: 'POM Version'
+    type: string
+
+variables:
+  environment: 'PRF'
+  vmImageNameDefault: 'ubuntu-latest'
+  poolNameDeploy: 'pagopa-agent-pool-uat'
+  dockerRegistryServiceConnection: 'pm-cstaruatregistry-connector'
+  imageRepository: 'mockpaymentgateway'
+  dockerfileRelativePath: './Dockerfile'
+  namespace: 'mockpaymentgateway-prf'
+  kubernetesServiceConnection: 'pm-aks-connection-uat'
+  imagePullSecret: 'pmmockserviceregistry-auth'
+  containerRegistry: 'cstaruatregistry.azurecr.io'
+
+stages:
+  - stage: PRF
+    displayName: PRF
+    jobs:
+      - job: Build
+        displayName: Build
+        pool:
+          vmImage: $(vmImageNameDefault)
+        steps:
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Atrifact manifests'
+            inputs:
+              targetPath: '$(Build.Repository.LocalPath)/.devops/manifests'
+              artifact: 'manifests'
+              publishLocation: 'pipeline'
+
+      - deployment: Deploy
+        displayName: Deploy
+        dependsOn: Build
+        pool:
+          name: $(poolNameDeploy)
+        environment: 'PT'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: none
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    buildType: 'current'
+                    artifactName: 'manifests'
+                    targetPath: '$(Pipeline.Workspace)/manifests'
+                - task: KubernetesManifest@0
+                  displayName: Create Namespace
+                  inputs:
+                    namespace: $(namespace)
+                    action: deploy
+                    kubernetesServiceConnection: $(kubernetesServiceConnection)
+                    manifests: |
+                      $(Pipeline.Workspace)/manifests/namespace-$(environment).yml
+                - task: KubernetesManifest@0
+                  displayName: Deploy to Kubernetes cluster
+                  inputs:
+                    namespace: $(namespace)
+                    action: deploy
+                    kubernetesServiceConnection: $(kubernetesServiceConnection)
+                    manifests: |
+                      $(Pipeline.Workspace)/manifests/deployment-$(environment).yml
+                      $(Pipeline.Workspace)/manifests/service-$(environment).yml
+                      $(Pipeline.Workspace)/manifests/ingress-$(environment).yml
+                    imagePullSecrets: |
+                      $(imagePullSecret)
+                    containers: |
+                      $(containerRegistry)/$(imageRepository):${{ parameters.pomversion }}
