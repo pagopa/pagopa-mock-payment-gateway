@@ -13,5 +13,6 @@ public class UpdateAuthRequest {
     @NotBlank
     private String timestampOperation; //2022-02-11T13:00:00+01:00
 
+    @NotBlank
     private String authorizationCode;
 }
