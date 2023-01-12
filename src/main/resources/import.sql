@@ -36,10 +36,6 @@ INSERT INTO config(id, property_key, property_value) VALUES (26, 'VPOS_ORDER_STA
 INSERT INTO config(id, property_key, property_value) VALUES (27, 'VPOS_TRANSACTION_STATUS','00');
 INSERT INTO config(id, property_key, property_value) VALUES (28, 'VPOS_HTTP_CODE_RESPONSE','200');
 
---TRANSACTION CONFIGURATIONS
-INSERT INTO config(id, property_key, property_value) VALUES (29, 'TRANSACTION_HTTP_CODE_RESPONSE','200');
-INSERT INTO config(id, property_key, property_value) VALUES (30, 'TRANSACTION_STATUS_RESPONSE','ACTIVATION_REQUESTED');
-
 --GENERIC CONFIGURATIONS
 INSERT INTO client(id, client_name, base_url) VALUES (1, 'local', 'http://host.docker.internal:8080');
 INSERT INTO client(id, client_name, base_url) VALUES (2, 'sit', 'https://api.dev.platform.pagopa.it');
