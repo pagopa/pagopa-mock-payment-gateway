@@ -15,8 +15,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -39,7 +42,10 @@ public class IssuerController {
     //Only for manual testing
     @GetMapping("/method")
     public String methodGet(@RequestParam String threeDSMethodData, Model model) {
-        return methodUrl(threeDSMethodData, model);
+
+        MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<String, String>();
+        multiValueMap.add("threeDSMethodData", threeDSMethodData);
+        return methodUrl(multiValueMap, model);
     }
 
     //Only for manual testing
@@ -49,10 +55,10 @@ public class IssuerController {
     }
 
     @PostMapping("/method")
-    public String methodUrl(@RequestParam String threeDSMethodData, Model model) {
+    public String methodUrl(@RequestBody MultiValueMap<String, String> formData, Model model) {
         Function<String, TableConfig> findByKey = key -> configService.getOptionalByKey(key).orElse(new TableConfig());
 
-        String decodedMethodData = new String(Base64Utils.decodeFromString(threeDSMethodData));
+        String decodedMethodData = new String(Base64Utils.decodeFromString(formData.getFirst("threeDSMethodData")));
         MethodData3Ds methodData3Ds = new Gson().fromJson(decodedMethodData, MethodData3Ds.class);
         model.addAttribute("threeDSMethodNotificationUrl", methodData3Ds.getThreeDSMethodNotificationUrl());
 
