@@ -45,12 +45,14 @@ public class XPayRefundService {
         String codiceTransazione = request.getCodiceTransazione();
         String idOperazione = UUID.randomUUID().toString();
         long timeStamp = System.currentTimeMillis();
+        String macToCheck;
         String macToReturn;
         String macForError;
 
         try {
             log.info("XPay Refund - Generating MAC for transactionId: " + codiceTransazione);
-            macToReturn = XPayUtils.getBaseMac(codiceTransazione, request.getDivisa(), request.getImporto(), request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToCheck = XPayUtils.getBaseMac(codiceTransazione, request.getDivisa(), request.getImporto(), request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToReturn = XPayUtils.getMacWithoutNonce(XPayOutcome.OK.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
             macForError = XPayUtils.getMacWithoutNonce(XPayOutcome.KO.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
         } catch (Exception e) {
             log.error("XPay Refund - Exception during the creation of the MAC string: ", e);
@@ -61,7 +63,7 @@ public class XPayRefundService {
         }
 
         if(outcomeConfig.equals("OK")) {
-            if (macToReturn.equals(request.getMac())) {
+            if (macToCheck.equals(request.getMac())) {
                 log.info("XPay Refund - MAC verified");
 
                 return ResponseEntity.ok()

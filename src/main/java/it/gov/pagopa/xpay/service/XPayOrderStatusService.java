@@ -52,12 +52,14 @@ public class XPayOrderStatusService {
         this.codiceTransazione = request.getCodiceTransazione();
         String idOperazione = UUID.randomUUID().toString();
         long timeStamp = System.currentTimeMillis();
+        String macToCheck;
         String macToReturn;
         String macForError;
 
         try {
             log.info("XPay OrderStatus - Generating MAC for transactionId: " + codiceTransazione);
-            macToReturn = XPayUtils.getRefundMac(codiceTransazione, request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToCheck = XPayUtils.getRefundMac(codiceTransazione, request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToReturn = XPayUtils.getMacWithoutNonce(XPayOutcome.OK.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
             macForError = XPayUtils.getMacWithoutNonce(XPayOutcome.KO.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
         } catch (Exception e) {
             log.error("XPay OrderStatus - Exception during the creation of the MAC string: ", e);
@@ -68,7 +70,7 @@ public class XPayOrderStatusService {
         }
 
         if (outcomeConfig.equals("OK")) {
-            if (macToReturn.equals(request.getMac())) {
+            if (macToCheck.equals(request.getMac())) {
                 log.info("XPay OrderStatus - MAC verified");
 
                 return ResponseEntity.ok()
