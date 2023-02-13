@@ -62,13 +62,13 @@ public class XPayPayment3DSService {
             XPayErrorEnum error = XPayErrorEnum.ERROR_50;
 
             return ResponseEntity.status(error.getHttpStatus())
-                    .body(createXPayPaymentResponse(XPayOutcome.KO, idOperazione, null, error));
+                    .body(createXPayPaymentResponse(XPayOutcome.KO, idOperazione, null, error, timeStamp));
         }
 
         if (outcomeConfig.equals("OK")) {
             if (macToCheck.equals(request.getMac())) {
                 log.info("XPay Paga3DS - MAC verified");
-                XPayPaymentResponse xPayPaymentResponse = createXPayPaymentResponse(XPayOutcome.OK, idOperazione, macToReturn, null);
+                XPayPaymentResponse xPayPaymentResponse = createXPayPaymentResponse(XPayOutcome.OK, idOperazione, macToReturn, null, timeStamp);
                 if (request.getParametriAggiuntivi() != null)
                     xPayPaymentResponse.setParametriAggiuntivi(request.getParametriAggiuntivi());
 
@@ -78,21 +78,21 @@ public class XPayPayment3DSService {
                 XPayErrorEnum error = XPayErrorEnum.ERROR_3;
 
                 return ResponseEntity.status(error.getHttpStatus())
-                        .body(createXPayPaymentResponse(XPayOutcome.KO, idOperazione, macForError, error));
+                        .body(createXPayPaymentResponse(XPayOutcome.KO, idOperazione, macForError, error, timeStamp));
             }
         } else {
             return ResponseEntity.status(errorConfig.getHttpStatus())
-                    .body(createXPayPaymentResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig));
+                    .body(createXPayPaymentResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig, timeStamp));
         }
     }
 
     private XPayPaymentResponse createXPayPaymentResponse(XPayOutcome xPayOutcome, String idOperazione, String mac,
-                                                          XPayErrorEnum error) {
+                                                          XPayErrorEnum error, Long timeStamp) {
 
         XPayPaymentResponse xPayPaymentResponse = new XPayPaymentResponse();
         xPayPaymentResponse.setEsito(xPayOutcome);
         xPayPaymentResponse.setIdOperazione(idOperazione);
-        xPayPaymentResponse.setTimeStamp(System.currentTimeMillis());
+        xPayPaymentResponse.setTimeStamp(timeStamp);
         xPayPaymentResponse.setMac(mac);
 
         if (error == null) {
