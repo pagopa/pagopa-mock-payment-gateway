@@ -64,7 +64,7 @@ public class XPayOrderStatusService {
             XPayErrorEnum error = XPayErrorEnum.ERROR_50;
 
             return ResponseEntity.status(error.getHttpStatus())
-                    .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, null, error));
+                    .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, null, error, timeStamp));
         }
 
         if (outcomeConfig.equals("OK")) {
@@ -72,27 +72,27 @@ public class XPayOrderStatusService {
                 log.info("XPay OrderStatus - MAC verified");
 
                 return ResponseEntity.ok()
-                        .body(createXPayOrderResponse(XPayOutcome.OK, idOperazione, macToReturn, null));
+                        .body(createXPayOrderResponse(XPayOutcome.OK, idOperazione, macToReturn, null, timeStamp));
             } else {
                 log.info("XPay OrderStatus - MAC not verified");
                 XPayErrorEnum error = XPayErrorEnum.ERROR_3;
 
                 return ResponseEntity.status(error.getHttpStatus())
-                        .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, macForError, error));
+                        .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, macForError, error, timeStamp));
             }
         } else {
             return ResponseEntity.status(errorConfig.getHttpStatus())
-                    .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig));
+                    .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig, timeStamp));
         }
     }
 
     private XPayOrderResponse createXPayOrderResponse(XPayOutcome xPayOutcome, String idOperazione, String mac,
-                                                      XPayErrorEnum error) {
+                                                      XPayErrorEnum error, Long timeStamp) {
 
         XPayOrderResponse xPayOrderResponse = new XPayOrderResponse();
         xPayOrderResponse.setEsito(xPayOutcome);
         xPayOrderResponse.setIdOperazione(idOperazione);
-        xPayOrderResponse.setTimeStamp(System.currentTimeMillis());
+        xPayOrderResponse.setTimeStamp(timeStamp);
         xPayOrderResponse.setMac(mac);
 
         if (error == null)

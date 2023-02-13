@@ -57,7 +57,7 @@ public class XPayRefundService {
             XPayErrorEnum error = XPayErrorEnum.ERROR_50;
 
             return ResponseEntity.status(error.getHttpStatus())
-                    .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, null, error));
+                    .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, null, error, timeStamp));
         }
 
         if(outcomeConfig.equals("OK")) {
@@ -65,27 +65,27 @@ public class XPayRefundService {
                 log.info("XPay Refund - MAC verified");
 
                 return ResponseEntity.ok()
-                        .body(createXPayRefundResponse(XPayOutcome.OK, idOperazione, macToReturn, null));
+                        .body(createXPayRefundResponse(XPayOutcome.OK, idOperazione, macToReturn, null, timeStamp));
             } else {
                 log.info("XPay Refund - MAC not verified");
                 XPayErrorEnum error = XPayErrorEnum.ERROR_3;
 
                 return ResponseEntity.status(error.getHttpStatus())
-                        .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, macForError, error));
+                        .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, macForError, error, timeStamp));
             }
         } else {
             return ResponseEntity.status(errorConfig.getHttpStatus())
-                    .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig));
+                    .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig, timeStamp));
         }
     }
 
     private XPayRefundResponse createXPayRefundResponse(XPayOutcome xPayOutcome, String idOperazione, String mac,
-                                                          XPayErrorEnum error) {
+                                                          XPayErrorEnum error, Long timeStamp) {
 
         XPayRefundResponse xPayRefundResponse = new XPayRefundResponse();
         xPayRefundResponse.setEsito(xPayOutcome);
         xPayRefundResponse.setIdOperazione(idOperazione);
-        xPayRefundResponse.setTimeStamp(System.currentTimeMillis());
+        xPayRefundResponse.setTimeStamp(timeStamp);
         xPayRefundResponse.setMac(mac);
 
         if(error == null)
