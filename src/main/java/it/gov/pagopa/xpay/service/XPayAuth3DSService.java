@@ -129,7 +129,7 @@ public class XPayAuth3DSService {
         return String.format("<html>" +
                         "   <head>" +
                         "      <title>Gestione Pagamento - Autenticazione</title>" +
-                        "      <script type= \"text/javascript language= \"javascript\">" +
+                        "      <script type=\"text/javascript\" language=\"javascript\">" +
                         "         function moveWindow() { " +
                         "               document.tdsFraudForm.submit();}" +
                         "      </script>" +
@@ -145,7 +145,7 @@ public class XPayAuth3DSService {
                         "         <input type=\"hidden\" name=\"messaggio\" value=\"%s\">" +
                         "         <input type=\"hidden\" name=\"resumeType \" value=\"xpay\">" +
                         "      </form>" +
-                        "      <script type= \"text/javascript\"> moveWindow(); </script>" +
+                        "      <script type=\"text/javascript\"> moveWindow(); </script>" +
                         "   </body>" +
                         "</html>",
                 url, outcome, operationId, timeStamp, mac, nonce, code, message);
