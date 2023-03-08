@@ -126,27 +126,31 @@ public class XPayAuth3DSService {
         String code = "mock-code";
         String message = "mock-message";
 
-        return String.format("<html>" +
-                        "   <head>" +
-                        "      <title>Gestione Pagamento - Autenticazione</title>" +
-                        "      <script type= \"text/javascript language= \"javascript\">" +
-                        "         function moveWindow() { " +
-                        "               document.tdsFraudForm.submit();}" +
-                        "      </script>" +
-                        "   </head>" +
-                        "   <body>" +
-                        "      <form name=\"tdsFraudForm\" action=\"%s\" method= \"GET \">" +
-                        "         <input type=\"hidden\" name=\"esito\" value=\"%s\">" +
-                        "         <input type=\"hidden\" name=\"idOperazione\" value=\"%s\">" +
-                        "         <input type=\"hidden\" name=\"timeStamp\" value= \"%s\">" +
-                        "         <input type=\"hidden\" name=\"mac\" value=\"%s\">" +
-                        "         <input type=\"hidden\" name=\"xpayNonce\" value=\"%s\">" +
-                        "         <input type=\"hidden\" name=\"codice\" value=\"%s\">" +
-                        "         <input type=\"hidden\" name=\"messaggio\" value=\"%s\">" +
-                        "         <input type=\"hidden\" name=\"resumeType \" value=\"xpay\">" +
-                        "      </form>" +
-                        "      <script type= \"text/javascript\"> moveWindow(); </script>" +
-                        "   </body>" +
+        return String.format("\n\n\n" +
+                        "<html>" +
+                        "\n" +
+                        "<head>" +
+                        "\n<script type=\"text/javascript\" language=\"javascript\">" +
+                        "\nfunction moveWindow() { " +
+                        "\ndocument.tdsFraudForm.submit();} </script>\n" +
+                        "<title>3DSECURE</title>" +
+                        "\n" +
+                        "</head>" +
+                        "\n\n" +
+                        "<body>" +
+                        "\n<form name=\"tdsFraudForm\" action=\"%s\" method= \"GET \">" +
+                        "\n<input type=\"hidden\" name=\"esito\" value=\"%s\">" +
+                        "\n<input type=\"hidden\" name=\"idOperazione\" value=\"%s\">" +
+                        "\n<input type=\"hidden\" name=\"timeStamp\" value= \"%s\">" +
+                        "\n<input type=\"hidden\" name=\"mac\" value=\"%s\">" +
+                        "\n<input type=\"hidden\" name=\"xpayNonce\" value=\"%s\">" +
+                        "\n<input type=\"hidden\" name=\"codice\" value=\"%s\">" +
+                        "\n<input type=\"hidden\" name=\"messaggio\" value=\"%s\">" +
+                        "\n<input type=\"hidden\" name=\"resumeType \" value=\"xpay\">" +
+                        "\n</form>" +
+                        "\n\n<script type=\"text/javascript\"> moveWindow(); </script>" +
+                        "\n</body>" +
+                        "\n" +
                         "</html>",
                 url, outcome, operationId, timeStamp, mac, nonce, code, message);
     }
