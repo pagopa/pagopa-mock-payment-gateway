@@ -74,7 +74,8 @@ public class XPayAuth3DSService {
             if (macToCheck.equals(request.getMac())) {
                 log.info("XPay Autenticazione3DS - MAC verified");
                 XPayAuthResponse xpayResponse = createXpayAuthResponse(XPayOutcome.OK, idOperazione, timeStamp, macForResponse, null);
-                String html = createHtml(request.getUrlRisposta());
+                String html = createHtml(request.getUrlRisposta(), xpayResponse.getEsito().toString(), xpayResponse.getIdOperazione(),
+                        xpayResponse.getTimeStamp().toString(), macForHtml, nonce);
                 xpayResponse.setHtml(html);
 
                 return ResponseEntity.ok().body(xpayResponse);
@@ -121,39 +122,36 @@ public class XPayAuth3DSService {
         return xPayAuthResponse;
     }
 
-    private static String createHtml(String url) {
+    private static String createHtml(String url, String outcome, String operationId, String timeStamp, String mac, String nonce) {
+        String code = "mock-code";
+        String message = "mock-message";
+
         return String.format("\n\n\n" +
-                "<html>" +
-                "\n" +
-                "<head>" +
-                "\n <script type=\"text/javascript\">\n function moveWindow() {\n var form = document.getElementById(\"downloadForm\");\n if (form != null) {\n form.submit();\n }\n }\n </script>\n" +
-                "<title>3DSECURE</title>" +
-                "\n" +
-                "<link rel=\"icon\" href=\"acs/images/favicon.ico\" type=\"image/x-icon\" />" +
-                "\n" +
-                "<link rel=\"shortcut icon\" href=\"acs/images/favicon.ico\" type=\"image/x-icon\" />" +
-                "\n" +
-                "</head>" +
-                "\n\n" +
-                "<body>" +
-                "\n" +
-                "<form id=\"downloadForm\"\n action=\"%s\"\n method=\"GET\">" +
-                "\n <!-- Dati Carta -->\n <input type=\"hidden\" name=\"PaReq\" value=\"WSxZLDEsMDEsQUxscWthUU1kbm93dEtJd0xPK0JwYlI1dC9JPSxVU0QsWSwxLEE=\">\n <input type=\"hidden\" name=\"TermUrl\" value=\"https://int-ecommerce.nexi.it/ecomm/3dsResponse\">\n <!-- Parametri MPI -->\n <input type=\"hidden\" name=\"mpi_xid\" value=\"vN2/Y9GNHe9yQ8fZfnXWSQKOFBE=\" /><input type=\"hidden\" name=\"mpi_digest\" value=\"RchIeGJTjSaArFCRMqpA4TWPe3Q=\" /><input type=\"hidden\" name=\"mpi_recurEnd\" value=\"\" /><input type=\"hidden\" name=\"mpi_purchAmount\" value=\"12200\" /><input type=\"hidden\" name=\"mpi_okUrl\" value=\"https://int-ecommerce.nexi.it/ecomm/3dsResponse\" /><input type=\"hidden\" name=\"mpi_expiry\" value=\"3012\" /><input type=\"hidden\" name=\"mpi_failUrl\" value=\"https://int-ecommerce.nexi.it/ecomm/3dsResponse\" /><input type=\"hidden\" name=\"mpi_version\" value=\"2.0\" /><input type=\"hidden\" name=\"mpi_currency\" value=\"978\" /><input type=\"hidden\" name=\"mpi_MD\" value=\"ImwDDTTbmo0is44kgnkHSJfR.xpdemoas1\" /><input type=\"hidden\" name=\"mpi_installment\" value=\"\" /><input type=\"hidden\" name=\"mpi_exponent\" value=\"2\" /><input type=\"hidden\" name=\"mpi_merchantID\" value=\"00061134\" /><input type=\"hidden\" name=\"mpi_recurFreq\" value=\"\" /><input type=\"hidden\" name=\"mpi_description\" value=\"7090144925_1675798849994\" /><input type=\"hidden\" name=\"mpi_deviceCategory\" value=\"0\" /><input type=\"hidden\" name=\"mpi_pan\" value=\"4000000000000101\" />\n <!-- To support javascript unaware/disabled browsers -->\n" +
-                "<div style=\"text-align:center;\">" +
-                "\n" +
-                "<noscript>" +
-                "\n" +
-                "<p align=\"center\">Please click the submit button below.<br>\n <input type=\"submit\" name=\"submit\" value=\"Submit\"></p>" +
-                "\n" +
-                "</noscript>" +
-                "\n" +
-                "</div>" +
-                "\n" +
-                "</form>" +
-                "\n <script type=\"text/javascript\">\nmoveWindow();\n</script>\n" +
-                "</body>" +
-                "\n" +
-                "</html>" +
-                "\n", url);
+                        "<html>" +
+                        "\n" +
+                        "<head>" +
+                        "\n<script type=\"text/javascript\" language=\"javascript\">" +
+                        "\nfunction moveWindow() { " +
+                        "\ndocument.tdsFraudForm.submit();} </script>\n" +
+                        "<title>3DSECURE</title>" +
+                        "\n" +
+                        "</head>" +
+                        "\n\n" +
+                        "<body>" +
+                        "\n<form name=\"tdsFraudForm\" action=\"%s\" method= \"GET \">" +
+                        "\n<input type=\"hidden\" name=\"esito\" value=\"%s\">" +
+                        "\n<input type=\"hidden\" name=\"idOperazione\" value=\"%s\">" +
+                        "\n<input type=\"hidden\" name=\"timeStamp\" value= \"%s\">" +
+                        "\n<input type=\"hidden\" name=\"mac\" value=\"%s\">" +
+                        "\n<input type=\"hidden\" name=\"xpayNonce\" value=\"%s\">" +
+                        "\n<input type=\"hidden\" name=\"codice\" value=\"%s\">" +
+                        "\n<input type=\"hidden\" name=\"messaggio\" value=\"%s\">" +
+                        "\n<input type=\"hidden\" name=\"resumeType \" value=\"xpay\">" +
+                        "\n</form>" +
+                        "\n\n<script type=\"text/javascript\"> moveWindow(); </script>" +
+                        "\n</body>" +
+                        "\n" +
+                        "</html>",
+                url, outcome, operationId, timeStamp, mac, nonce, code, message);
     }
 }
