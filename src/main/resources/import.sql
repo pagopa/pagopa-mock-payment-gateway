@@ -35,6 +35,8 @@ INSERT INTO config(id, property_key, property_value) VALUES (25, 'VPOS_STEP2_3DS
 INSERT INTO config(id, property_key, property_value) VALUES (26, 'VPOS_ORDER_STATUS_RESPONSE','00');
 INSERT INTO config(id, property_key, property_value) VALUES (27, 'VPOS_TRANSACTION_STATUS','00');
 INSERT INTO config(id, property_key, property_value) VALUES (28, 'VPOS_HTTP_CODE_RESPONSE','200');
+INSERT INTO config(id, property_key, property_value) VALUES (29, 'VPOS_ACCOUNTING_RESPONSE','00');
+INSERT INTO config(id, property_key, property_value) VALUES (30, 'VPOS_REVERT_RESPONSE','00');
 
 --GENERIC CONFIGURATIONS
 INSERT INTO client(id, client_name, base_url) VALUES (1, 'local', 'http://host.docker.internal:8080');
