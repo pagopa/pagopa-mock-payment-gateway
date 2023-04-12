@@ -90,6 +90,7 @@ public class BPayController {
         ResponseInserimentoRichiestaPagamentoPagoPaVO responseData = new ResponseInserimentoRichiestaPagamentoPagoPaVO();
         responseData.setEsito(generateEsito(EsitoEnum.fromCode(paymentOutcomeConfig)));
         responseData.setCorrelationId(correlationId);
+        responseData.setAbi("03069");
         InserimentoRichiestaPagamentoPagoPaResponse response = new InserimentoRichiestaPagamentoPagoPaResponse();
         response.setReturn(responseData);
         pmClient.callbackPm(payment, clientBaseUrl);
