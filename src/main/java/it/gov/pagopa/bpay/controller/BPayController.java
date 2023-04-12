@@ -1,6 +1,6 @@
 package it.gov.pagopa.bpay.controller;
 
-import it.gft.p2b.srv.pp.*;
+import eu.sia.p2b.adapter.srv.pp.*;
 import it.gov.pagopa.bpay.client.*;
 import it.gov.pagopa.bpay.dto.*;
 import it.gov.pagopa.bpay.entity.*;
