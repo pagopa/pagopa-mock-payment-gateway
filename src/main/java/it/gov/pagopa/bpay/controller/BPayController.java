@@ -54,7 +54,7 @@ public class BPayController {
 
     private String inquiryOutcomeConfig;
 
-    private static final String NAMESPACE_URI = "http://p2b.gft.it/srv/pp";
+    private static final String NAMESPACE_URI = "http://adapter.p2b.sia.eu/srv/pp";
 
     private static final ObjectFactory factory = new ObjectFactory();
 

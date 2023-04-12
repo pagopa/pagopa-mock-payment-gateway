@@ -31,7 +31,7 @@ public class SoapConfig extends WsConfigurerAdapter {
         DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();
         wsdl11Definition.setPortTypeName("BPayPort");
         wsdl11Definition.setLocationUri("/bpay");
-        wsdl11Definition.setTargetNamespace("http://p2b.gft.it/srv/pp");
+        wsdl11Definition.setTargetNamespace("http://adapter.p2b.sia.eu/srv/pp");
         wsdl11Definition.setSchema(schema);
         return wsdl11Definition;
     }
