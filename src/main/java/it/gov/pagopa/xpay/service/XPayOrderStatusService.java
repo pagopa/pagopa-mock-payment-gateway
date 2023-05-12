@@ -37,7 +37,6 @@ public class XPayOrderStatusService {
 
     private String outcomeConfig;
     private XPayErrorEnum errorConfig;
-    private String codiceTransazione;
     private final LocalDateTime nowDateTime = LocalDateTime.now();
 
     private void refreshConfigs() {
@@ -49,7 +48,7 @@ public class XPayOrderStatusService {
         log.info("XPay OrderStatus - Request from PGS: " + request);
         refreshConfigs();
 
-        this.codiceTransazione = request.getCodiceTransazione();
+        String codiceTransazione = request.getCodiceTransazione();
         String idOperazione = UUID.randomUUID().toString();
         long timeStamp = System.currentTimeMillis();
         String macToReturn;
@@ -64,7 +63,7 @@ public class XPayOrderStatusService {
             XPayErrorEnum error = XPayErrorEnum.ERROR_50;
 
             return ResponseEntity.status(error.getHttpStatus())
-                    .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, null, error));
+                    .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, null, error,codiceTransazione));
         }
 
         if (outcomeConfig.equals("OK")) {
@@ -72,22 +71,22 @@ public class XPayOrderStatusService {
                 log.info("XPay OrderStatus - MAC verified");
 
                 return ResponseEntity.ok()
-                        .body(createXPayOrderResponse(XPayOutcome.OK, idOperazione, macToReturn, null));
+                        .body(createXPayOrderResponse(XPayOutcome.OK, idOperazione, macToReturn, null,codiceTransazione));
             } else {
-                log.info("XPay OrderStatus - MAC not verified");
+                log.info("XPay OrderStatus - MAC not verified {} {} {} ", macToReturn, request.getMac(), request.getCodiceTransazione());
                 XPayErrorEnum error = XPayErrorEnum.ERROR_3;
 
                 return ResponseEntity.status(error.getHttpStatus())
-                        .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, macForError, error));
+                        .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, macForError, error,codiceTransazione));
             }
         } else {
             return ResponseEntity.status(errorConfig.getHttpStatus())
-                    .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig));
+                    .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig,codiceTransazione));
         }
     }
 
     private XPayOrderResponse createXPayOrderResponse(XPayOutcome xPayOutcome, String idOperazione, String mac,
-                                                      XPayErrorEnum error) {
+                                                      XPayErrorEnum error, String codiceTransazione) {
 
         XPayOrderResponse xPayOrderResponse = new XPayOrderResponse();
         xPayOrderResponse.setEsito(xPayOutcome);
@@ -96,14 +95,14 @@ public class XPayOrderStatusService {
         xPayOrderResponse.setMac(mac);
 
         if (error == null)
-            xPayOrderResponse.setReport(createXPayReport());
+            xPayOrderResponse.setReport(createXPayReport(codiceTransazione));
         else
             xPayOrderResponse.setErrore(new XPayError(error.getErrorCode(), error.getDescription()));
 
         return xPayOrderResponse;
     }
 
-    private List<XPayReport> createXPayReport() {
+    private List<XPayReport> createXPayReport(String codiceTransazione) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
 
         XPayReport xPayReport = new XPayReport();
@@ -120,12 +119,12 @@ public class XPayOrderStatusService {
         xPayReport.setPan("123456");
         xPayReport.setDataTransazione(nowDateTime.format(formatter));
         xPayReport.setMail("prova@mail.it");
-        xPayReport.setDettaglio(createXPayReportDetail());
+        xPayReport.setDettaglio(createXPayReportDetail(codiceTransazione));
 
         return Collections.singletonList(xPayReport);
     }
 
-    private List<XPayReportDetail> createXPayReportDetail() {
+    private List<XPayReportDetail> createXPayReportDetail(String codiceTransazione) {
         XPayReportDetail detail = new XPayReportDetail();
         detail.setNome("Mario");
         detail.setCognome("Rossi");
