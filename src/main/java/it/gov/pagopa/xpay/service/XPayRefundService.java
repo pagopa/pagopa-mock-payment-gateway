@@ -45,47 +45,49 @@ public class XPayRefundService {
         String codiceTransazione = request.getCodiceTransazione();
         String idOperazione = UUID.randomUUID().toString();
         long timeStamp = System.currentTimeMillis();
+        String macToCheck;
         String macToReturn;
         String macForError;
 
         try {
             log.info("XPay Refund - Generating MAC for transactionId: " + codiceTransazione);
-            macToReturn = XPayUtils.getBaseMac(codiceTransazione, request.getDivisa(), request.getImporto(), request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToCheck = XPayUtils.getBaseMac(codiceTransazione, request.getDivisa(), request.getImporto(), request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToReturn = XPayUtils.getMacWithoutNonce(XPayOutcome.OK.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
             macForError = XPayUtils.getMacWithoutNonce(XPayOutcome.KO.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
         } catch (Exception e) {
             log.error("XPay Refund - Exception during the creation of the MAC string: ", e);
             XPayErrorEnum error = XPayErrorEnum.ERROR_50;
 
             return ResponseEntity.status(error.getHttpStatus())
-                    .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, null, error));
+                    .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, null, error, timeStamp));
         }
 
         if(outcomeConfig.equals("OK")) {
-            if (macToReturn.equals(request.getMac())) {
+            if (macToCheck.equals(request.getMac())) {
                 log.info("XPay Refund - MAC verified");
 
                 return ResponseEntity.ok()
-                        .body(createXPayRefundResponse(XPayOutcome.OK, idOperazione, macToReturn, null));
+                        .body(createXPayRefundResponse(XPayOutcome.OK, idOperazione, macToReturn, null, timeStamp));
             } else {
                 log.info("XPay Refund - MAC not verified");
                 XPayErrorEnum error = XPayErrorEnum.ERROR_3;
 
                 return ResponseEntity.status(error.getHttpStatus())
-                        .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, macForError, error));
+                        .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, macForError, error, timeStamp));
             }
         } else {
             return ResponseEntity.status(errorConfig.getHttpStatus())
-                    .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig));
+                    .body(createXPayRefundResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig, timeStamp));
         }
     }
 
     private XPayRefundResponse createXPayRefundResponse(XPayOutcome xPayOutcome, String idOperazione, String mac,
-                                                          XPayErrorEnum error) {
+                                                          XPayErrorEnum error, Long timeStamp) {
 
         XPayRefundResponse xPayRefundResponse = new XPayRefundResponse();
         xPayRefundResponse.setEsito(xPayOutcome);
         xPayRefundResponse.setIdOperazione(idOperazione);
-        xPayRefundResponse.setTimeStamp(System.currentTimeMillis());
+        xPayRefundResponse.setTimeStamp(timeStamp);
         xPayRefundResponse.setMac(mac);
 
         if(error == null)

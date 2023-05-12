@@ -51,47 +51,49 @@ public class XPayOrderStatusService {
         String codiceTransazione = request.getCodiceTransazione();
         String idOperazione = UUID.randomUUID().toString();
         long timeStamp = System.currentTimeMillis();
+        String macToCheck;
         String macToReturn;
         String macForError;
 
         try {
             log.info("XPay OrderStatus - Generating MAC for transactionId: " + codiceTransazione);
-            macToReturn = XPayUtils.getRefundMac(codiceTransazione, request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToCheck = XPayUtils.getRefundMac(codiceTransazione, request.getTimeStamp(), apiKey, chiaveSegreta);
+            macToReturn = XPayUtils.getMacWithoutNonce(XPayOutcome.OK.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
             macForError = XPayUtils.getMacWithoutNonce(XPayOutcome.KO.toString(), idOperazione, Long.toString(timeStamp), chiaveSegreta);
         } catch (Exception e) {
             log.error("XPay OrderStatus - Exception during the creation of the MAC string: ", e);
             XPayErrorEnum error = XPayErrorEnum.ERROR_50;
 
             return ResponseEntity.status(error.getHttpStatus())
-                    .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, null, error,codiceTransazione));
+                    .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, null, error, timeStamp, codiceTransazione));
         }
 
         if (outcomeConfig.equals("OK")) {
-            if (macToReturn.equals(request.getMac())) {
+            if (macToCheck.equals(request.getMac())) {
                 log.info("XPay OrderStatus - MAC verified");
 
                 return ResponseEntity.ok()
-                        .body(createXPayOrderResponse(XPayOutcome.OK, idOperazione, macToReturn, null,codiceTransazione));
+                        .body(createXPayOrderResponse(XPayOutcome.OK, idOperazione, macToReturn, null, timeStamp, codiceTransazione));
             } else {
                 log.info("XPay OrderStatus - MAC not verified {} {} {} ", macToReturn, request.getMac(), request.getCodiceTransazione());
                 XPayErrorEnum error = XPayErrorEnum.ERROR_3;
 
                 return ResponseEntity.status(error.getHttpStatus())
-                        .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, macForError, error,codiceTransazione));
+                        .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, macForError, error, timeStamp, codiceTransazione));
             }
         } else {
             return ResponseEntity.status(errorConfig.getHttpStatus())
-                    .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig,codiceTransazione));
+                    .body(createXPayOrderResponse(XPayOutcome.KO, idOperazione, macForError, errorConfig, timeStamp, codiceTransazione));
         }
     }
 
     private XPayOrderResponse createXPayOrderResponse(XPayOutcome xPayOutcome, String idOperazione, String mac,
-                                                      XPayErrorEnum error, String codiceTransazione) {
+                                                      XPayErrorEnum error, Long timeStamp, String codiceTransazione) {
 
         XPayOrderResponse xPayOrderResponse = new XPayOrderResponse();
         xPayOrderResponse.setEsito(xPayOutcome);
         xPayOrderResponse.setIdOperazione(idOperazione);
-        xPayOrderResponse.setTimeStamp(System.currentTimeMillis());
+        xPayOrderResponse.setTimeStamp(timeStamp);
         xPayOrderResponse.setMac(mac);
 
         if (error == null)
