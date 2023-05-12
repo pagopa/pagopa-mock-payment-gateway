@@ -74,9 +74,11 @@ public class VposService {
                 transactionStatus = configService.getByKey(VposConstants.VPOS_TRANSACTION_STATUS).getPropertyValue();
                 return createOrderStatusResponse(orderStatus, returnCode, transactionStatus);
             case "ACCOUNTING":
+                returnCode = configService.getByKey(VposConstants.VPOS_ACCOUNTING_RESPONSE).getPropertyValue();
+                return createContabResponse3ds2(returnCode);
             case "REFUND":
-                returnCode = RETURN_CODE_OK;
-                return createContabOrRefundResponse3ds2(returnCode);
+                returnCode = configService.getByKey(VposConstants.VPOS_REVERT_RESPONSE).getPropertyValue();
+                return createRefundResponse3ds2(returnCode);
             default:
                 break;
         }
@@ -335,11 +337,29 @@ public class VposService {
         return panAliasData;
     }
 
-    private static BPWXmlResponse createContabOrRefundResponse3ds2(String returnCode) {
+    private static BPWXmlResponse createContabResponse3ds2(String returnCode) {
         BPWXmlResponse response = new BPWXmlResponse();
         response.setMac(generateAuthorizationMac(null, returnCode));
         response.setResult(returnCode);
+        ThreeDSAuthorization authorization = new ThreeDSAuthorization();
+        authorization.setAuthorizationNumber(RandomStringUtils.randomNumeric(8));
+        authorization.setTransactionAmount("1000");
+        authorization.setAuthorizedAmount("1000");
 
+        if (RETURN_CODE_OK.equals(returnCode)) {
+            XmlData data = new XmlData();
+            Operation operation = new Operation();
+            operation.setThreeDSAuthorization(authorization);
+            data.setOperation(operation);
+            response.setData(data);
+        }
+        return response;
+    }
+
+    private static BPWXmlResponse createRefundResponse3ds2(String returnCode) {
+        BPWXmlResponse response = new BPWXmlResponse();
+        response.setMac(generateAuthorizationMac(null, returnCode));
+        response.setResult(returnCode);
         return response;
     }
 

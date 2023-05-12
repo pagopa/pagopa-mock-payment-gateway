@@ -52,4 +52,8 @@ public class XmlData {
     // returnCode 00, 3dsV2 authorization response (from authReq 0, 1 or 2)
     @XmlElement(name = "Authorization")
     private ThreeDSAuthorization threeDSAuthorization;
+
+    // accounting
+    @XmlElement(name = "Operation")
+    private Operation operation;
 }

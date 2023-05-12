@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema targetNamespace="http://p2b.gft.it/srv/pp" xmlns:tns="http://p2b.gft.it/srv/pp" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema xmlns:tns="http://adapter.p2b.sia.eu/srv/pp" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://adapter.p2b.sia.eu/srv/pp">
    <xs:element name="inquiryTransactionStatus" type="tns:inquiryTransactionStatus"/>
    <xs:element name="inquiryTransactionStatusResponse" type="tns:inquiryTransactionStatusResponse"/>
    <xs:element name="inserimentoRichiestaPagamentoPagoPa" type="tns:inserimentoRichiestaPagamentoPagoPa"/>
@@ -41,14 +41,14 @@
    </xs:complexType>
    <xs:complexType name="baseVO">
       <xs:complexContent>
-         <xs:extension base="tns:p2BAbstractPresentationBean">
+         <xs:extension base="tns:p2BAbstractAdapterPresentationBean">
             <xs:sequence>
                <xs:element name="contesto" type="tns:contestoVO"/>
             </xs:sequence>
          </xs:extension>
       </xs:complexContent>
    </xs:complexType>
-   <xs:complexType abstract="true" name="p2BAbstractPresentationBean">
+   <xs:complexType abstract="true" name="p2BAbstractAdapterPresentationBean">
       <xs:complexContent>
          <xs:extension base="tns:abstractPresentationBean">
             <xs:sequence/>
@@ -78,6 +78,13 @@
          </xs:extension>
       </xs:complexContent>
    </xs:complexType>
+   <xs:complexType abstract="true" name="p2BAbstractPresentationBean">
+      <xs:complexContent>
+         <xs:extension base="tns:abstractPresentationBean">
+            <xs:sequence/>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
    <xs:complexType name="deviceIdDataVO">
       <xs:complexContent>
          <xs:extension base="tns:p2BAbstractPresentationBean">
@@ -90,11 +97,11 @@
    </xs:complexType>
    <xs:complexType name="contestoVO">
       <xs:complexContent>
-         <xs:extension base="tns:p2BAbstractPresentationBean">
+         <xs:extension base="tns:p2BAbstractAdapterPresentationBean">
             <xs:sequence>
                <xs:element name="guid" type="xs:string"/>
                <xs:element name="token" type="xs:string"/>
-               <xs:element name="utenteAttivo" type="tns:utenteAttivoVO"/>
+               <xs:element minOccurs="0" name="utenteAttivo" type="tns:utenteAttivoVO"/>
                <xs:element minOccurs="0" name="dataEsecuzione" type="xs:dateTime"/>
                <xs:element minOccurs="0" name="sessionId" type="xs:string"/>
                <xs:element minOccurs="0" name="ip" type="xs:string"/>
@@ -102,7 +109,6 @@
                <xs:element minOccurs="0" name="device" type="xs:string"/>
                <xs:element minOccurs="0" name="matricola" type="xs:string"/>
                <xs:element minOccurs="0" name="versione" type="xs:string"/>
-               <xs:element minOccurs="0" name="clientTransactionId" type="xs:string"/>
             </xs:sequence>
          </xs:extension>
       </xs:complexContent>
@@ -123,7 +129,7 @@
             <xs:sequence>
                <xs:element name="codGruppo" type="xs:string"/>
                <xs:element name="codIstituto" type="xs:string"/>
-               <xs:element name="codUtente" type="xs:string"/>
+               <xs:element minOccurs="0" name="codUtente" type="xs:string"/>
                <xs:element minOccurs="0" name="nome" type="xs:string"/>
                <xs:element minOccurs="0" name="cognome" type="xs:string"/>
                <xs:element minOccurs="0" name="codiceFiscale" type="xs:string"/>
@@ -156,12 +162,42 @@
    </xs:complexType>
    <xs:complexType name="esitoVO">
       <xs:complexContent>
-         <xs:extension base="tns:p2BAbstractPresentationBean">
+         <xs:extension base="tns:p2BAbstractAdapterPresentationBean">
             <xs:sequence>
                <xs:element minOccurs="0" name="avvertenza" type="xs:boolean"/>
                <xs:element minOccurs="0" name="codice" type="xs:string"/>
                <xs:element minOccurs="0" name="esito" type="xs:boolean"/>
                <xs:element minOccurs="0" name="messaggio" type="xs:string"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+   <xs:complexType name="inquiryTransactionStatus">
+      <xs:sequence>
+         <xs:element minOccurs="0" name="arg0" type="tns:requestInquiryTransactionStatusVO"/>
+      </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="requestInquiryTransactionStatusVO">
+      <xs:complexContent>
+         <xs:extension base="tns:baseRequestVO">
+            <xs:sequence>
+               <xs:element minOccurs="0" name="correlationId" type="xs:string"/>
+               <xs:element minOccurs="0" name="idPagoPa" type="xs:string"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+   <xs:complexType name="inquiryTransactionStatusResponse">
+      <xs:sequence>
+         <xs:element minOccurs="0" name="return" type="tns:responseInquiryTransactionStatusVO"/>
+      </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="responseInquiryTransactionStatusVO">
+      <xs:complexContent>
+         <xs:extension base="tns:baseResponseVO">
+            <xs:sequence>
+               <xs:element minOccurs="0" name="esitoPagamento" type="xs:string"/>
+               <xs:element minOccurs="0" name="endToEndId" type="xs:string"/>
             </xs:sequence>
          </xs:extension>
       </xs:complexContent>
@@ -221,46 +257,16 @@
          <xs:extension base="tns:baseResponseVO">
             <xs:sequence>
                <xs:element minOccurs="0" name="correlationId" type="xs:string"/>
-            </xs:sequence>
-         </xs:extension>
-      </xs:complexContent>
-   </xs:complexType>
-   <xs:complexType name="inquiryTransactionStatus">
-      <xs:sequence>
-         <xs:element minOccurs="0" name="arg0" type="tns:requestInquiryTransactionStatusVO"/>
-      </xs:sequence>
-   </xs:complexType>
-   <xs:complexType name="requestInquiryTransactionStatusVO">
-      <xs:complexContent>
-         <xs:extension base="tns:baseRequestVO">
-            <xs:sequence>
-               <xs:element minOccurs="0" name="correlationId" type="xs:string"/>
-               <xs:element minOccurs="0" name="idPagoPa" type="xs:string"/>
-            </xs:sequence>
-         </xs:extension>
-      </xs:complexContent>
-   </xs:complexType>
-   <xs:complexType name="inquiryTransactionStatusResponse">
-      <xs:sequence>
-         <xs:element minOccurs="0" name="return" type="tns:responseInquiryTransactionStatusVO"/>
-      </xs:sequence>
-   </xs:complexType>
-   <xs:complexType name="responseInquiryTransactionStatusVO">
-      <xs:complexContent>
-         <xs:extension base="tns:baseResponseVO">
-            <xs:sequence>
-               <xs:element minOccurs="0" name="esitoPagamento" type="xs:string"/>
-               <xs:element minOccurs="0" name="endToEndId" type="xs:string"/>
+               <xs:element minOccurs="0" name="abi" type="xs:string"/>
             </xs:sequence>
          </xs:extension>
       </xs:complexContent>
    </xs:complexType>
    <xs:simpleType name="linguaEnum">
       <xs:restriction base="xs:string">
-         <xs:enumeration value="IT"/>
          <xs:enumeration value="EN"/>
          <xs:enumeration value="DE"/>
-         <xs:enumeration value="AT"/>
+         <xs:enumeration value="IT"/>
       </xs:restriction>
    </xs:simpleType>
    <xs:element name="Exception" type="tns:Exception"/>

@@ -1,6 +1,6 @@
 package it.gov.pagopa.bpay.controller;
 
-import it.gft.p2b.srv.pp.*;
+import eu.sia.p2b.adapter.srv.pp.*;
 import it.gov.pagopa.bpay.client.*;
 import it.gov.pagopa.bpay.dto.*;
 import it.gov.pagopa.bpay.entity.*;
@@ -54,7 +54,7 @@ public class BPayController {
 
     private String inquiryOutcomeConfig;
 
-    private static final String NAMESPACE_URI = "http://p2b.gft.it/srv/pp";
+    private static final String NAMESPACE_URI = "http://adapter.p2b.sia.eu/srv/pp";
 
     private static final ObjectFactory factory = new ObjectFactory();
 
@@ -90,6 +90,7 @@ public class BPayController {
         ResponseInserimentoRichiestaPagamentoPagoPaVO responseData = new ResponseInserimentoRichiestaPagamentoPagoPaVO();
         responseData.setEsito(generateEsito(EsitoEnum.fromCode(paymentOutcomeConfig)));
         responseData.setCorrelationId(correlationId);
+        responseData.setAbi("03069");
         InserimentoRichiestaPagamentoPagoPaResponse response = new InserimentoRichiestaPagamentoPagoPaResponse();
         response.setReturn(responseData);
         pmClient.callbackPm(payment, clientBaseUrl);

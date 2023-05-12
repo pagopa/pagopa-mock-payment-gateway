@@ -1,5 +1,6 @@
 package it.gov.pagopa.vpos.controller;
 
+import io.micrometer.core.instrument.util.StringUtils;
 import it.gov.pagopa.service.ConfigService;
 import it.gov.pagopa.vpos.dto.ChangeVposOutcome;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,5 +62,21 @@ public class VposSettingsController {
                     c.setPropertyValue(input.getHttpOutcome().getCode());
                     configService.save(c);
                 });
+
+        if (input.getAccountingOutcome() != null) {
+            configService.getOptionalByKey(VPOS_ACCOUNTING_RESPONSE)
+                    .ifPresent(c -> {
+                        c.setPropertyValue(input.getAccountingOutcome().getCode());
+                        configService.save(c);
+                    });
+        }
+
+        if (input.getRevertOutcome() != null) {
+            configService.getOptionalByKey(VPOS_REVERT_RESPONSE)
+                    .ifPresent(c -> {
+                        c.setPropertyValue(input.getRevertOutcome().getCode());
+                        configService.save(c);
+                    });
+        }
     }
 }

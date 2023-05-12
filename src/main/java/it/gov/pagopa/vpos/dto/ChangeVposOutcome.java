@@ -1,9 +1,6 @@
 package it.gov.pagopa.vpos.dto;
 
-import it.gov.pagopa.vpos.dto.response.Response3Ds2Step0Enum;
-import it.gov.pagopa.vpos.dto.response.Response3Ds2Step1Enum;
-import it.gov.pagopa.vpos.dto.response.Response3Ds2Step2Enum;
-import it.gov.pagopa.vpos.dto.response.ResponseOrderStatusEnum;
+import it.gov.pagopa.vpos.dto.response.*;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -29,4 +26,8 @@ public class ChangeVposOutcome {
 
     @NotNull
     private VposHttpResponseEnum httpOutcome;
+
+    private ResponseAccountingRevertStatusEnum accountingOutcome;
+
+    private ResponseAccountingRevertStatusEnum revertOutcome;
 }
